@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: exam-paper-formatter
+    runtime: python
+    plan: starter
+    region: virginia
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+
+      # Same Meta/WhatsApp variable names used by ExamHelper / Student Evaluator.
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_GRAPH_VERSION
+        value: v25.0
+
+      # Existing ExamPaperFormatter/OpenAI setting.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: EXAM_REDO_MODEL
+        value: gpt-4.1
+
+      # Project-specific Flask/WhatsApp runtime settings.
+      - key: WHATSAPP_ASYNC
+        value: "true"
+      - key: WHATSAPP_HTTP_TIMEOUT
+        value: "60"
+      - key: GUNICORN_WORKERS
+        value: "1"
+      - key: GUNICORN_THREADS
+        value: "4"
+      - key: GUNICORN_TIMEOUT
+        value: "300"

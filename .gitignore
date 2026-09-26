@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets
+.env
+
+# Runtime/local generated data
+# Keep a committed reference only if you intentionally want it in the deploy.
+data/whatsapp/
+data/exams/
+output/
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

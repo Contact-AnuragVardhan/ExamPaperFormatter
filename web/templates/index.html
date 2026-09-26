@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Exam Format</title>
+  <style>
+    body { font-family: Calibri, sans-serif; margin: 2rem; max-width: 40rem; }
+    h1, h2 { margin-bottom: 0.4rem; }
+    section { margin: 1.5rem 0 2rem; }
+    button, a.button { font-size: 1.15rem; padding: 0.45rem 0.8rem; }
+    input[type="file"] { font-size: 1rem; margin: 0.4rem 0; }
+    .error { color: #8b0000; }
+  </style>
+</head>
+<body>
+  <h1>Exam Format</h1>
+  {% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
+  {% if error %}<p class="error"><strong>{{ error }}</strong></p>{% endif %}
+
+  <section>
+    <h2>REFERENCE EXAM</h2>
+    {% if reference %}
+      <p>Active reference: {{ reference }}</p>
+    {% else %}
+      <p>No Reference Exam loaded.</p>
+    {% endif %}
+    <form method="post" action="/reference" enctype="multipart/form-data">
+      <div><input type="file" name="reference" accept=".docx" required></div>
+      <button type="submit">UPLOAD REFERENCE</button>
+    </form>
+    <form method="post" action="/reference/delete">
+      <button type="submit">DELETE REFERENCE</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>FORMAT EXAM</h2>
+    <form method="post" action="/format" enctype="multipart/form-data">
+      <div><input type="file" name="teacher" accept=".docx" required></div>
+      <button type="submit">FORMAT EXAM</button>
+    </form>
+    {% if download_id %}
+      <p><a class="button" href="/exams/{{ download_id }}/download">DOWNLOAD FORMATTED EXAM</a></p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>PREVIOUS EXAMS</h2>
+    {% if not exams %}
+      <p>No formatted exams yet.</p>
+    {% endif %}
+    {% for exam in exams %}
+      <p>
+        {{ exam.original_filename }}<br>
+        {{ exam.created }}<br>
+        {{ exam.formatted_filename }}<br>
+        <a href="/exams/{{ exam.id }}/download">DOWNLOAD</a>
+        <form method="post" action="/exams/{{ exam.id }}/delete" style="display:inline">
+          <button type="submit">DELETE</button>
+        </form>
+      </p>
+    {% endfor %}
+  </section>
+</body>
+</html>
