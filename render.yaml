@@ -40,3 +40,7 @@ services:
         value: "4"
       - key: GUNICORN_TIMEOUT
         value: "300"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: GUNICORN_LOG_LEVEL
+        value: info

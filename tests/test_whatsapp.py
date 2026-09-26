@@ -96,9 +96,14 @@ def test_document_then_metadata_questions(tmp_path, monkeypatch):
     assert response.status_code == 200
     assert "subject" in fake.texts[-1][1].lower()
 
+    formatted_sessions = []
+    bot._format_and_send = lambda sender, session: formatted_sessions.append((sender, dict(session)))
+
     response = client.post(
         "/webhook",
         json=_payload({"id": "wamid-3", "from": "15551234567", "type": "text", "text": {"body": "English"}}),
     )
     assert response.status_code == 200
-    assert "exam name/type" in fake.texts[-1][1].lower()
+    assert "formatting the exam now" in fake.texts[-1][1].lower()
+    assert len(formatted_sessions) == 1
+    assert formatted_sessions[0][1]["metadata"] == {"class_grade": "10", "subject": "English"}

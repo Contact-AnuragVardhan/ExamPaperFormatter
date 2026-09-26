@@ -40,7 +40,6 @@ DEFAULT_GRAPH_VERSION = "v25.0"
 METADATA_FIELDS = [
     ("class_grade", "What class/grade is this exam for? (Example: 10)"),
     ("subject", "What subject is this exam for? (Example: English)"),
-    ("exam_name", "What is the exam name/type? (Example: Quarterly Exam)"),
 ]
 
 
@@ -304,13 +303,17 @@ class WhatsAppExamBot:
             )
             return
 
+        LOGGER.info("WhatsApp document received: filename=%s mime_type=%s", filename, mime_type or "unknown")
         old_session = self.store.clear(sender)
         self._clear_session_files(old_session)
 
         incoming_dir = self.incoming_root / _safe_sender(sender) / uuid4().hex
         incoming_dir.mkdir(parents=True, exist_ok=True)
         original_path = incoming_dir / "original.docx"
-        original_path.write_bytes(self.client.download_document(media_id))
+        LOGGER.info("WhatsApp download starting: filename=%s", filename)
+        document_bytes = self.client.download_document(media_id)
+        original_path.write_bytes(document_bytes)
+        LOGGER.info("WhatsApp download complete: filename=%s bytes=%d", filename, len(document_bytes))
 
         session = {
             "state": "awaiting_metadata",
@@ -358,6 +361,7 @@ class WhatsAppExamBot:
         key, _prompt = METADATA_FIELDS[index]
         metadata = dict(session.get("metadata") or {})
         metadata[key] = text
+        LOGGER.info("WhatsApp metadata received: field=%s filename=%s", key, session.get("original_filename", "exam.docx"))
         index += 1
         session["metadata"] = metadata
         session["metadata_index"] = index
@@ -372,6 +376,7 @@ class WhatsAppExamBot:
         session["state"] = "formatting"
         self.store.set(sender, session)
         self.client.send_text(sender, "Thanks. I have the details. I am formatting the exam now.", phone_number_id)
+        LOGGER.info("WhatsApp formatting requested: filename=%s", session.get("original_filename", "exam.docx"))
         self._format_and_send(sender, session)
 
     def _format_and_send(self, sender: str, session: dict) -> None:
@@ -386,15 +391,31 @@ class WhatsAppExamBot:
         shutil.copy2(source, original)
 
         try:
-            result = run_pipeline(original, self.reference_path(), folder / "work")
+            LOGGER.info("[whatsapp:%s] Formatting started: filename=%s", exam_id, original_filename)
+            result = run_pipeline(
+                original,
+                self.reference_path(),
+                folder / "work",
+                log_context=f"whatsapp:{exam_id}",
+            )
             if not result["ok"]:
-                LOGGER.error("WhatsApp exam %s failed Phase 1: %s", exam_id, result.get("problems"))
+                LOGGER.error("[whatsapp:%s] Phase 1 failed: %s", exam_id, result.get("problems"))
                 raise RuntimeError("Exam hierarchy validation failed.")
+
+            LOGGER.info("[whatsapp:%s] DOCX rendering started", exam_id)
             format_exam(result["blocks"], original, formatted)
+            LOGGER.info(
+                "[whatsapp:%s] DOCX rendering complete: bytes=%d",
+                exam_id,
+                formatted.stat().st_size if formatted.exists() else 0,
+            )
+
+            LOGGER.info("[whatsapp:%s] Format integrity check started", exam_id)
             problems = check_format(result["blocks"], original, formatted, self.reference_path())
             if problems:
-                LOGGER.error("WhatsApp exam %s failed format integrity: %s", exam_id, problems)
+                LOGGER.error("[whatsapp:%s] Format integrity failed: %s", exam_id, problems)
                 raise RuntimeError("Formatted exam integrity validation failed.")
+            LOGGER.info("[whatsapp:%s] Format integrity check passed", exam_id)
 
             formatted_name = self.download_stem(original_filename) + "_FORMATTED.docx"
             metadata_record = {
@@ -418,6 +439,7 @@ class WhatsAppExamBot:
                 }
             )
             self.save_index(rows)
+            LOGGER.info("[whatsapp:%s] Uploading formatted DOCX to WhatsApp", exam_id)
             self.client.send_document(
                 sender,
                 formatted,
@@ -425,6 +447,7 @@ class WhatsAppExamBot:
                 "Your formatted exam is ready.",
                 phone_number_id,
             )
+            LOGGER.info("[whatsapp:%s] Formatting completed and document sent: filename=%s", exam_id, formatted_name)
         except Exception:
             shutil.rmtree(folder, ignore_errors=True)
             raise

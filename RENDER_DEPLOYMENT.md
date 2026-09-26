@@ -142,3 +142,27 @@ WHATSAPP_PHONE_NUMBER_ID
 ```
 
 The settings that remain different are project-specific: this application is Flask/Gunicorn rather than FastAPI/Uvicorn, uses `EXAM_REDO_MODEL=gpt-4.1`, and currently keeps formatter/session state in local files rather than PostgreSQL.
+
+## Render formatting logs
+
+The application writes progress logs to stdout so they are visible in **Render -> Logs** while a file is being processed. The same staged logging is used for browser and WhatsApp formatting. Typical entries include:
+
+```text
+[browser:<exam-id>] Formatting started
+[browser:<exam-id>] Extracting teacher DOCX
+[browser:<exam-id>] OpenAI hierarchy discovery started
+[browser:<exam-id>] OpenAI hierarchy discovery complete
+[browser:<exam-id>] DOCX rendering started
+[browser:<exam-id>] Format integrity check passed
+[browser:<exam-id>] Formatting completed successfully
+
+[whatsapp:<exam-id>] Formatting started
+[whatsapp:<exam-id>] OpenAI hierarchy discovery started
+[whatsapp:<exam-id>] DOCX rendering complete
+[whatsapp:<exam-id>] Uploading formatted DOCX to WhatsApp
+[whatsapp:<exam-id>] Formatting completed and document sent
+```
+
+`start.sh` uses Gunicorn `--capture-output` and stdout/error log output so these messages appear in the Render service log stream. Set `LOG_LEVEL=INFO` for normal progress logging.
+
+The WhatsApp conversation currently asks only for **class/grade** and **subject** before formatting. It no longer asks for exam name/type.

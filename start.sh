@@ -9,6 +9,8 @@ exec gunicorn \
   --workers "${GUNICORN_WORKERS:-1}" \
   --threads "${GUNICORN_THREADS:-4}" \
   --timeout "${GUNICORN_TIMEOUT:-300}" \
+  --log-level "${GUNICORN_LOG_LEVEL:-info}" \
+  --capture-output \
   --access-logfile - \
   --error-logfile - \
   web.app:app

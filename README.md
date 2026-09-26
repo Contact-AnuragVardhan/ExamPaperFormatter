@@ -15,7 +15,7 @@ The Flask app now exposes a WhatsApp Cloud API webhook at `/webhook`.
 - `GET /webhook` handles Meta webhook verification.
 - `POST /webhook` receives WhatsApp events.
 - A received Word `.docx` document is downloaded from WhatsApp.
-- The bot asks, one at a time, for class/grade, subject, and exam name/type.
+- The bot asks, one at a time, for class/grade and subject.
 - After those answers, it calls the existing formatter without changing its formatting logic.
 - If formatting succeeds, the generated `.docx` is uploaded to WhatsApp and sent back to the same sender.
 - `CANCEL`, `STOP`, or `RESET` clears a sender's pending conversation.

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+import os
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -17,6 +20,9 @@ from core.integrity import integrity
 from core.models import clone_blocks
 from core.number import labels_are_stable
 from core.validate import validate
+
+
+LOGGER = logging.getLogger("exam_formatter.pipeline")
 
 
 def _default_input(name: str) -> Path:
@@ -58,16 +64,74 @@ def _tree_lines(blocks) -> list[str]:
     return lines
 
 
-def run_pipeline(teacher: Path, reference: Path, out_dir: Path) -> dict:
+def run_pipeline(
+    teacher: Path,
+    reference: Path,
+    out_dir: Path,
+    log_context: str | None = None,
+) -> dict:
+    context = log_context or teacher.name
+    started = time.monotonic()
+    LOGGER.info(
+        "[%s] Phase 1 started: teacher=%s reference=%s",
+        context,
+        teacher.name,
+        reference.name,
+    )
+
+    stage = time.monotonic()
+    LOGGER.info("[%s] Extracting teacher DOCX", context)
     source = extract_document(teacher)
+    LOGGER.info(
+        "[%s] Teacher extraction complete: blocks=%d elapsed=%.2fs",
+        context,
+        len(source),
+        time.monotonic() - stage,
+    )
+
+    stage = time.monotonic()
+    LOGGER.info("[%s] Extracting reference DOCX", context)
     reference_blocks = extract_document(reference)
     notes = reference_convention_notes(reference_blocks)
+    LOGGER.info(
+        "[%s] Reference extraction complete: blocks=%d elapsed=%.2fs",
+        context,
+        len(reference_blocks),
+        time.monotonic() - stage,
+    )
+
     blocks = clone_blocks(source)
+    stage = time.monotonic()
+    LOGGER.info(
+        "[%s] OpenAI hierarchy discovery started: model=%s teacher_blocks=%d",
+        context,
+        os.environ.get("EXAM_REDO_MODEL", "gpt-4.1"),
+        len(blocks),
+    )
     discover(blocks, notes)
+    LOGGER.info(
+        "[%s] OpenAI hierarchy discovery complete: elapsed=%.2fs",
+        context,
+        time.monotonic() - stage,
+    )
+
+    stage = time.monotonic()
+    LOGGER.info("[%s] Numbering and hierarchy validation started", context)
     stable = labels_are_stable(blocks)
     problems = validate(blocks, stable)
     checks = integrity(source, blocks)
+    review_count = sum(1 for block in blocks if block.review_required)
+    LOGGER.info(
+        "[%s] Validation complete: numbering_stable=%s problems=%d review_required=%d integrity_checks=%d elapsed=%.2fs",
+        context,
+        stable,
+        len(problems),
+        review_count,
+        len(checks),
+        time.monotonic() - stage,
+    )
 
+    LOGGER.info("[%s] Writing Phase 1 diagnostic files", context)
     out_dir.mkdir(parents=True, exist_ok=True)
     payload = [b.to_dict() for b in blocks]
     (out_dir / "hierarchy.json").write_text(
@@ -108,6 +172,18 @@ def run_pipeline(teacher: Path, reference: Path, out_dir: Path) -> dict:
     )
 
     ok = not problems and all(flag for _, flag, _ in checks)
+    LOGGER.info(
+        "[%s] Phase 1 complete: ok=%s blocks=%d total_elapsed=%.2fs",
+        context,
+        ok,
+        len(blocks),
+        time.monotonic() - started,
+    )
+    if problems:
+        LOGGER.error("[%s] Validation problems: %s", context, problems)
+    failed_checks = [detail for _name, flag, detail in checks if not flag]
+    if failed_checks:
+        LOGGER.error("[%s] Integrity failures: %s", context, failed_checks)
     return {
         "ok": ok,
         "blocks": blocks,
