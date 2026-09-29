@@ -1,10 +1,3 @@
-"""WhatsApp Cloud API adapter for the existing exam formatter.
-
-This module intentionally does not change the formatter itself.  It only adds a
-transport layer that can receive a teacher DOCX, collect a few workflow metadata
-fields in chat, call the existing pipeline, and send the formatted DOCX back.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -29,18 +22,18 @@ from format.format_integrity import check_format
 from format.word_formatter import format_exam
 from run_core import run_pipeline
 
+
 LOGGER = logging.getLogger(__name__)
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 DEFAULT_GRAPH_VERSION = "v25.0"
 
-# These fields are collected for the WhatsApp workflow and saved with the exam.
-# The existing formatter does not use them yet; it still formats from the DOCX
-# plus the active reference exam exactly as the browser flow does.
 METADATA_FIELDS = [
     ("class_grade", "What class/grade is this exam for? (Example: 10)"),
     ("subject", "What subject is this exam for? (Example: English)"),
 ]
+
+CANCEL_WORDS = {"cancel", "stop", "reset"}
 
 
 def _utc_now() -> str:
@@ -48,7 +41,8 @@ def _utc_now() -> str:
 
 
 def _safe_sender(sender: str) -> str:
-    return re.sub(r"[^0-9A-Za-z_.-]", "_", sender) or "unknown"
+    cleaned = re.sub(r"[^0-9A-Za-z_.-]", "_", sender)
+    return cleaned or "unknown"
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -59,11 +53,10 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 class JsonSessionStore:
-    """Very small JSON-backed session store suitable for the current POC."""
-
     def __init__(self, root: Path):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
+
         self.sessions_path = self.root / "sessions.json"
         self.seen_path = self.root / "seen_message_ids.json"
         self._lock = threading.RLock()
@@ -72,6 +65,7 @@ class JsonSessionStore:
     def _read_json(path: Path, default):
         if not path.exists():
             return default
+
         try:
             return json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -79,15 +73,17 @@ class JsonSessionStore:
 
     @staticmethod
     def _write_json(path: Path, value) -> None:
-        temporary = path.with_suffix(path.suffix + ".tmp")
-        temporary.write_text(json.dumps(value, indent=2), encoding="utf-8")
-        temporary.replace(path)
+        temp_path = path.with_suffix(path.suffix + ".tmp")
+        temp_path.write_text(json.dumps(value, indent=2), encoding="utf-8")
+        temp_path.replace(path)
 
     def get(self, sender: str) -> dict | None:
         with self._lock:
             sessions = self._read_json(self.sessions_path, {})
-            value = sessions.get(sender)
-            return dict(value) if isinstance(value, dict) else None
+            session = sessions.get(sender)
+            if not isinstance(session, dict):
+                return None
+            return dict(session)
 
     def set(self, sender: str, session: dict) -> None:
         with self._lock:
@@ -98,28 +94,35 @@ class JsonSessionStore:
     def clear(self, sender: str) -> dict | None:
         with self._lock:
             sessions = self._read_json(self.sessions_path, {})
-            previous = sessions.pop(sender, None)
+            session = sessions.pop(sender, None)
             self._write_json(self.sessions_path, sessions)
-            return previous
+            return session
 
     def mark_seen(self, message_id: str) -> bool:
-        """Return False for duplicate webhook deliveries."""
         if not message_id:
             return True
+
         with self._lock:
             data = self._read_json(self.seen_path, {"ids": []})
-            ids = list(data.get("ids") or [])
-            if message_id in ids:
+            message_ids = list(data.get("ids") or [])
+
+            if message_id in message_ids:
                 return False
-            ids.append(message_id)
-            self._write_json(self.seen_path, {"ids": ids[-500:]})
+
+            message_ids.append(message_id)
+            self._write_json(self.seen_path, {"ids": message_ids[-500:]})
             return True
 
 
 class WhatsAppClient:
     def __init__(self) -> None:
-        self.graph_version = os.getenv("WHATSAPP_GRAPH_VERSION", DEFAULT_GRAPH_VERSION).strip()
-        self.access_token = (os.getenv("WHATSAPP_TOKEN") or os.getenv("WHATSAPP_ACCESS_TOKEN", "")).strip()
+        self.graph_version = os.getenv(
+            "WHATSAPP_GRAPH_VERSION", DEFAULT_GRAPH_VERSION
+        ).strip()
+        self.access_token = (
+            os.getenv("WHATSAPP_TOKEN")
+            or os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+        ).strip()
         self.default_phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "").strip()
         self.timeout = int(os.getenv("WHATSAPP_HTTP_TIMEOUT", "60"))
 
@@ -128,15 +131,23 @@ class WhatsAppClient:
             raise RuntimeError("WHATSAPP_TOKEN is not configured.")
         return {"Authorization": f"Bearer {self.access_token}"}
 
-    def _phone_number_id(self, value: str | None) -> str:
-        phone_number_id = (value or self.default_phone_number_id).strip()
-        if not phone_number_id:
-            raise RuntimeError("WHATSAPP_PHONE_NUMBER_ID is not configured or present in the webhook payload.")
-        return phone_number_id
+    def _phone_number_id(self, phone_number_id: str | None) -> str:
+        value = (phone_number_id or self.default_phone_number_id).strip()
+        if not value:
+            raise RuntimeError(
+                "WHATSAPP_PHONE_NUMBER_ID is not configured or present in the webhook payload."
+            )
+        return value
 
-    def send_text(self, to: str, text: str, phone_number_id: str | None = None) -> None:
+    def send_text(
+        self,
+        to: str,
+        text: str,
+        phone_number_id: str | None = None,
+    ) -> None:
         phone_id = self._phone_number_id(phone_number_id)
         url = f"https://graph.facebook.com/{self.graph_version}/{phone_id}/messages"
+
         response = requests.post(
             url,
             headers={**self._headers(), "Content-Type": "application/json"},
@@ -152,20 +163,35 @@ class WhatsAppClient:
         response.raise_for_status()
 
     def download_document(self, media_id: str) -> bytes:
-        info_url = f"https://graph.facebook.com/{self.graph_version}/{media_id}"
-        info = requests.get(info_url, headers=self._headers(), timeout=self.timeout)
-        info.raise_for_status()
-        media_url = info.json().get("url")
+        media_info_url = f"https://graph.facebook.com/{self.graph_version}/{media_id}"
+        response = requests.get(
+            media_info_url,
+            headers=self._headers(),
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+
+        media_url = response.json().get("url")
         if not media_url:
             raise RuntimeError("WhatsApp media lookup did not return a download URL.")
-        media = requests.get(media_url, headers=self._headers(), timeout=self.timeout)
-        media.raise_for_status()
-        return media.content
 
-    def upload_document(self, path: Path, phone_number_id: str | None = None) -> str:
+        response = requests.get(
+            media_url,
+            headers=self._headers(),
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        return response.content
+
+    def upload_document(
+        self,
+        path: Path,
+        phone_number_id: str | None = None,
+    ) -> str:
         phone_id = self._phone_number_id(phone_number_id)
         url = f"https://graph.facebook.com/{self.graph_version}/{phone_id}/media"
         mime_type = mimetypes.guess_type(path.name)[0] or DOCX_MIME
+
         with path.open("rb") as handle:
             response = requests.post(
                 url,
@@ -174,10 +200,12 @@ class WhatsAppClient:
                 files={"file": (path.name, handle, mime_type)},
                 timeout=self.timeout,
             )
+
         response.raise_for_status()
         media_id = response.json().get("id")
         if not media_id:
             raise RuntimeError("WhatsApp media upload did not return a media id.")
+
         return media_id
 
     def send_document(
@@ -191,6 +219,7 @@ class WhatsAppClient:
         phone_id = self._phone_number_id(phone_number_id)
         media_id = self.upload_document(path, phone_id)
         url = f"https://graph.facebook.com/{self.graph_version}/{phone_id}/messages"
+
         response = requests.post(
             url,
             headers={**self._headers(), "Content-Type": "application/json"},
@@ -225,6 +254,7 @@ class WhatsAppExamBot:
         self.whatsapp_root = self.data_root / "whatsapp"
         self.incoming_root = self.whatsapp_root / "incoming"
         self.incoming_root.mkdir(parents=True, exist_ok=True)
+
         self.store = JsonSessionStore(self.whatsapp_root)
         self.client = client or WhatsAppClient()
         self.reference_path = reference_path
@@ -237,40 +267,68 @@ class WhatsAppExamBot:
         for entry in payload.get("entry") or []:
             for change in entry.get("changes") or []:
                 value = change.get("value") or {}
-                phone_number_id = ((value.get("metadata") or {}).get("phone_number_id") or "").strip()
-                contacts = value.get("contacts") or []
-                profile_name = ""
-                if contacts:
-                    profile_name = (((contacts[0] or {}).get("profile") or {}).get("name") or "").strip()
-                for message in value.get("messages") or []:
-                    message_id = str(message.get("id") or "")
-                    if not self.store.mark_seen(message_id):
-                        continue
-                    sender = str(message.get("from") or "").strip()
-                    if not sender:
-                        continue
-                    try:
-                        self._handle_message(sender, phone_number_id, profile_name, message)
-                    except Exception:
-                        LOGGER.exception("WhatsApp message processing failed for message %s", message_id)
-                        try:
-                            self.client.send_text(
-                                sender,
-                                "Something went wrong while processing your exam. Please try again or contact the administrator.",
-                                phone_number_id,
-                            )
-                        except Exception:
-                            LOGGER.exception("Could not send WhatsApp failure message")
+                metadata = value.get("metadata") or {}
+                phone_number_id = str(metadata.get("phone_number_id") or "").strip()
 
-    def _handle_message(self, sender: str, phone_number_id: str, profile_name: str, message: dict) -> None:
-        message_type = str(message.get("type") or "")
-        if message_type == "document":
-            self._handle_document(sender, phone_number_id, profile_name, message.get("document") or {})
+                profile_name = ""
+                contacts = value.get("contacts") or []
+                if contacts:
+                    profile = (contacts[0] or {}).get("profile") or {}
+                    profile_name = str(profile.get("name") or "").strip()
+
+                for message in value.get("messages") or []:
+                    self._process_message(
+                        message,
+                        phone_number_id=phone_number_id,
+                        profile_name=profile_name,
+                    )
+
+    def _process_message(
+        self,
+        message: dict,
+        phone_number_id: str,
+        profile_name: str,
+    ) -> None:
+        message_id = str(message.get("id") or "")
+        if not self.store.mark_seen(message_id):
             return
+
+        sender = str(message.get("from") or "").strip()
+        if not sender:
+            return
+
+        try:
+            self._handle_message(sender, phone_number_id, profile_name, message)
+        except Exception:
+            LOGGER.exception("WhatsApp message processing failed for message %s", message_id)
+            try:
+                self.client.send_text(
+                    sender,
+                    "Something went wrong while processing your exam. Please try again or contact the administrator.",
+                    phone_number_id,
+                )
+            except Exception:
+                LOGGER.exception("Could not send WhatsApp failure message")
+
+    def _handle_message(
+        self,
+        sender: str,
+        phone_number_id: str,
+        profile_name: str,
+        message: dict,
+    ) -> None:
+        message_type = str(message.get("type") or "")
+
+        if message_type == "document":
+            document = message.get("document") or {}
+            self._handle_document(sender, phone_number_id, profile_name, document)
+            return
+
         if message_type == "text":
-            text = str(((message.get("text") or {}).get("body")) or "").strip()
+            text = str((message.get("text") or {}).get("body") or "").strip()
             self._handle_text(sender, phone_number_id, text)
             return
+
         self.client.send_text(
             sender,
             "Please send the unformatted exam as a Word .docx document.",
@@ -280,21 +338,39 @@ class WhatsAppExamBot:
     def _clear_session_files(self, session: dict | None) -> None:
         if not session:
             return
+
         incoming_dir = session.get("incoming_dir")
         if incoming_dir:
             shutil.rmtree(incoming_dir, ignore_errors=True)
 
-    def _handle_document(self, sender: str, phone_number_id: str, profile_name: str, document: dict) -> None:
-        filename = secure_filename(str(document.get("filename") or "exam.docx")) or "exam.docx"
+    def _handle_document(
+        self,
+        sender: str,
+        phone_number_id: str,
+        profile_name: str,
+        document: dict,
+    ) -> None:
+        filename = secure_filename(str(document.get("filename") or "exam.docx"))
+        filename = filename or "exam.docx"
         mime_type = str(document.get("mime_type") or "").lower()
         media_id = str(document.get("id") or "").strip()
-        is_docx = filename.lower().endswith(".docx") or mime_type == DOCX_MIME
-        if not is_docx:
-            self.client.send_text(sender, "Please send a Word .docx file. Other document types are not supported yet.", phone_number_id)
+
+        if not (filename.lower().endswith(".docx") or mime_type == DOCX_MIME):
+            self.client.send_text(
+                sender,
+                "Please send a Word .docx file. Other document types are not supported yet.",
+                phone_number_id,
+            )
             return
+
         if not media_id:
-            self.client.send_text(sender, "I could not read that WhatsApp document. Please send the .docx file again.", phone_number_id)
+            self.client.send_text(
+                sender,
+                "I could not read that WhatsApp document. Please send the .docx file again.",
+                phone_number_id,
+            )
             return
+
         if not self.reference_path().exists():
             self.client.send_text(
                 sender,
@@ -303,17 +379,27 @@ class WhatsAppExamBot:
             )
             return
 
-        LOGGER.info("WhatsApp document received: filename=%s mime_type=%s", filename, mime_type or "unknown")
+        LOGGER.info(
+            "WhatsApp document received: filename=%s mime_type=%s",
+            filename,
+            mime_type or "unknown",
+        )
+
         old_session = self.store.clear(sender)
         self._clear_session_files(old_session)
 
         incoming_dir = self.incoming_root / _safe_sender(sender) / uuid4().hex
         incoming_dir.mkdir(parents=True, exist_ok=True)
         original_path = incoming_dir / "original.docx"
+
         LOGGER.info("WhatsApp download starting: filename=%s", filename)
         document_bytes = self.client.download_document(media_id)
         original_path.write_bytes(document_bytes)
-        LOGGER.info("WhatsApp download complete: filename=%s bytes=%d", filename, len(document_bytes))
+        LOGGER.info(
+            "WhatsApp download complete: filename=%s bytes=%d",
+            filename,
+            len(document_bytes),
+        )
 
         session = {
             "state": "awaiting_metadata",
@@ -328,6 +414,7 @@ class WhatsAppExamBot:
             "updated_at": _utc_now(),
         }
         self.store.set(sender, session)
+
         self.client.send_text(
             sender,
             f"I received {filename}. {METADATA_FIELDS[0][1]}",
@@ -335,10 +422,14 @@ class WhatsAppExamBot:
         )
 
     def _handle_text(self, sender: str, phone_number_id: str, text: str) -> None:
-        if text.lower() in {"cancel", "stop", "reset"}:
+        if text.lower() in CANCEL_WORDS:
             session = self.store.clear(sender)
             self._clear_session_files(session)
-            self.client.send_text(sender, "Cancelled. Send a new unformatted .docx exam whenever you are ready.", phone_number_id)
+            self.client.send_text(
+                sender,
+                "Cancelled. Send a new unformatted .docx exam whenever you are ready.",
+                phone_number_id,
+            )
             return
 
         session = self.store.get(sender)
@@ -350,18 +441,24 @@ class WhatsAppExamBot:
             )
             return
 
-        if not text:
-            index = int(session.get("metadata_index", 0))
-            self.client.send_text(sender, METADATA_FIELDS[index][1], phone_number_id)
-            return
-
         index = int(session.get("metadata_index", 0))
         if index >= len(METADATA_FIELDS):
             return
-        key, _prompt = METADATA_FIELDS[index]
+
+        if not text:
+            self.client.send_text(sender, METADATA_FIELDS[index][1], phone_number_id)
+            return
+
+        field_name, _ = METADATA_FIELDS[index]
         metadata = dict(session.get("metadata") or {})
-        metadata[key] = text
-        LOGGER.info("WhatsApp metadata received: field=%s filename=%s", key, session.get("original_filename", "exam.docx"))
+        metadata[field_name] = text
+
+        LOGGER.info(
+            "WhatsApp metadata received: field=%s filename=%s",
+            field_name,
+            session.get("original_filename", "exam.docx"),
+        )
+
         index += 1
         session["metadata"] = metadata
         session["metadata_index"] = index
@@ -375,92 +472,153 @@ class WhatsAppExamBot:
 
         session["state"] = "formatting"
         self.store.set(sender, session)
-        self.client.send_text(sender, "Thanks. I have the details. I am formatting the exam now.", phone_number_id)
-        LOGGER.info("WhatsApp formatting requested: filename=%s", session.get("original_filename", "exam.docx"))
+
+        self.client.send_text(
+            sender,
+            "Thanks. I have the details. I am formatting the exam now.",
+            phone_number_id,
+        )
+        LOGGER.info(
+            "WhatsApp formatting requested: filename=%s",
+            session.get("original_filename", "exam.docx"),
+        )
         self._format_and_send(sender, session)
 
     def _format_and_send(self, sender: str, session: dict) -> None:
         phone_number_id = str(session.get("phone_number_id") or "")
         original_filename = str(session.get("original_filename") or "exam.docx")
-        source = Path(str(session["original_path"]))
+        source_path = Path(str(session["original_path"]))
+
         exam_id = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid4().hex[:6]
-        folder = self.exams_dir() / exam_id
-        folder.mkdir(parents=True, exist_ok=False)
-        original = folder / "original.docx"
-        formatted = folder / "formatted.docx"
-        shutil.copy2(source, original)
+        exam_dir = self.exams_dir() / exam_id
+        exam_dir.mkdir(parents=True, exist_ok=False)
+
+        original_path = exam_dir / "original.docx"
+        formatted_path = exam_dir / "formatted.docx"
+        shutil.copy2(source_path, original_path)
 
         try:
-            LOGGER.info("[whatsapp:%s] Formatting started: filename=%s", exam_id, original_filename)
+            LOGGER.info(
+                "[whatsapp:%s] Formatting started: filename=%s",
+                exam_id,
+                original_filename,
+            )
+
             result = run_pipeline(
-                original,
+                original_path,
                 self.reference_path(),
-                folder / "work",
+                exam_dir / "work",
                 log_context=f"whatsapp:{exam_id}",
             )
             if not result["ok"]:
-                LOGGER.error("[whatsapp:%s] Phase 1 failed: %s", exam_id, result.get("problems"))
+                LOGGER.error(
+                    "[whatsapp:%s] Phase 1 failed: %s",
+                    exam_id,
+                    result.get("problems"),
+                )
                 raise RuntimeError("Exam hierarchy validation failed.")
 
             LOGGER.info("[whatsapp:%s] DOCX rendering started", exam_id)
-            format_exam(result["blocks"], original, formatted)
+            format_exam(result["blocks"], original_path, formatted_path)
             LOGGER.info(
                 "[whatsapp:%s] DOCX rendering complete: bytes=%d",
                 exam_id,
-                formatted.stat().st_size if formatted.exists() else 0,
+                formatted_path.stat().st_size if formatted_path.exists() else 0,
             )
 
             LOGGER.info("[whatsapp:%s] Format integrity check started", exam_id)
-            problems = check_format(result["blocks"], original, formatted, self.reference_path())
+            problems = check_format(
+                result["blocks"],
+                original_path,
+                formatted_path,
+                self.reference_path(),
+            )
             if problems:
-                LOGGER.error("[whatsapp:%s] Format integrity failed: %s", exam_id, problems)
+                LOGGER.error(
+                    "[whatsapp:%s] Format integrity failed: %s",
+                    exam_id,
+                    problems,
+                )
                 raise RuntimeError("Formatted exam integrity validation failed.")
+
             LOGGER.info("[whatsapp:%s] Format integrity check passed", exam_id)
 
             formatted_name = self.download_stem(original_filename) + "_FORMATTED.docx"
-            metadata_record = {
-                "source": "whatsapp",
-                "original_filename": original_filename,
-                "profile_name": session.get("profile_name", ""),
-                "metadata": session.get("metadata", {}),
-                "created_at": _utc_now(),
-            }
-            (folder / "metadata.json").write_text(json.dumps(metadata_record, indent=2), encoding="utf-8")
-
-            rows = self.load_index()
-            rows.append(
-                {
-                    "id": exam_id,
-                    "original_filename": original_filename,
-                    "formatted_filename": formatted_name,
-                    "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "source": "whatsapp",
-                    "metadata": session.get("metadata", {}),
-                }
+            self._save_exam_record(
+                exam_id=exam_id,
+                exam_dir=exam_dir,
+                original_filename=original_filename,
+                formatted_name=formatted_name,
+                session=session,
             )
-            self.save_index(rows)
+
             LOGGER.info("[whatsapp:%s] Uploading formatted DOCX to WhatsApp", exam_id)
             self.client.send_document(
                 sender,
-                formatted,
+                formatted_path,
                 formatted_name,
                 "Your formatted exam is ready.",
                 phone_number_id,
             )
-            LOGGER.info("[whatsapp:%s] Formatting completed and document sent: filename=%s", exam_id, formatted_name)
+            LOGGER.info(
+                "[whatsapp:%s] Formatting completed and document sent: filename=%s",
+                exam_id,
+                formatted_name,
+            )
         except Exception:
-            shutil.rmtree(folder, ignore_errors=True)
+            shutil.rmtree(exam_dir, ignore_errors=True)
             raise
         finally:
-            completed = self.store.clear(sender)
-            self._clear_session_files(completed)
+            completed_session = self.store.clear(sender)
+            self._clear_session_files(completed_session)
+
+    def _save_exam_record(
+        self,
+        exam_id: str,
+        exam_dir: Path,
+        original_filename: str,
+        formatted_name: str,
+        session: dict,
+    ) -> None:
+        metadata = session.get("metadata", {})
+
+        metadata_record = {
+            "source": "whatsapp",
+            "original_filename": original_filename,
+            "profile_name": session.get("profile_name", ""),
+            "metadata": metadata,
+            "created_at": _utc_now(),
+        }
+        (exam_dir / "metadata.json").write_text(
+            json.dumps(metadata_record, indent=2),
+            encoding="utf-8",
+        )
+
+        rows = self.load_index()
+        rows.append(
+            {
+                "id": exam_id,
+                "original_filename": original_filename,
+                "formatted_filename": formatted_name,
+                "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "source": "whatsapp",
+                "metadata": metadata,
+            }
+        )
+        self.save_index(rows)
 
 
 def _verify_signature(raw_body: bytes, signature: str, app_secret: str) -> bool:
     if not signature.startswith("sha256="):
         return False
-    expected = hmac.new(app_secret.encode("utf-8"), raw_body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(signature.removeprefix("sha256="), expected)
+
+    expected = hmac.new(
+        app_secret.encode("utf-8"),
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+    supplied = signature.removeprefix("sha256=")
+    return hmac.compare_digest(supplied, expected)
 
 
 def register_whatsapp_routes(
@@ -484,20 +642,28 @@ def register_whatsapp_routes(
 
     @app.get("/webhook")
     def whatsapp_webhook_verify():
-        verify_token = (os.getenv("VERIFY_TOKEN") or os.getenv("WHATSAPP_VERIFY_TOKEN", "")).strip()
+        verify_token = (
+            os.getenv("VERIFY_TOKEN")
+            or os.getenv("WHATSAPP_VERIFY_TOKEN", "")
+        ).strip()
+
+        if not verify_token:
+            return Response("VERIFY_TOKEN is not configured.", status=503)
+
         mode = request.args.get("hub.mode", "")
         token = request.args.get("hub.verify_token", "")
         challenge = request.args.get("hub.challenge", "")
-        if not verify_token:
-            return Response("VERIFY_TOKEN is not configured.", status=503)
+
         if mode == "subscribe" and hmac.compare_digest(token, verify_token):
             return Response(challenge, status=200, mimetype="text/plain")
+
         return Response("Forbidden", status=403)
 
     @app.post("/webhook")
     def whatsapp_webhook_receive():
         raw_body = request.get_data(cache=True)
         app_secret = os.getenv("WHATSAPP_APP_SECRET", "").strip()
+
         if app_secret:
             signature = request.headers.get("X-Hub-Signature-256", "")
             if not _verify_signature(raw_body, signature, app_secret):
@@ -508,9 +674,15 @@ def register_whatsapp_routes(
             return Response("", status=200)
 
         if _env_bool("WHATSAPP_ASYNC", True):
-            threading.Thread(target=bot.handle_payload, args=(payload,), daemon=True).start()
+            thread = threading.Thread(
+                target=bot.handle_payload,
+                args=(payload,),
+                daemon=True,
+            )
+            thread.start()
         else:
             bot.handle_payload(payload)
+
         return Response("", status=200)
 
     return bot

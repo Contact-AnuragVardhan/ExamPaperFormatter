@@ -1,5 +1,3 @@
-"""WhatsApp webhook transport tests. No network calls are made."""
-
 from __future__ import annotations
 
 import os
