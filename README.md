@@ -54,3 +54,9 @@ Deployment files:
 The production server starts `web.app:app` with Gunicorn. `GET /health` is the
 Render health-check endpoint. See `RENDER_DEPLOYMENT.md` for the exact Render
 and Meta configuration.
+
+## Reference nonconformance corrections
+
+Before the normal formatting pipeline runs, browser and WhatsApp uploads are checked against the active reference exam for required header roles and reference Sections A-D. If required items are missing, the formatter does not call the normal OpenAI formatting pipeline. Instead it returns `<original>_CORRECTIONS.docx`, preserving the teacher exam and inserting yellow `ERROR:` / `FIX:` paragraphs that explain what must be corrected. The teacher should make the corrections, delete the yellow notes, and upload/send the corrected DOCX again.
+
+This behavior is covered by `tests/test_nonconformance.py` and a WhatsApp regression test in `tests/test_whatsapp.py`.

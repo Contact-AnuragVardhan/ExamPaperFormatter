@@ -19,6 +19,7 @@ from flask import Flask, Response, request
 from werkzeug.utils import secure_filename
 
 from format.format_integrity import check_format
+from format.nonconformance import find_nonconformances, write_nonconformance_file
 from format.word_formatter import format_exam
 from run_core import run_pipeline
 
@@ -475,7 +476,7 @@ class WhatsAppExamBot:
 
         self.client.send_text(
             sender,
-            "Thanks. I have the details. I am formatting the exam now.",
+            "Thanks. I have the details. I am checking the exam against the reference and will format it if it matches.",
             phone_number_id,
         )
         LOGGER.info(
@@ -504,67 +505,103 @@ class WhatsAppExamBot:
                 original_filename,
             )
 
-            result = run_pipeline(
-                original_path,
-                self.reference_path(),
-                exam_dir / "work",
-                log_context=f"whatsapp:{exam_id}",
-            )
-            if not result["ok"]:
-                LOGGER.error(
-                    "[whatsapp:%s] Phase 1 failed: %s",
+            LOGGER.info("[whatsapp:%s] Reference conformance check started", exam_id)
+            errors = find_nonconformances(original_path, self.reference_path())
+            if errors:
+                LOGGER.info(
+                    "[whatsapp:%s] Reference conformance failed with %d issue(s); creating corrections DOCX",
                     exam_id,
-                    result.get("problems"),
+                    len(errors),
                 )
-                raise RuntimeError("Exam hierarchy validation failed.")
-
-            LOGGER.info("[whatsapp:%s] DOCX rendering started", exam_id)
-            format_exam(result["blocks"], original_path, formatted_path)
-            LOGGER.info(
-                "[whatsapp:%s] DOCX rendering complete: bytes=%d",
-                exam_id,
-                formatted_path.stat().st_size if formatted_path.exists() else 0,
-            )
-
-            LOGGER.info("[whatsapp:%s] Format integrity check started", exam_id)
-            problems = check_format(
-                result["blocks"],
-                original_path,
-                formatted_path,
-                self.reference_path(),
-            )
-            if problems:
-                LOGGER.error(
-                    "[whatsapp:%s] Format integrity failed: %s",
+                write_nonconformance_file(original_path, formatted_path, errors)
+                formatted_name = self.download_stem(original_filename) + "_CORRECTIONS.docx"
+                self._save_exam_record(
+                    exam_id=exam_id,
+                    exam_dir=exam_dir,
+                    original_filename=original_filename,
+                    formatted_name=formatted_name,
+                    session=session,
+                )
+                LOGGER.info("[whatsapp:%s] Uploading corrections DOCX to WhatsApp", exam_id)
+                self.client.send_document(
+                    sender,
+                    formatted_path,
+                    formatted_name,
+                    (
+                        "This exam does not match the Reference Exam. "
+                        "Please follow the yellow ERROR/FIX notes, delete those notes after making "
+                        "the corrections, and send the corrected .docx again."
+                    ),
+                    phone_number_id,
+                )
+                LOGGER.info(
+                    "[whatsapp:%s] Corrections document sent: filename=%s",
                     exam_id,
-                    problems,
+                    formatted_name,
                 )
-                raise RuntimeError("Formatted exam integrity validation failed.")
+            else:
+                LOGGER.info("[whatsapp:%s] Reference conformance passed; formatting started", exam_id)
+                result = run_pipeline(
+                    original_path,
+                    self.reference_path(),
+                    exam_dir / "work",
+                    log_context=f"whatsapp:{exam_id}",
+                )
+                if not result["ok"]:
+                    LOGGER.error(
+                        "[whatsapp:%s] Phase 1 failed: %s",
+                        exam_id,
+                        result.get("problems"),
+                    )
+                    raise RuntimeError("Exam hierarchy validation failed.")
 
-            LOGGER.info("[whatsapp:%s] Format integrity check passed", exam_id)
+                LOGGER.info("[whatsapp:%s] DOCX rendering started", exam_id)
+                format_exam(result["blocks"], original_path, formatted_path)
+                LOGGER.info(
+                    "[whatsapp:%s] DOCX rendering complete: bytes=%d",
+                    exam_id,
+                    formatted_path.stat().st_size if formatted_path.exists() else 0,
+                )
 
-            formatted_name = self.download_stem(original_filename) + "_FORMATTED.docx"
-            self._save_exam_record(
-                exam_id=exam_id,
-                exam_dir=exam_dir,
-                original_filename=original_filename,
-                formatted_name=formatted_name,
-                session=session,
-            )
+                LOGGER.info("[whatsapp:%s] Format integrity check started", exam_id)
+                problems = check_format(
+                    result["blocks"],
+                    original_path,
+                    formatted_path,
+                    self.reference_path(),
+                )
+                if problems:
+                    LOGGER.error(
+                        "[whatsapp:%s] Format integrity failed: %s",
+                        exam_id,
+                        problems,
+                    )
+                    raise RuntimeError("Formatted exam integrity validation failed.")
 
-            LOGGER.info("[whatsapp:%s] Uploading formatted DOCX to WhatsApp", exam_id)
-            self.client.send_document(
-                sender,
-                formatted_path,
-                formatted_name,
-                "Your formatted exam is ready.",
-                phone_number_id,
-            )
-            LOGGER.info(
-                "[whatsapp:%s] Formatting completed and document sent: filename=%s",
-                exam_id,
-                formatted_name,
-            )
+                LOGGER.info("[whatsapp:%s] Format integrity check passed", exam_id)
+
+                formatted_name = self.download_stem(original_filename) + "_FORMATTED.docx"
+                self._save_exam_record(
+                    exam_id=exam_id,
+                    exam_dir=exam_dir,
+                    original_filename=original_filename,
+                    formatted_name=formatted_name,
+                    session=session,
+                )
+
+                LOGGER.info("[whatsapp:%s] Uploading formatted DOCX to WhatsApp", exam_id)
+                self.client.send_document(
+                    sender,
+                    formatted_path,
+                    formatted_name,
+                    "Your formatted exam is ready.",
+                    phone_number_id,
+                )
+                LOGGER.info(
+                    "[whatsapp:%s] Formatting completed and document sent: filename=%s",
+                    exam_id,
+                    formatted_name,
+                )
         except Exception:
             shutil.rmtree(exam_dir, ignore_errors=True)
             raise

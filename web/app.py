@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from format.format_integrity import check_format
+from format.nonconformance import find_nonconformances, write_nonconformance_file
 from format.word_formatter import format_exam
 from run_core import run_pipeline
 from web.whatsapp import register_whatsapp_routes
@@ -147,36 +148,52 @@ def create_app(data_root: Path | None = None) -> Flask:
             original.stat().st_size,
         )
         try:
-            LOGGER.info("[browser:%s] Formatting started", exam_id)
-            result = run_pipeline(
-                original,
-                reference_path(),
-                folder / "work",
-                log_context=f"browser:{exam_id}",
-            )
-            if not result["ok"]:
-                LOGGER.error("Browser exam %s failed Phase 1: %s", exam_id, result.get("problems"))
-                shutil.rmtree(folder, ignore_errors=True)
-                return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
-            LOGGER.info("[browser:%s] DOCX rendering started", exam_id)
-            format_exam(result["blocks"], original, formatted)
-            LOGGER.info(
-                "[browser:%s] DOCX rendering complete: bytes=%d",
-                exam_id,
-                formatted.stat().st_size if formatted.exists() else 0,
-            )
-            LOGGER.info("[browser:%s] Format integrity check started", exam_id)
-            problems = check_format(result["blocks"], original, formatted, reference_path())
-            if problems:
-                LOGGER.error("[browser:%s] Format integrity failed: %s", exam_id, problems)
-                shutil.rmtree(folder, ignore_errors=True)
-                return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
-            LOGGER.info("[browser:%s] Format integrity check passed", exam_id)
+            LOGGER.info("[browser:%s] Reference conformance check started", exam_id)
+            errors = find_nonconformances(original, reference_path())
+            if errors:
+                LOGGER.info(
+                    "[browser:%s] Reference conformance failed with %d issue(s); creating corrections DOCX",
+                    exam_id,
+                    len(errors),
+                )
+                write_nonconformance_file(original, formatted, errors)
+                formatted_name = download_stem(original_name) + "_CORRECTIONS.docx"
+                message = (
+                    "This exam does not match the Reference Exam. "
+                    "Download the file, follow the yellow ERROR/FIX notes, delete those notes, and upload again."
+                )
+            else:
+                LOGGER.info("[browser:%s] Reference conformance passed; formatting started", exam_id)
+                result = run_pipeline(
+                    original,
+                    reference_path(),
+                    folder / "work",
+                    log_context=f"browser:{exam_id}",
+                )
+                if not result["ok"]:
+                    LOGGER.error("Browser exam %s failed Phase 1: %s", exam_id, result.get("problems"))
+                    shutil.rmtree(folder, ignore_errors=True)
+                    return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
+                LOGGER.info("[browser:%s] DOCX rendering started", exam_id)
+                format_exam(result["blocks"], original, formatted)
+                LOGGER.info(
+                    "[browser:%s] DOCX rendering complete: bytes=%d",
+                    exam_id,
+                    formatted.stat().st_size if formatted.exists() else 0,
+                )
+                LOGGER.info("[browser:%s] Format integrity check started", exam_id)
+                problems = check_format(result["blocks"], original, formatted, reference_path())
+                if problems:
+                    LOGGER.error("[browser:%s] Format integrity failed: %s", exam_id, problems)
+                    shutil.rmtree(folder, ignore_errors=True)
+                    return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
+                LOGGER.info("[browser:%s] Format integrity check passed", exam_id)
+                formatted_name = download_stem(original_name) + "_FORMATTED.docx"
+                message = "Exam formatted."
         except Exception:
             LOGGER.exception("Browser exam %s formatting failed", exam_id)
             shutil.rmtree(folder, ignore_errors=True)
             return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
-        formatted_name = download_stem(original_name) + "_FORMATTED.docx"
         rows = load_index()
         rows.append(
             {
@@ -187,8 +204,8 @@ def create_app(data_root: Path | None = None) -> Flask:
             }
         )
         save_index(rows)
-        LOGGER.info("[browser:%s] Formatting completed successfully: output=%s", exam_id, formatted_name)
-        return redirect(url_for("index", message="Exam formatted.", download=exam_id))
+        LOGGER.info("[browser:%s] Browser processing completed: output=%s", exam_id, formatted_name)
+        return redirect(url_for("index", message=message, download=exam_id))
 
     @app.get("/exams/<exam_id>/download")
     def download_exam(exam_id: str):
