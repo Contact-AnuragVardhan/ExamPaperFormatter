@@ -10,7 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from core.validate import _leading_int
+from reference_profile.numbering import load_numbering_policy
 from format.format_integrity import check_format
+from format.nonconformance import find_nonconformances
 from format.word_formatter import format_exam
 from run_core import run_pipeline
 
@@ -26,7 +29,7 @@ def _norm(text: str) -> str:
 def test_formatted_exam():
     result = run_pipeline(TEACHER, REFERENCE, ROOT / "output")
     assert result["ok"], result["problems"]
-    format_exam(result["blocks"], TEACHER, OUTPUT)
+    format_exam(result["blocks"], TEACHER, OUTPUT, REFERENCE)
     assert OUTPUT.exists()
     problems = check_format(result["blocks"], TEACHER, OUTPUT, REFERENCE)
     assert problems == [], problems
@@ -34,6 +37,8 @@ def test_formatted_exam():
     from docx import Document
 
     doc = Document(str(OUTPUT))
+    assert not any(p.text.strip().startswith("ERROR:") for p in doc.paragraphs)
+    assert not any(p.text.strip().startswith("FIX:") for p in doc.paragraphs)
     text = "\n".join(p.text for p in doc.paragraphs)
     flat = _norm(text)
     cursor = 0
@@ -90,3 +95,43 @@ def test_formatted_exam():
         media = [n for n in out.namelist() if n.startswith("word/media/")]
         assert len(media) == 1
         assert hashlib.sha256(out.read(media[0])).hexdigest() == teacher_hash
+
+
+def test_format_round_trip(tmp_path):
+    policy = load_numbering_policy(REFERENCE)
+    assert _leading_int("1) Read", policy) == 1
+    assert _leading_int("1.Read", policy) == 1
+    assert _leading_int("Q1) Read", policy) == 1
+    assert _leading_int("Q16) Answer", policy) == 16
+    assert _leading_int("Question 1", policy) is None
+
+    first_dir = tmp_path / "first"
+    first = run_pipeline(TEACHER, REFERENCE, first_dir)
+    assert first["ok"], first["problems"]
+    once = tmp_path / "once.docx"
+    format_exam(first["blocks"], TEACHER, once, REFERENCE)
+    assert find_nonconformances(once, REFERENCE) == []
+
+    second_dir = tmp_path / "second"
+    second = run_pipeline(once, REFERENCE, second_dir)
+    assert second["ok"], second["problems"]
+    twice = tmp_path / "twice.docx"
+    format_exam(second["blocks"], once, twice, REFERENCE)
+    problems = check_format(second["blocks"], once, twice, REFERENCE)
+    assert problems == [], problems
+
+    from docx import Document
+
+    doc = Document(str(twice))
+    assert not any(p.text.strip().startswith("ERROR:") for p in doc.paragraphs)
+    assert not any(p.text.strip().startswith("FIX:") for p in doc.paragraphs)
+    flat = _norm("\n".join(p.text for p in doc.paragraphs))
+    assert "Bhagini" in flat
+    assert "Class X" in flat
+    cursor = 0
+    for n in range(1, 17):
+        token = f"Q{n})"
+        pos = flat.find(token, cursor)
+        assert pos >= 0, token
+        cursor = pos + len(token)
+        assert f"{token} {token}" not in flat

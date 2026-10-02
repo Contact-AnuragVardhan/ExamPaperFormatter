@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import re
 import sys
 import zipfile
 from pathlib import Path
@@ -13,8 +14,10 @@ from docx.enum.text import WD_COLOR_INDEX
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from format.nonconformance import _HEADING, _norm, find_nonconformances
+from format.nonconformance import _norm, find_nonconformances
 from web.app import create_app
+
+_HEADING = re.compile(r"^section\s*[-–—]?\s*([A-D])\s*$", re.IGNORECASE)
 
 TEACHER = ROOT / "input" / "Teacher Exam English 10 Actual.docx"
 BAD = ROOT / "input" / "Teacher Exam English 10 BAD.docx"

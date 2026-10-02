@@ -513,7 +513,7 @@ class WhatsAppExamBot:
                     exam_id,
                     len(errors),
                 )
-                write_nonconformance_file(original_path, formatted_path, errors)
+                write_nonconformance_file(original_path, formatted_path, errors, self.reference_path())
                 formatted_name = self.download_stem(original_filename) + "_CORRECTIONS.docx"
                 self._save_exam_record(
                     exam_id=exam_id,
@@ -556,7 +556,7 @@ class WhatsAppExamBot:
                     raise RuntimeError("Exam hierarchy validation failed.")
 
                 LOGGER.info("[whatsapp:%s] DOCX rendering started", exam_id)
-                format_exam(result["blocks"], original_path, formatted_path)
+                format_exam(result["blocks"], original_path, formatted_path, self.reference_path())
                 LOGGER.info(
                     "[whatsapp:%s] DOCX rendering complete: bytes=%d",
                     exam_id,

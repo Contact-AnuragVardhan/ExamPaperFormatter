@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 from core.models import Block
+from reference_profile.images import ImagePolicy
 
 _MARK = re.compile(r"\(\s*\d+\s*x\s*\d+\s*=\s*\d+\s*\)|\(\s*\d+\s*\)")
 _NUMBER = re.compile(r"\d+")
@@ -14,7 +15,7 @@ def _paras(blocks: list[Block]) -> list[Block]:
     return [b for b in blocks if b.source_id.startswith("p")]
 
 
-def integrity(source: list[Block], canonical: list[Block]) -> list[tuple[str, bool, str]]:
+def integrity(source: list[Block], canonical: list[Block], image_policy: ImagePolicy) -> list[tuple[str, bool, str]]:
     source_paras = {b.source_id: b.original_text for b in _paras(source)}
     canon_paras = {b.source_id: b.original_text for b in _paras(canonical)}
     checks: list[tuple[str, bool, str]] = []
@@ -57,7 +58,7 @@ def integrity(source: list[Block], canonical: list[Block]) -> list[tuple[str, bo
     canon_images = [(b.source_id, b.media_part, b.host_paragraph_id) for b in canonical if b.media_part]
     checks.append((
         "image_presence",
-        source_images == canon_images and len(canon_images) > 0,
+        source_images == canon_images and len(canon_images) == image_policy.count,
         f"{len(canon_images)} image block(s)",
     ))
 

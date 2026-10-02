@@ -156,7 +156,7 @@ def create_app(data_root: Path | None = None) -> Flask:
                     exam_id,
                     len(errors),
                 )
-                write_nonconformance_file(original, formatted, errors)
+                write_nonconformance_file(original, formatted, errors, reference_path())
                 formatted_name = download_stem(original_name) + "_CORRECTIONS.docx"
                 message = (
                     "This exam does not match the Reference Exam. "
@@ -175,7 +175,7 @@ def create_app(data_root: Path | None = None) -> Flask:
                     shutil.rmtree(folder, ignore_errors=True)
                     return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
                 LOGGER.info("[browser:%s] DOCX rendering started", exam_id)
-                format_exam(result["blocks"], original, formatted)
+                format_exam(result["blocks"], original, formatted, reference_path())
                 LOGGER.info(
                     "[browser:%s] DOCX rendering complete: bytes=%d",
                     exam_id,

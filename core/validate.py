@@ -5,22 +5,26 @@ from __future__ import annotations
 import re
 
 from core.models import Block
+from reference_profile.images import ImagePolicy
+from reference_profile.numbering import NumberingPolicy
 
-_MAJOR_NUM = re.compile(r"^\s*(\d{1,2})[\.\)\s]")
+_MAJOR_NUM = re.compile(r"^\s*(?:Q)?(\d{1,2})[\.\)\s]")
+_PLAIN_MAJOR = re.compile(r"^\s*(\d{1,2})[\.\)\s]")
 
 
 def _map(blocks: list[Block]) -> dict[str, Block]:
     return {b.source_id: b for b in blocks}
 
 
-def _leading_int(text: str) -> int | None:
-    match = _MAJOR_NUM.match(text or "")
+def _leading_int(text: str, policy: NumberingPolicy) -> int | None:
+    pattern = _MAJOR_NUM if policy.source == "compatibility" or (policy.major or "").startswith("Q") else _PLAIN_MAJOR
+    match = pattern.match(text or "")
     if not match:
         return None
     return int(match.group(1))
 
 
-def validate(blocks: list[Block], numbering_stable: bool) -> list[str]:
+def validate(blocks: list[Block], numbering_stable: bool, policy: NumberingPolicy, image_policy: ImagePolicy) -> list[str]:
     """Return a list of problem statements. Empty means the invariants hold."""
     problems: list[str] = []
     by_id = _map(blocks)
@@ -68,7 +72,7 @@ def validate(blocks: list[Block], numbering_stable: bool) -> list[str]:
         if block.block_type in {"alternative", "or_marker"} and (
             parent is None or parent.block_type != "major_question"
         ):
-            problems.append(f"{block.source_id} OR structure does not belong to a major question.")
+            problems.append(f"{block.source_id} alternative structure does not belong to a major question.")
         if block.block_type == "subquestion" and (
             parent is None or parent.block_type not in {"major_question", "branch"}
         ):
@@ -91,15 +95,15 @@ def validate(blocks: list[Block], numbering_stable: bool) -> list[str]:
     orders = [b.source_order for b in majors]
     if orders != sorted(orders):
         problems.append("Major questions are not in document order.")
-    leading = [_leading_int(b.original_text) for b in majors]
+    leading = [_leading_int(b.original_text, policy) for b in majors]
     if any(n is None for n in leading):
         problems.append("A major question has no leading integer in the source text.")
     elif leading != list(range(1, len(leading) + 1)):
         problems.append(f"Major leading numbers are {leading}, not 1..N in order.")
 
     images = [b for b in blocks if b.block_type == "image"]
-    if not images:
-        problems.append("No image block is present.")
+    if len(images) != image_policy.count:
+        problems.append(f"Expected {image_policy.count} image block(s), found {len(images)}.")
 
     if not numbering_stable:
         problems.append("Numbering the hierarchy twice produced different labels.")

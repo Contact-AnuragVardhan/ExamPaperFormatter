@@ -17,41 +17,8 @@ from docx.enum.text import WD_COLOR_INDEX
 from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
 
-_HEADING = re.compile(r"^section\s*[-–—]?\s*([A-D])\s*$", re.IGNORECASE)
-_CLASS = re.compile(
-    r"^(?:class|grade)\s*[:\-–—]?\s*(?:\d{1,2}|xii|xi|x)\s*$",
-    re.IGNORECASE,
-)
-_SUBJECT = re.compile(r"^subject\b", re.IGNORECASE)
-_TIME = re.compile(r"^time\b", re.IGNORECASE)
-_MARKS = re.compile(r"(?:maximum\s+marks|\bm\s*\.\s*m\s*\.)", re.IGNORECASE)
-
-_HEADER_ROLES = (
-    (
-        "class",
-        _CLASS,
-        "Class header is missing.",
-        "Add the Class header in the header area, following the Reference Exam.",
-    ),
-    (
-        "subject",
-        _SUBJECT,
-        "Subject header is missing.",
-        "Add the Subject header in the header area, following the Reference Exam.",
-    ),
-    (
-        "time",
-        _TIME,
-        "Time header is missing.",
-        "Add the Time header in the header area, following the Reference Exam.",
-    ),
-    (
-        "marks",
-        _MARKS,
-        "Maximum marks header is missing.",
-        "Add the Maximum marks header in the header area, following the Reference Exam.",
-    ),
-)
+from reference_profile.headers import HeaderRequirement, load_header_policy
+from reference_profile.sections import canonical_heading, heading_key, required_section_headings
 
 
 @dataclass(frozen=True)
@@ -66,59 +33,68 @@ def _norm(text: str) -> str:
     return " ".join((text or "").split())
 
 
-def _section_letters(doc: Document) -> list[str]:
-    letters = []
+def _present_headings(doc: Document, headings: list[str]) -> list[str]:
+    found = []
     for paragraph in doc.paragraphs:
-        match = _HEADING.match(_norm(paragraph.text))
-        if match:
-            letters.append(match.group(1).upper())
-    return letters
+        canonical = canonical_heading(paragraph.text, headings)
+        if canonical and canonical not in found:
+            found.append(canonical)
+    return found
 
 
-def _before_first_section(doc: Document) -> list[str]:
+def _before_first_section(doc: Document, headings: list[str]) -> list[str]:
     texts = []
     for paragraph in doc.paragraphs:
-        if _HEADING.match(_norm(paragraph.text)):
+        if canonical_heading(paragraph.text, headings):
             break
         texts.append(paragraph.text)
     return texts
 
 
-def _has_role(texts: list[str], pattern: re.Pattern[str]) -> bool:
-    return any(pattern.search(_norm(text)) for text in texts)
+def _has_role(texts: list[str], requirement: HeaderRequirement) -> bool:
+    return any(requirement.matches(text) for text in texts)
 
 
-def _place_for_missing_section(present: list[str], letter: str) -> str:
-    for later in "ABCD":
-        if later > letter and later in present:
+def _place_for_missing_section(present: list[str], heading: str, headings: list[str]) -> str:
+    for later in headings[headings.index(heading) + 1 :]:
+        if later in present:
             return f"before-section:{later}"
     return "bottom"
 
 
 def find_nonconformances(teacher: Path, reference: Path) -> list[ExamError]:
-    """Header roles and section headings the reference has and the teacher lacks."""
+    """Header roles and profile section headings the teacher lacks."""
+    headings = required_section_headings(reference)
+    requirements = load_header_policy(reference)
     teacher_doc = Document(str(teacher))
-    reference_doc = Document(str(reference))
-    teacher_header = _before_first_section(teacher_doc)
-    reference_header = _before_first_section(reference_doc)
+    teacher_header = _before_first_section(teacher_doc, headings)
     errors: list[ExamError] = []
-    for code, pattern, error, fix in _HEADER_ROLES:
-        if _has_role(reference_header, pattern) and not _has_role(teacher_header, pattern):
-            errors.append(ExamError(f"missing_header_{code}", error, fix, "header"))
-    teacher_sections = _section_letters(teacher_doc)
-    seen_sections: list[str] = []
-    for letter in _section_letters(reference_doc):
-        if letter in seen_sections:
-            continue
-        seen_sections.append(letter)
-        if letter in teacher_sections:
+    for requirement in requirements:
+        if _has_role(teacher_header, requirement):
             continue
         errors.append(
             ExamError(
-                f"missing_section_{letter}",
-                f"Section {letter} is missing.",
-                f"Add Section {letter} in the correct position, following the Reference Exam.",
-                _place_for_missing_section(teacher_sections, letter),
+                f"missing_header_{requirement.role}",
+                f"{requirement.label} header is missing.",
+                f"Add the {requirement.label} header in the header area, following the Reference Exam.",
+                "header",
+            )
+        )
+    teacher_sections = _present_headings(teacher_doc, headings)
+    seen_sections: list[str] = []
+    for heading in headings:
+        if heading in seen_sections:
+            continue
+        seen_sections.append(heading)
+        if heading in teacher_sections:
+            continue
+        code = "missing_section_" + re.sub(r"\W+", "_", heading).strip("_")
+        errors.append(
+            ExamError(
+                code,
+                f"{heading} is missing.",
+                f"Add {heading} in the correct position, following the Reference Exam.",
+                _place_for_missing_section(teacher_sections, heading, headings),
             )
         )
     return errors
@@ -159,24 +135,23 @@ def _insert_lines_before(anchor, lines: list[str]) -> None:
         _insert_before(anchor, line)
 
 
-def _first_header_paragraph(doc: Document):
+def _first_header_paragraph(doc: Document, requirements: list[HeaderRequirement]):
     for paragraph in doc.paragraphs:
-        text = _norm(paragraph.text)
-        if _CLASS.search(text) or _SUBJECT.search(text) or _TIME.search(text) or _MARKS.search(text):
+        if any(requirement.matches(paragraph.text) for requirement in requirements):
             return paragraph
     return doc.paragraphs[0] if doc.paragraphs else None
 
 
-def _section_anchors(doc: Document) -> dict[str, object]:
+def _section_anchors(doc: Document) -> dict[tuple[str, ...], object]:
     anchors = {}
     for paragraph in doc.paragraphs:
-        match = _HEADING.match(_norm(paragraph.text))
-        if match:
-            anchors[match.group(1).upper()] = paragraph
+        key = heading_key(paragraph.text)
+        if key and key not in anchors:
+            anchors[key] = paragraph
     return anchors
 
 
-def write_nonconformance_file(teacher: Path, output: Path, errors: list[ExamError]) -> Path:
+def write_nonconformance_file(teacher: Path, output: Path, errors: list[ExamError], reference: Path) -> Path:
     """Copy the teacher exam and insert yellow ERROR/FIX paragraphs."""
     output.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(teacher, output)
@@ -184,7 +159,7 @@ def write_nonconformance_file(teacher: Path, output: Path, errors: list[ExamErro
     header = [item for item in errors if item.place == "header"]
     bottom = [item for item in errors if item.place == "bottom"]
     if header:
-        anchor = _first_header_paragraph(doc)
+        anchor = _first_header_paragraph(doc, load_header_policy(reference))
         if anchor is None:
             bottom = header + bottom
         else:
@@ -193,8 +168,8 @@ def write_nonconformance_file(teacher: Path, output: Path, errors: list[ExamErro
     for item in errors:
         if not item.place.startswith("before-section:"):
             continue
-        letter = item.place.split(":", 1)[1]
-        anchor = anchors.get(letter)
+        heading = item.place.split(":", 1)[1]
+        anchor = anchors.get(heading_key(heading))
         if anchor is None:
             bottom.append(item)
         else:

@@ -1,0 +1,970 @@
+{
+  "profile_version": 1,
+  "source_reference": "Reference Exam English 10 WORD.docx",
+  "source_hash": {
+    "algorithm": "sha256",
+    "hex": "194e08abc18c67fb649d8b88a2fbe7463be26082cd995918a3d33f5ecd0edd29"
+  },
+  "identity": {
+    "subject": {
+      "value": "English",
+      "status": "observed",
+      "evidence": "Subject: English"
+    },
+    "class_grade": {
+      "value": "10",
+      "status": "observed",
+      "evidence": "Grade: 10"
+    }
+  },
+  "header": {
+    "status": "observed",
+    "ordering": "document_order",
+    "lines": [
+      {
+        "order": 1,
+        "paragraph_index": 1,
+        "text": "Jalta Sitara / School Examination",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 15,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 2,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 2,
+        "paragraph_index": 2,
+        "text": "Grade 10 English Quarterly",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 14,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 6,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 3,
+        "paragraph_index": 3,
+        "text": "Grade: 10",
+        "role": {
+          "value": "class_grade",
+          "status": "observed",
+          "captured": "10",
+          "label": "Class",
+          "pattern": "^(?:class|grade)\\s*[:\\-–—]?\\s*(?:\\d{1,2}|xii|xi|x)\\s*$"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 11,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 0,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 4,
+        "paragraph_index": 4,
+        "text": "Subject: English",
+        "role": {
+          "value": "subject",
+          "status": "observed",
+          "captured": "English",
+          "label": "Subject",
+          "pattern": "^subject\\b"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 11,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 0,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 5,
+        "paragraph_index": 5,
+        "text": "Time: 180 minutes",
+        "role": {
+          "value": "time",
+          "status": "observed",
+          "captured": "180 minutes",
+          "label": "Time",
+          "pattern": "^time\\b"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 11,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 0,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 6,
+        "paragraph_index": 6,
+        "text": "Maximum Marks: 80",
+        "role": {
+          "value": "marks",
+          "status": "observed",
+          "captured": "80",
+          "label": "Maximum marks",
+          "pattern": "(?:maximum\\s+marks|\\bm\\s*\\.\\s*m\\s*\\.)"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Calibri",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 11,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 10,
+            "status": "observed"
+          }
+        }
+      }
+    ]
+  },
+  "structure": {
+    "sections": {
+      "status": "observed",
+      "items": [
+        {
+          "order": 1,
+          "kind": "Section",
+          "label": "A",
+          "heading": "Section A",
+          "paragraph_index": 16
+        },
+        {
+          "order": 2,
+          "kind": "Section",
+          "label": "B",
+          "heading": "Section B",
+          "paragraph_index": 36
+        },
+        {
+          "order": 3,
+          "kind": "Section",
+          "label": "C",
+          "heading": "Section C",
+          "paragraph_index": 50
+        },
+        {
+          "order": 4,
+          "kind": "Section",
+          "label": "D",
+          "heading": "Section D",
+          "paragraph_index": 68
+        }
+      ]
+    },
+    "major_questions": {
+      "status": "observed",
+      "count": 16,
+      "numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "hierarchy": {
+      "status": "observed",
+      "majors": [
+        {
+          "number": 1,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q1.",
+              "paragraph_index": 20,
+              "subquestion_count": 5,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q2.",
+              "paragraph_index": 27,
+              "subquestion_count": 5,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q3.",
+              "paragraph_index": 34,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q4.",
+              "paragraph_index": 40,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q5.",
+              "paragraph_index": 42,
+              "subquestion_count": 0,
+              "choice_count": 4
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q6.",
+              "paragraph_index": 47,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 7,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q7.",
+              "paragraph_index": 54,
+              "subquestion_count": 6,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 8,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q8.",
+              "paragraph_index": 61,
+              "subquestion_count": 6,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 9,
+          "branches": [
+            "a",
+            "b"
+          ],
+          "stems": [
+            {
+              "marker": "Q9(a).",
+              "paragraph_index": 72,
+              "subquestion_count": 3,
+              "choice_count": 12
+            },
+            {
+              "marker": "Q9(b).",
+              "paragraph_index": 89,
+              "subquestion_count": 3,
+              "choice_count": 12
+            }
+          ]
+        },
+        {
+          "number": 10,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q10.",
+              "paragraph_index": 106,
+              "subquestion_count": 4,
+              "choice_count": 16
+            }
+          ]
+        },
+        {
+          "number": 11,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q11.",
+              "paragraph_index": 127,
+              "subquestion_count": 7,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 12,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q12.",
+              "paragraph_index": 135,
+              "subquestion_count": 3,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 13,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q13.",
+              "paragraph_index": 139,
+              "subquestion_count": 3,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 14,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q14.",
+              "paragraph_index": 143,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 15,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q15.",
+              "paragraph_index": 145,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 16,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "Q16.",
+              "paragraph_index": 147,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        }
+      ]
+    },
+    "syllabus": {
+      "status": "observed",
+      "heading": "SYLLABUS",
+      "paragraph_index": 7,
+      "location": "before_first_section",
+      "item_count": 2
+    },
+    "front_matter_headings": [
+      {
+        "text": "SYLLABUS",
+        "paragraph_index": 7
+      },
+      {
+        "text": "INSTRUCTIONS",
+        "paragraph_index": 10
+      }
+    ]
+  },
+  "numbering": {
+    "major": {
+      "status": "observed",
+      "patterns": [
+        "Q{n}.",
+        "Q{n}({letter})."
+      ],
+      "examples": [
+        "Q1.",
+        "Q9(a).",
+        "Q16."
+      ]
+    },
+    "subquestion": {
+      "status": "observed",
+      "patterns": [
+        "({roman})"
+      ],
+      "examples": [
+        "(i)",
+        "(ii)",
+        "(iii)",
+        "(iv)"
+      ]
+    },
+    "choice": {
+      "status": "observed",
+      "kinds": [
+        {
+          "patterns": [
+            "({letter})"
+          ],
+          "examples": [
+            "(a)",
+            "(b)",
+            "(c)",
+            "(d)"
+          ],
+          "count": 4
+        },
+        {
+          "patterns": [
+            "{Letter})"
+          ],
+          "examples": [
+            "A)",
+            "B)",
+            "C)",
+            "D)"
+          ],
+          "count": 40
+        }
+      ]
+    },
+    "branch": {
+      "status": "observed",
+      "patterns": [
+        "Q{n}({letter})."
+      ],
+      "letters": [
+        "a",
+        "b"
+      ],
+      "examples": [
+        "Q9(a).",
+        "Q9(b)."
+      ]
+    },
+    "alternative": {
+      "value": null,
+      "status": "not_determined"
+    }
+  },
+  "images": {
+    "status": "observed",
+    "count": 1,
+    "items": [
+      {
+        "paragraph_index": 48,
+        "media": "media/image1.jpeg",
+        "host_marker": "Q6.",
+        "width_emu": 4533900,
+        "height_emu": 4267200,
+        "width_in": 4.9583,
+        "height_in": 4.6667
+      }
+    ]
+  },
+  "appearance": {
+    "page": {
+      "status": "observed",
+      "width_twip": 12240,
+      "height_twip": 15840,
+      "width_in": 8.5,
+      "height_in": 11,
+      "orientation": "PORTRAIT"
+    },
+    "margins": {
+      "status": "observed",
+      "top_twip": 1080,
+      "right_twip": 1080,
+      "bottom_twip": 1080,
+      "left_twip": 1080,
+      "top_in": 0.75,
+      "right_in": 0.75,
+      "bottom_in": 0.75,
+      "left_in": 0.75
+    },
+    "predominant_font": {
+      "value": "Calibri",
+      "status": "observed",
+      "run_count": 139
+    },
+    "document_defaults": {
+      "font_name": {
+        "value": null,
+        "status": "not_determined",
+        "theme": "minorHAnsi"
+      },
+      "font_size_pt": {
+        "value": 11,
+        "status": "observed"
+      },
+      "space_after_pt": {
+        "value": 10,
+        "status": "observed"
+      },
+      "line_spacing": {
+        "value": 276,
+        "rule": "auto",
+        "status": "observed",
+        "multiple": 1.15
+      }
+    },
+    "roles": {
+      "section_heading": {
+        "status": "observed",
+        "paragraph_count": 4,
+        "font_name": {
+          "value": "Calibri",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 13,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": true,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 12,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 2,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "major_question": {
+        "status": "observed",
+        "paragraph_count": 17,
+        "font_name": {
+          "value": "Calibri",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 12,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": true,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 10,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 5,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "subquestion": {
+        "status": "observed",
+        "paragraph_count": 45,
+        "font_name": {
+          "value": "Calibri",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 11,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": 0.3,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_before_pt": {
+          "value": 5,
+          "status": "observed",
+          "uniform": false
+        },
+        "space_after_pt": {
+          "value": 3,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "choice": {
+        "status": "observed",
+        "paragraph_count": 44,
+        "font_name": {
+          "value": "Calibri",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 11,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": 0.9,
+          "status": "observed",
+          "uniform": false
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 1.5,
+          "status": "observed",
+          "uniform": false
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "body": {
+        "status": "observed",
+        "paragraph_count": 29,
+        "font_name": {
+          "value": "Calibri",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 11,
+          "status": "observed",
+          "uniform": false
+        },
+        "bold": {
+          "value": false,
+          "status": "observed",
+          "uniform": false
+        },
+        "underline": {
+          "value": false,
+          "status": "observed",
+          "uniform": false
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": 0.3,
+          "status": "observed",
+          "uniform": false
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": false
+        },
+        "space_after_pt": {
+          "value": 6,
+          "status": "observed",
+          "uniform": false
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      }
+    }
+  }
+}

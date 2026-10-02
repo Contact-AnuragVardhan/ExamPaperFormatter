@@ -15,6 +15,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from core.discover import discover, reference_convention_notes
+from reference_profile.images import load_image_policy
+from reference_profile.numbering import load_numbering_policy
+from reference_profile.sections import required_section_headings
+from reference_profile.syllabus import load_syllabus_policy
 from core.extract import extract_document
 from core.integrity import integrity
 from core.models import clone_blocks
@@ -92,7 +96,11 @@ def run_pipeline(
     stage = time.monotonic()
     LOGGER.info("[%s] Extracting reference DOCX", context)
     reference_blocks = extract_document(reference)
-    notes = reference_convention_notes(reference_blocks)
+    section_headings = required_section_headings(reference)
+    numbering_policy = load_numbering_policy(reference)
+    syllabus_policy = load_syllabus_policy(reference)
+    image_policy = load_image_policy(reference)
+    notes = reference_convention_notes(reference_blocks, section_headings, numbering_policy)
     LOGGER.info(
         "[%s] Reference extraction complete: blocks=%d elapsed=%.2fs",
         context,
@@ -108,7 +116,7 @@ def run_pipeline(
         os.environ.get("EXAM_REDO_MODEL", "gpt-4.1"),
         len(blocks),
     )
-    discover(blocks, notes)
+    discover(blocks, notes, section_headings, numbering_policy, syllabus_policy.heading)
     LOGGER.info(
         "[%s] OpenAI hierarchy discovery complete: elapsed=%.2fs",
         context,
@@ -117,9 +125,9 @@ def run_pipeline(
 
     stage = time.monotonic()
     LOGGER.info("[%s] Numbering and hierarchy validation started", context)
-    stable = labels_are_stable(blocks)
-    problems = validate(blocks, stable)
-    checks = integrity(source, blocks)
+    stable = labels_are_stable(blocks, numbering_policy)
+    problems = validate(blocks, stable, numbering_policy, image_policy)
+    checks = integrity(source, blocks, image_policy)
     review_count = sum(1 for block in blocks if block.review_required)
     LOGGER.info(
         "[%s] Validation complete: numbering_stable=%s problems=%d review_required=%d integrity_checks=%d elapsed=%.2fs",

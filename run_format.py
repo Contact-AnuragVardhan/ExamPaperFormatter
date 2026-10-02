@@ -21,7 +21,7 @@ REPORT = ROOT / "output" / "format_integrity.txt"
 
 def main() -> int:
     result = run_pipeline(TEACHER, REFERENCE, ROOT / "output")
-    format_exam(result["blocks"], TEACHER, OUTPUT)
+    format_exam(result["blocks"], TEACHER, OUTPUT, REFERENCE)
     problems = check_format(result["blocks"], TEACHER, OUTPUT, REFERENCE)
     lines = ["FORMAT INTEGRITY", "PASS" if not problems else "FAIL"]
     lines.extend(problems or ["No content differences detected."])

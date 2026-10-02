@@ -80,7 +80,7 @@ def test_browser_workflow(tmp_path):
     direct = run_pipeline(TEACHER, REFERENCE, direct_dir)
     assert direct["ok"], direct["problems"]
     direct_docx = direct_dir / "direct.docx"
-    format_exam(direct["blocks"], TEACHER, direct_docx)
+    format_exam(direct["blocks"], TEACHER, direct_docx, REFERENCE)
 
     formatted = client.post(
         "/format",
