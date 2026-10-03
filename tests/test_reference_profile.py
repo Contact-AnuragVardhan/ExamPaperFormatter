@@ -235,3 +235,47 @@ def test_runtime_section_policy_requires_a_matching_profile(tmp_path):
     page = client.get("/")
     assert page.status_code == 200
     assert not (tmp_path / "data" / "reference_profiles").exists()
+
+
+def test_missing_page_setup_is_not_invented_and_math_reference_saves(tmp_path):
+    from web.references import ReferenceLibrary
+
+    doc = Document()
+    doc.add_paragraph("1. Find the value.")
+    sect = doc.sections[0]._sectPr
+    for child in list(sect):
+        if child.tag in {qn("w:pgSz"), qn("w:pgMar")}:
+            sect.remove(child)
+    blank = tmp_path / "no_page.docx"
+    doc.save(str(blank))
+    reopened = Document(str(blank)).sections[0]
+    assert reopened.page_width is None
+    assert reopened.page_height is None
+    assert reopened.top_margin is None
+    assert reopened.left_margin is None
+
+    profile = build_profile(blank)
+    page = profile["appearance"]["page"]
+    margins = profile["appearance"]["margins"]
+    assert page["width_twip"] is None
+    assert page["height_twip"] is None
+    assert page["width_in"] is None
+    assert page["height_in"] is None
+    for side in ("top", "right", "bottom", "left"):
+        assert margins[f"{side}_twip"] is None
+        assert margins[f"{side}_in"] is None
+    assert page["width_twip"] != 12240
+    assert margins["left_twip"] != 1080
+
+    math = ROOT / "input" / "Reference Exam Math Grade 10.docx"
+    math_profile = build_profile(math)
+    assert math_profile["appearance"]["page"]["width_twip"] is None
+    assert math_profile["appearance"]["margins"]["left_twip"] is None
+
+    library = ReferenceLibrary(tmp_path / "references")
+    assert library.add("10", "English", ENGLISH.name, ENGLISH.read_bytes()) is None
+    assert library.add("10", "Math", math.name, math.read_bytes()) is None
+    assert [(row["grade"], row["subject"], row["filename"]) for row in library.listed()] == [
+        ("10", "English", ENGLISH.name),
+        ("10", "Math", math.name),
+    ]

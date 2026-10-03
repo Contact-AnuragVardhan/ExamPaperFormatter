@@ -1,0 +1,584 @@
+{
+  "profile_version": 1,
+  "source_reference": "a69b6714ec66aea8.docx",
+  "source_hash": {
+    "algorithm": "sha256",
+    "hex": "6c5f6c944903511828f8d13a7400ecf6945b8a0fa9d12d6e79cc4c128aad1d81"
+  },
+  "identity": {
+    "subject": {
+      "value": "History",
+      "status": "observed",
+      "evidence": "Subject: History"
+    },
+    "class_grade": {
+      "value": "7",
+      "status": "observed",
+      "evidence": "Class: 7"
+    }
+  },
+  "header": {
+    "status": "observed",
+    "ordering": "document_order",
+    "lines": [
+      {
+        "order": 1,
+        "paragraph_index": 1,
+        "text": "Northwind Academy",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Times New Roman",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 18,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 6,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 2,
+        "paragraph_index": 2,
+        "text": "Term Assessment",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Times New Roman",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 14,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 6,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 3,
+        "paragraph_index": 3,
+        "text": "Class: 7",
+        "role": {
+          "value": "class_grade",
+          "status": "observed",
+          "captured": "7",
+          "label": "Class",
+          "pattern": "^(?:class|grade)\\s*[:\\-–—]?\\s*(?:\\d{1,2}|xii|xi|x)\\s*$"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Times New Roman",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 12,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 6,
+            "status": "observed"
+          }
+        }
+      },
+      {
+        "order": 4,
+        "paragraph_index": 4,
+        "text": "Subject: History",
+        "role": {
+          "value": "subject",
+          "status": "observed",
+          "captured": "History",
+          "label": "Subject",
+          "pattern": "^subject\\b"
+        },
+        "formatting": {
+          "font_name": {
+            "value": "Times New Roman",
+            "status": "observed",
+            "uniform": true
+          },
+          "font_size_pt": {
+            "value": 12,
+            "status": "observed",
+            "uniform": true
+          },
+          "bold": {
+            "value": false,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": 0,
+            "status": "observed"
+          },
+          "space_after_pt": {
+            "value": 6,
+            "status": "observed"
+          }
+        }
+      }
+    ]
+  },
+  "structure": {
+    "sections": {
+      "status": "observed",
+      "items": [
+        {
+          "order": 1,
+          "kind": "Part",
+          "label": "I",
+          "heading": "Part I",
+          "paragraph_index": 5
+        },
+        {
+          "order": 2,
+          "kind": "Part",
+          "label": "II",
+          "heading": "Part II",
+          "paragraph_index": 10
+        },
+        {
+          "order": 3,
+          "kind": "Part",
+          "label": "III",
+          "heading": "Part III",
+          "paragraph_index": 13
+        }
+      ]
+    },
+    "major_questions": {
+      "status": "observed",
+      "count": 4,
+      "numbers": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "hierarchy": {
+      "status": "observed",
+      "majors": [
+        {
+          "number": 1,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "1.",
+              "paragraph_index": 6,
+              "subquestion_count": 2,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "2.",
+              "paragraph_index": 9,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "3.",
+              "paragraph_index": 12,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "branches": [],
+          "stems": [
+            {
+              "marker": "4.",
+              "paragraph_index": 14,
+              "subquestion_count": 0,
+              "choice_count": 0
+            }
+          ]
+        }
+      ]
+    },
+    "syllabus": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "front_matter_headings": []
+  },
+  "numbering": {
+    "major": {
+      "status": "observed",
+      "patterns": [
+        "{n}."
+      ],
+      "examples": [
+        "1.",
+        "4."
+      ]
+    },
+    "subquestion": {
+      "status": "observed",
+      "patterns": [
+        "{letter}."
+      ],
+      "examples": [
+        "a.",
+        "b."
+      ]
+    },
+    "choice": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "branch": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "alternative": {
+      "value": null,
+      "status": "not_determined"
+    }
+  },
+  "images": {
+    "status": "observed",
+    "count": 0,
+    "items": []
+  },
+  "appearance": {
+    "page": {
+      "status": "observed",
+      "width_twip": 11906,
+      "height_twip": 16838,
+      "width_in": 8.2681,
+      "height_in": 11.6931,
+      "orientation": "PORTRAIT"
+    },
+    "margins": {
+      "status": "observed",
+      "top_twip": 720,
+      "right_twip": 720,
+      "bottom_twip": 720,
+      "left_twip": 720,
+      "top_in": 0.5,
+      "right_in": 0.5,
+      "bottom_in": 0.5,
+      "left_in": 0.5
+    },
+    "predominant_font": {
+      "value": "Times New Roman",
+      "status": "observed",
+      "run_count": 14
+    },
+    "document_defaults": {
+      "font_name": {
+        "value": null,
+        "status": "not_determined",
+        "theme": "minorHAnsi"
+      },
+      "font_size_pt": {
+        "value": 11,
+        "status": "observed"
+      },
+      "space_after_pt": {
+        "value": 10,
+        "status": "observed"
+      },
+      "line_spacing": {
+        "value": 276,
+        "rule": "auto",
+        "status": "observed",
+        "multiple": 1.15
+      }
+    },
+    "roles": {
+      "section_heading": {
+        "status": "observed",
+        "paragraph_count": 3,
+        "font_name": {
+          "value": "Times New Roman",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 16,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": true,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": null,
+          "status": "not_set"
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 6,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "major_question": {
+        "status": "observed",
+        "paragraph_count": 4,
+        "font_name": {
+          "value": "Times New Roman",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 14,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": true,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": null,
+          "status": "not_set"
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 6,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "subquestion": {
+        "status": "observed",
+        "paragraph_count": 2,
+        "font_name": {
+          "value": "Times New Roman",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 12,
+          "status": "observed",
+          "uniform": true
+        },
+        "bold": {
+          "value": false,
+          "status": "observed",
+          "uniform": true
+        },
+        "underline": {
+          "value": null,
+          "status": "not_set"
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 6,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      },
+      "choice": {
+        "value": null,
+        "status": "not_determined"
+      },
+      "body": {
+        "status": "observed",
+        "paragraph_count": 5,
+        "font_name": {
+          "value": "Times New Roman",
+          "status": "observed",
+          "uniform": true
+        },
+        "font_size_pt": {
+          "value": 12,
+          "status": "observed",
+          "uniform": false
+        },
+        "bold": {
+          "value": false,
+          "status": "observed",
+          "uniform": false
+        },
+        "underline": {
+          "value": null,
+          "status": "not_set"
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": 0,
+          "status": "observed",
+          "uniform": true
+        },
+        "space_after_pt": {
+          "value": 6,
+          "status": "observed",
+          "uniform": true
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      }
+    }
+  }
+}

@@ -343,24 +343,30 @@ def _page_setup(doc: Document):
     section = doc.sections[0]
     orientation = section.orientation
     orientation_name = getattr(orientation, "name", None) if orientation is not None else None
+    width_twip = _twips(section.page_width)
+    height_twip = _twips(section.page_height)
+    top_twip = _twips(section.top_margin)
+    right_twip = _twips(section.right_margin)
+    bottom_twip = _twips(section.bottom_margin)
+    left_twip = _twips(section.left_margin)
     page = {
         "status": "observed",
-        "width_twip": _twips(section.page_width),
-        "height_twip": _twips(section.page_height),
-        "width_in": _whole(section.page_width.twips / 1440),
-        "height_in": _whole(section.page_height.twips / 1440),
+        "width_twip": width_twip,
+        "height_twip": height_twip,
+        "width_in": None if width_twip is None else _whole(width_twip / 1440),
+        "height_in": None if height_twip is None else _whole(height_twip / 1440),
         "orientation": orientation_name if orientation_name else _unknown(),
     }
     margins = {
         "status": "observed",
-        "top_twip": _twips(section.top_margin),
-        "right_twip": _twips(section.right_margin),
-        "bottom_twip": _twips(section.bottom_margin),
-        "left_twip": _twips(section.left_margin),
-        "top_in": _whole(section.top_margin.twips / 1440),
-        "right_in": _whole(section.right_margin.twips / 1440),
-        "bottom_in": _whole(section.bottom_margin.twips / 1440),
-        "left_in": _whole(section.left_margin.twips / 1440),
+        "top_twip": top_twip,
+        "right_twip": right_twip,
+        "bottom_twip": bottom_twip,
+        "left_twip": left_twip,
+        "top_in": None if top_twip is None else _whole(top_twip / 1440),
+        "right_in": None if right_twip is None else _whole(right_twip / 1440),
+        "bottom_in": None if bottom_twip is None else _whole(bottom_twip / 1440),
+        "left_in": None if left_twip is None else _whole(left_twip / 1440),
     }
     return page, margins
 

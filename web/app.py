@@ -24,6 +24,7 @@ from format.format_integrity import check_format
 from format.nonconformance import find_nonconformances, write_nonconformance_file
 from format.word_formatter import format_exam
 from run_core import run_pipeline
+from web.references import ReferenceLibrary, display_text
 from web.whatsapp import register_whatsapp_routes
 
 
@@ -62,9 +63,6 @@ def create_app(data_root: Path | None = None) -> Flask:
     def reference_path() -> Path:
         return references_dir() / "active.docx"
 
-    def reference_meta_path() -> Path:
-        return references_dir() / "active.json"
-
     def index_path() -> Path:
         return exams_dir() / "index.json"
 
@@ -77,11 +75,7 @@ def create_app(data_root: Path | None = None) -> Flask:
     def save_index(rows: list[dict]) -> None:
         index_path().write_text(json.dumps(rows, indent=2), encoding="utf-8")
 
-    def active_reference_name() -> str | None:
-        meta = reference_meta_path()
-        if not reference_path().exists() or not meta.exists():
-            return None
-        return json.loads(meta.read_text(encoding="utf-8")).get("original_filename")
+    library = ReferenceLibrary(references_dir())
 
     def is_docx(filename: str) -> bool:
         return bool(filename) and filename.lower().endswith(".docx")
@@ -99,7 +93,7 @@ def create_app(data_root: Path | None = None) -> Flask:
     def index():
         return render_template(
             "index.html",
-            reference=active_reference_name(),
+            references=library.listed(),
             exams=list(reversed(load_index())),
             message=request.args.get("message", ""),
             error=request.args.get("error", ""),
@@ -108,29 +102,45 @@ def create_app(data_root: Path | None = None) -> Flask:
 
     @app.post("/reference")
     def upload_reference():
+        grade = request.form.get("grade", "")
+        subject = request.form.get("subject", "")
+        if not display_text(grade) or not display_text(subject):
+            return redirect(url_for("index", error="Enter a grade and a subject."))
         upload = request.files.get("reference")
         if upload is None or not is_docx(upload.filename or ""):
             return redirect(url_for("index", error="Upload a DOCX reference exam."))
-        target = reference_path()
-        temporary = target.with_suffix(".docx.tmp")
-        upload.save(temporary)
-        temporary.replace(target)
-        reference_meta_path().write_text(
-            json.dumps({"original_filename": Path(upload.filename).name}, indent=2),
-            encoding="utf-8",
-        )
+        try:
+            error = library.add(grade, subject, upload.filename or "reference.docx", upload.read())
+        except Exception:
+            LOGGER.exception("Reference upload failed")
+            return redirect(url_for("index", error="Reference exam could not be saved."))
+        if error:
+            return redirect(url_for("index", error=error))
         return redirect(url_for("index", message="Reference exam saved."))
 
     @app.post("/reference/delete")
     def delete_reference():
-        reference_path().unlink(missing_ok=True)
-        reference_meta_path().unlink(missing_ok=True)
-        return redirect(url_for("index", message="Reference exam removed."))
+        grade = request.form.get("grade", "")
+        subject = request.form.get("subject", "")
+        if library.remove(grade, subject):
+            return redirect(url_for("index", message="Reference exam removed."))
+        return redirect(url_for("index", error="That Reference Exam is not stored."))
 
     @app.post("/format")
     def format_teacher():
-        if active_reference_name() is None:
-            return redirect(url_for("index", error="No Reference Exam loaded."))
+        grade = request.form.get("grade", "")
+        subject = request.form.get("subject", "")
+        if not display_text(grade) or not display_text(subject):
+            return redirect(url_for("index", error="Enter a grade and a subject."))
+        selected = library.find(grade, subject)
+        if selected is None:
+            return redirect(
+                url_for(
+                    "index",
+                    error=f"No Reference Exam found for Grade {display_text(grade)} / {display_text(subject)}.",
+                )
+            )
+        selected_reference = library.file_path(selected)
         upload = request.files.get("teacher")
         if upload is None or not is_docx(upload.filename or ""):
             return redirect(url_for("index", error="Upload a DOCX teacher exam."))
@@ -149,14 +159,14 @@ def create_app(data_root: Path | None = None) -> Flask:
         )
         try:
             LOGGER.info("[browser:%s] Reference conformance check started", exam_id)
-            errors = find_nonconformances(original, reference_path())
+            errors = find_nonconformances(original, selected_reference)
             if errors:
                 LOGGER.info(
                     "[browser:%s] Reference conformance failed with %d issue(s); creating corrections DOCX",
                     exam_id,
                     len(errors),
                 )
-                write_nonconformance_file(original, formatted, errors, reference_path())
+                write_nonconformance_file(original, formatted, errors, selected_reference)
                 formatted_name = download_stem(original_name) + "_CORRECTIONS.docx"
                 message = (
                     "This exam does not match the Reference Exam. "
@@ -166,7 +176,7 @@ def create_app(data_root: Path | None = None) -> Flask:
                 LOGGER.info("[browser:%s] Reference conformance passed; formatting started", exam_id)
                 result = run_pipeline(
                     original,
-                    reference_path(),
+                    selected_reference,
                     folder / "work",
                     log_context=f"browser:{exam_id}",
                 )
@@ -175,14 +185,14 @@ def create_app(data_root: Path | None = None) -> Flask:
                     shutil.rmtree(folder, ignore_errors=True)
                     return redirect(url_for("index", error="Formatting failed. The exam was not saved."))
                 LOGGER.info("[browser:%s] DOCX rendering started", exam_id)
-                format_exam(result["blocks"], original, formatted, reference_path())
+                format_exam(result["blocks"], original, formatted, selected_reference)
                 LOGGER.info(
                     "[browser:%s] DOCX rendering complete: bytes=%d",
                     exam_id,
                     formatted.stat().st_size if formatted.exists() else 0,
                 )
                 LOGGER.info("[browser:%s] Format integrity check started", exam_id)
-                problems = check_format(result["blocks"], original, formatted, reference_path())
+                problems = check_format(result["blocks"], original, formatted, selected_reference)
                 if problems:
                     LOGGER.error("[browser:%s] Format integrity failed: %s", exam_id, problems)
                     shutil.rmtree(folder, ignore_errors=True)

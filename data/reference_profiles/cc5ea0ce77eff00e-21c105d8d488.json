@@ -1,0 +1,5973 @@
+{
+  "profile_version": 1,
+  "source_reference": "cc5ea0ce77eff00e.docx",
+  "source_hash": {
+    "algorithm": "sha256",
+    "hex": "21c105d8d488bc304708b6590cc9c4740495d17327bba811ef397a2567ba53ac"
+  },
+  "identity": {
+    "subject": {
+      "value": "Mathematics Class: 10 Marks: 75 Time: 3 Hours",
+      "status": "observed",
+      "evidence": "Subject: Mathematics Class: 10 Marks: 75 Time: 3 Hours"
+    },
+    "class_grade": {
+      "value": null,
+      "status": "not_determined"
+    }
+  },
+  "header": {
+    "status": "observed",
+    "ordering": "document_order",
+    "lines": [
+      {
+        "order": 1,
+        "paragraph_index": 1,
+        "text": "Math Grade 10 QE",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 2,
+        "paragraph_index": 2,
+        "text": "Chapters Covered",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 3,
+        "paragraph_index": 3,
+        "text": "Real Numbers",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 4,
+        "paragraph_index": 4,
+        "text": "Polynomials",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 5,
+        "paragraph_index": 5,
+        "text": "Pair of Linear Equations in Two Variables",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 6,
+        "paragraph_index": 6,
+        "text": "Quadratic Equations",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 7,
+        "paragraph_index": 8,
+        "text": "BHAGINI NIVEDITA VIDYAPEETH",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 8,
+        "paragraph_index": 9,
+        "text": "Quarterly Examination 2026",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 9,
+        "paragraph_index": 10,
+        "text": "Subject: Mathematics Class: 10 Marks: 75 Time: 3 Hours",
+        "role": {
+          "value": "subject",
+          "status": "observed",
+          "captured": "Mathematics Class: 10 Marks: 75 Time: 3 Hours",
+          "label": "Subject",
+          "pattern": "^subject\\b"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 10,
+        "paragraph_index": 11,
+        "text": "Instructions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 11,
+        "paragraph_index": 12,
+        "text": "It is compulsory to answer all questions.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 12,
+        "paragraph_index": 13,
+        "text": "Questions 1–5 are objective-type questions (6 marks).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 13,
+        "paragraph_index": 14,
+        "text": "Questions 6–17 are very short-answer questions (2 marks).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 14,
+        "paragraph_index": 15,
+        "text": "Questions 18–20 are short-answer questions (3 marks).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 15,
+        "paragraph_index": 16,
+        "text": "Questions 21–23 are long-answer questions (4 marks).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 16,
+        "paragraph_index": 18,
+        "text": "Objective-Type Questions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 17,
+        "paragraph_index": 19,
+        "text": "6 × 5 = 30",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 18,
+        "paragraph_index": 20,
+        "text": "Question 1: Choose and write the correct option.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 19,
+        "paragraph_index": 21,
+        "text": "(i) √2 is a ______ number.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 20,
+        "paragraph_index": 22,
+        "text": "Rational",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 21,
+        "paragraph_index": 23,
+        "text": "Irrational",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 22,
+        "paragraph_index": 24,
+        "text": "Composite",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 23,
+        "paragraph_index": 25,
+        "text": "Prime",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 24,
+        "paragraph_index": 26,
+        "text": "(ii) The H.C.F. of the numbers 6 and 20 is:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 25,
+        "paragraph_index": 27,
+        "text": "2",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 26,
+        "paragraph_index": 28,
+        "text": "6",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 27,
+        "paragraph_index": 29,
+        "text": "20",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 28,
+        "paragraph_index": 30,
+        "text": "1",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 29,
+        "paragraph_index": 31,
+        "text": "(iii) If a₁/a₂ = b₁/b₂ = c₁/c₂, then the equations",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 30,
+        "paragraph_index": 32,
+        "text": "a₁x + b₁y + c₁ = 0 and a₂x + b₂y + c₂ = 0",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 31,
+        "paragraph_index": 33,
+        "text": "will have:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 32,
+        "paragraph_index": 34,
+        "text": "One solution",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 33,
+        "paragraph_index": 35,
+        "text": "Two solutions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 34,
+        "paragraph_index": 36,
+        "text": "Three solutions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 35,
+        "paragraph_index": 37,
+        "text": "No solution",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 36,
+        "paragraph_index": 38,
+        "text": "(iv) The zeroes of the polynomial x² − 49 are:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 37,
+        "paragraph_index": 39,
+        "text": "7, −7",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 38,
+        "paragraph_index": 40,
+        "text": "−7, −7",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 39,
+        "paragraph_index": 41,
+        "text": "0, 7",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 40,
+        "paragraph_index": 42,
+        "text": "7, 7",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 41,
+        "paragraph_index": 43,
+        "text": "(v) If α and β are the zeroes of the quadratic polynomial ax² + bx + c, then the value of α + β is:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 42,
+        "paragraph_index": 44,
+        "text": "b/a",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 43,
+        "paragraph_index": 45,
+        "text": "b/c",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 44,
+        "paragraph_index": 46,
+        "text": "−b/a",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 45,
+        "paragraph_index": 47,
+        "text": "a/c",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 46,
+        "paragraph_index": 48,
+        "text": "(vi) If α and β are the zeroes of the quadratic polynomial ax² + bx + c, then the value of αβ is:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 47,
+        "paragraph_index": 49,
+        "text": "b/a",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 48,
+        "paragraph_index": 50,
+        "text": "b/c",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 49,
+        "paragraph_index": 51,
+        "text": "−b/a",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 50,
+        "paragraph_index": 52,
+        "text": "a/c",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 51,
+        "paragraph_index": 54,
+        "text": "Question 2: Fill in the blanks.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 52,
+        "paragraph_index": 55,
+        "text": "6 × 1 = 6",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 53,
+        "paragraph_index": 56,
+        "text": "H.C.F. (a, b) × L.C.M. (a, b) = ______.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 54,
+        "paragraph_index": 57,
+        "text": "A polynomial whose degree is 3 is called a ______.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 55,
+        "paragraph_index": 58,
+        "text": "π is a ______ number.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 56,
+        "paragraph_index": 59,
+        "text": "A quadratic polynomial has ______ zeroes.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 57,
+        "paragraph_index": 60,
+        "text": "If x + y = 8 and x = 3, then y = ______.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 58,
+        "paragraph_index": 61,
+        "text": "If x + y = 5 and x = 1, then y = ______.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 59,
+        "paragraph_index": 63,
+        "text": "Question 3: Write True or False.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 60,
+        "paragraph_index": 64,
+        "text": "√5 is an irrational number.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 61,
+        "paragraph_index": 65,
+        "text": "An irrational number cannot be represented on the number line.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 62,
+        "paragraph_index": 66,
+        "text": "A pair of linear equations contains only one equation.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 63,
+        "paragraph_index": 67,
+        "text": "A cubic polynomial has three zeroes.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 64,
+        "paragraph_index": 68,
+        "text": "Every composite number can be expressed as a product of prime numbers.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 65,
+        "paragraph_index": 69,
+        "text": "√9 is an irrational number.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 66,
+        "paragraph_index": 71,
+        "text": "Question 4: Match the correct pairs.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 67,
+        "paragraph_index": 72,
+        "text": "A",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 68,
+        "paragraph_index": 73,
+        "text": "a₁/a₂ = b₁/b₂ ≠ c₁/c₂",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 69,
+        "paragraph_index": 74,
+        "text": "a₁/a₂ ≠ b₁/b₂",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 70,
+        "paragraph_index": 75,
+        "text": "Standard form of a quadratic equation",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 71,
+        "paragraph_index": 76,
+        "text": "Zeroes of x² − 3",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 72,
+        "paragraph_index": 77,
+        "text": "H.C.F. of 6, 72 and 120",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 73,
+        "paragraph_index": 78,
+        "text": "Sum of two polynomials",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 74,
+        "paragraph_index": 79,
+        "text": "B",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 75,
+        "paragraph_index": 80,
+        "text": "√13, −√13",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 76,
+        "paragraph_index": 81,
+        "text": "ax² + bx + c = 0",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 77,
+        "paragraph_index": 82,
+        "text": "Coincident lines",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 78,
+        "paragraph_index": 83,
+        "text": "Intersecting lines",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 79,
+        "paragraph_index": 84,
+        "text": "Is a polynomial",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 80,
+        "paragraph_index": 85,
+        "text": "6",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 81,
+        "paragraph_index": 87,
+        "text": "Question 5: Answer in one sentence.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 82,
+        "paragraph_index": 88,
+        "text": "(i) State the Fundamental Theorem of Arithmetic.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 83,
+        "paragraph_index": 89,
+        "text": "(ii) Write the standard form of a cubic polynomial.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 84,
+        "paragraph_index": 90,
+        "text": "(iii) Find the value of (x + 5)(x + 2).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 85,
+        "paragraph_index": 91,
+        "text": "(iv) Write the condition for obtaining two parallel lines.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 86,
+        "paragraph_index": 92,
+        "text": "(v) What is an inconsistent pair of equations?",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 87,
+        "paragraph_index": 93,
+        "text": "(vi) What is a consistent pair of equations?",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 88,
+        "paragraph_index": 95,
+        "text": "Very Short-Answer Questions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 89,
+        "paragraph_index": 96,
+        "text": "12 × 2 = 24",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 90,
+        "paragraph_index": 97,
+        "text": "Question 6. Find the zeroes of 4u² + 8u.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 91,
+        "paragraph_index": 98,
+        "text": "Question 7. Find the zeroes of x² + 7x + 10.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 92,
+        "paragraph_index": 99,
+        "text": "Question 8. Find the zeroes of 2x² − 5x + 3.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 93,
+        "paragraph_index": 100,
+        "text": "Question 9. Find the zeroes of 6x² − x − 2.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 94,
+        "paragraph_index": 101,
+        "text": "Question 10. Write the squares of the numbers from 1 to 10.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 95,
+        "paragraph_index": 102,
+        "text": "Question 11. Write the cubes of the numbers from 1 to 5.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 96,
+        "paragraph_index": 103,
+        "text": "Question 12. State the Pythagoras Theorem.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 97,
+        "paragraph_index": 104,
+        "text": "Question 13. What are variables and constants?",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 98,
+        "paragraph_index": 105,
+        "text": "Question 14. What is a polynomial?",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 99,
+        "paragraph_index": 106,
+        "text": "Question 15. Write the formulas for the sum and product of zeroes.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 100,
+        "paragraph_index": 107,
+        "text": "Question 16. Write the square roots from 1 to 10.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 101,
+        "paragraph_index": 108,
+        "text": "Question 17. Solve:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": false
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 102,
+        "paragraph_index": 109,
+        "text": "12 + 23 + 34 − 45",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 103,
+        "paragraph_index": 111,
+        "text": "Short-Answer Questions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 104,
+        "paragraph_index": 112,
+        "text": "3 × 3 = 9",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 105,
+        "paragraph_index": 113,
+        "text": "Question 18",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 106,
+        "paragraph_index": 114,
+        "text": "Find the zeroes of the following polynomials and verify the relationship between the zeroes and their coefficients:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 107,
+        "paragraph_index": 115,
+        "text": "x² − 3",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 108,
+        "paragraph_index": 116,
+        "text": "6x² + 13x + 7",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 109,
+        "paragraph_index": 117,
+        "text": "Question 19",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 110,
+        "paragraph_index": 118,
+        "text": "Find the quadratic polynomial whose sum and product of zeroes are respectively:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 111,
+        "paragraph_index": 119,
+        "text": "−3, 2",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 112,
+        "paragraph_index": 120,
+        "text": "−¼, ¼",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 113,
+        "paragraph_index": 121,
+        "text": "Question 20",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 114,
+        "paragraph_index": 122,
+        "text": "For the following polynomial p(x), the graph y = p(x) is given. Find the number of zeroes of p(x).",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 115,
+        "paragraph_index": 123,
+        "text": "[Image/graph in original examination]",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 116,
+        "paragraph_index": 125,
+        "text": "Long-Answer Questions",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 117,
+        "paragraph_index": 126,
+        "text": "Attempt any 3.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 118,
+        "paragraph_index": 127,
+        "text": "3 × 4 = 12",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": true,
+            "status": "observed",
+            "uniform": true
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 119,
+        "paragraph_index": 128,
+        "text": "Question 21",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 120,
+        "paragraph_index": 129,
+        "text": "Prove that √3 is an irrational number.",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 121,
+        "paragraph_index": 130,
+        "text": "Question 22",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 122,
+        "paragraph_index": 131,
+        "text": "Solve the following linear equations:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 123,
+        "paragraph_index": 132,
+        "text": "x + y = 14",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 124,
+        "paragraph_index": 133,
+        "text": "x − y = 4",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 125,
+        "paragraph_index": 134,
+        "text": "Question 23",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 126,
+        "paragraph_index": 135,
+        "text": "Solve the following linear equations:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 127,
+        "paragraph_index": 136,
+        "text": "3x + 4y = 10",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 128,
+        "paragraph_index": 137,
+        "text": "2x − 2y = 2",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 129,
+        "paragraph_index": 138,
+        "text": "Question 24",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 130,
+        "paragraph_index": 139,
+        "text": "Solve the following linear equations:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 131,
+        "paragraph_index": 140,
+        "text": "x + 5 = 5 2x − 3y = 4",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 132,
+        "paragraph_index": 141,
+        "text": "Question 25",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 133,
+        "paragraph_index": 142,
+        "text": "Determine the nature of the roots of the following quadratic equation. If real roots exist, find them:",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      },
+      {
+        "order": 134,
+        "paragraph_index": 143,
+        "text": "2x² − 4x + 3 = 0",
+        "role": {
+          "value": null,
+          "status": "not_determined"
+        },
+        "formatting": {
+          "font_name": {
+            "value": null,
+            "status": "not_set"
+          },
+          "font_size_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "bold": {
+            "value": null,
+            "status": "not_set"
+          },
+          "underline": {
+            "value": null,
+            "status": "not_set"
+          },
+          "alignment": {
+            "value": null,
+            "status": "not_set"
+          },
+          "left_indent_in": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_before_pt": {
+            "value": null,
+            "status": "not_set"
+          },
+          "space_after_pt": {
+            "value": null,
+            "status": "not_set"
+          }
+        }
+      }
+    ]
+  },
+  "structure": {
+    "sections": {
+      "status": "not_determined",
+      "items": []
+    },
+    "major_questions": {
+      "status": "not_determined",
+      "count": null,
+      "numbers": []
+    },
+    "hierarchy": {
+      "status": "not_determined",
+      "majors": []
+    },
+    "syllabus": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "front_matter_headings": []
+  },
+  "numbering": {
+    "major": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "subquestion": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "choice": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "branch": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "alternative": {
+      "value": null,
+      "status": "not_determined"
+    }
+  },
+  "images": {
+    "status": "observed",
+    "count": 0,
+    "items": []
+  },
+  "appearance": {
+    "page": {
+      "status": "observed",
+      "width_twip": null,
+      "height_twip": null,
+      "width_in": null,
+      "height_in": null,
+      "orientation": "PORTRAIT"
+    },
+    "margins": {
+      "status": "observed",
+      "top_twip": null,
+      "right_twip": null,
+      "bottom_twip": null,
+      "left_twip": null,
+      "top_in": null,
+      "right_in": null,
+      "bottom_in": null,
+      "left_in": null
+    },
+    "predominant_font": {
+      "value": null,
+      "status": "not_determined"
+    },
+    "document_defaults": {
+      "font_name": {
+        "value": null,
+        "status": "not_determined",
+        "theme": "minorHAnsi"
+      },
+      "font_size_pt": {
+        "value": 12,
+        "status": "observed"
+      },
+      "space_after_pt": {
+        "value": 10,
+        "status": "observed"
+      },
+      "line_spacing": {
+        "value": null,
+        "status": "not_determined"
+      }
+    },
+    "roles": {
+      "section_heading": {
+        "value": null,
+        "status": "not_determined"
+      },
+      "major_question": {
+        "value": null,
+        "status": "not_determined"
+      },
+      "subquestion": {
+        "value": null,
+        "status": "not_determined"
+      },
+      "choice": {
+        "value": null,
+        "status": "not_determined"
+      },
+      "body": {
+        "status": "observed",
+        "paragraph_count": 120,
+        "font_name": {
+          "value": null,
+          "status": "not_set"
+        },
+        "font_size_pt": {
+          "value": null,
+          "status": "not_set"
+        },
+        "bold": {
+          "value": true,
+          "status": "observed",
+          "uniform": false
+        },
+        "underline": {
+          "value": null,
+          "status": "not_set"
+        },
+        "alignment": {
+          "value": null,
+          "status": "not_set"
+        },
+        "left_indent_in": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_before_pt": {
+          "value": null,
+          "status": "not_set"
+        },
+        "space_after_pt": {
+          "value": null,
+          "status": "not_set"
+        },
+        "line_spacing": {
+          "value": null,
+          "status": "not_set"
+        }
+      }
+    }
+  }
+}

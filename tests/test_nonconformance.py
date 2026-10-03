@@ -43,7 +43,11 @@ def test_bad_exam_returns_two_yellow_notes(tmp_path):
     client = app.test_client()
     uploaded = client.post(
         "/reference",
-        data={"reference": (REFERENCE.open("rb"), REFERENCE.name)},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "reference": (REFERENCE.open("rb"), REFERENCE.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
@@ -51,7 +55,11 @@ def test_bad_exam_returns_two_yellow_notes(tmp_path):
 
     page = client.post(
         "/format",
-        data={"teacher": (BAD.open("rb"), BAD.name)},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "teacher": (BAD.open("rb"), BAD.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
@@ -93,7 +101,11 @@ def test_bad_exam_returns_two_yellow_notes(tmp_path):
 
     broken = client.post(
         "/format",
-        data={"teacher": (io.BytesIO(b"this is not a word file"), "broken.docx")},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "teacher": (io.BytesIO(b"this is not a word file"), "broken.docx"),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )

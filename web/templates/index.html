@@ -4,11 +4,14 @@
   <meta charset="utf-8">
   <title>Exam Format</title>
   <style>
-    body { font-family: Calibri, sans-serif; margin: 2rem; max-width: 40rem; }
+    body { font-family: Calibri, sans-serif; margin: 2rem; max-width: 46rem; }
     h1, h2 { margin-bottom: 0.4rem; }
     section { margin: 1.5rem 0 2rem; }
     button, a.button { font-size: 1.15rem; padding: 0.45rem 0.8rem; }
-    input[type="file"] { font-size: 1rem; margin: 0.4rem 0; }
+    input { font-size: 1rem; margin: 0.4rem 0; }
+    label { display: inline-block; width: 5.5rem; }
+    table { border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.25rem 0.8rem 0.25rem 0; }
     .error { color: #8b0000; }
   </style>
 </head>
@@ -18,24 +21,45 @@
   {% if error %}<p class="error"><strong>{{ error }}</strong></p>{% endif %}
 
   <section>
-    <h2>REFERENCE EXAM</h2>
-    {% if reference %}
-      <p>Active reference: {{ reference }}</p>
-    {% else %}
-      <p>No Reference Exam loaded.</p>
-    {% endif %}
+    <h2>ADD REFERENCE EXAM</h2>
     <form method="post" action="/reference" enctype="multipart/form-data">
+      <div><label for="reference-grade">Grade:</label> <input id="reference-grade" type="text" name="grade" required></div>
+      <div><label for="reference-subject">Subject:</label> <input id="reference-subject" type="text" name="subject" required></div>
       <div><input type="file" name="reference" accept=".docx" required></div>
       <button type="submit">UPLOAD REFERENCE</button>
     </form>
-    <form method="post" action="/reference/delete">
-      <button type="submit">DELETE REFERENCE</button>
-    </form>
+  </section>
+
+  <section>
+    <h2>VIEW REFERENCE EXAMS</h2>
+    {% if not references %}
+      <p>No Reference Exams stored.</p>
+    {% else %}
+      <table>
+        <tr><th>Grade</th><th>Subject</th><th>Reference File</th><th></th></tr>
+        {% for item in references %}
+          <tr>
+            <td>{{ item.grade }}</td>
+            <td>{{ item.subject }}</td>
+            <td>{{ item.filename }}</td>
+            <td>
+              <form method="post" action="/reference/delete">
+                <input type="hidden" name="grade" value="{{ item.grade }}">
+                <input type="hidden" name="subject" value="{{ item.subject }}">
+                <button type="submit">DELETE</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
   </section>
 
   <section>
     <h2>FORMAT EXAM</h2>
     <form method="post" action="/format" enctype="multipart/form-data">
+      <div><label for="exam-grade">Grade:</label> <input id="exam-grade" type="text" name="grade" required></div>
+      <div><label for="exam-subject">Subject:</label> <input id="exam-subject" type="text" name="subject" required></div>
       <div><input type="file" name="teacher" accept=".docx" required></div>
       <button type="submit">FORMAT EXAM</button>
     </form>

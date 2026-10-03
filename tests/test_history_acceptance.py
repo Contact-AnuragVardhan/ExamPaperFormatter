@@ -146,14 +146,22 @@ def test_browser_history_workflow(tmp_path):
     client = app.test_client()
     uploaded = client.post(
         "/reference",
-        data={"reference": (HISTORY.open("rb"), HISTORY.name)},
+        data={
+            "grade": "7",
+            "subject": "History",
+            "reference": (HISTORY.open("rb"), HISTORY.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
     assert b"synthetic_reference.docx" in uploaded.data
     formatted = client.post(
         "/format",
-        data={"teacher": (teacher.open("rb"), "History 7 Teacher.docx")},
+        data={
+            "grade": "7",
+            "subject": "History",
+            "teacher": (teacher.open("rb"), "History 7 Teacher.docx"),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )

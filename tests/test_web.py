@@ -49,18 +49,26 @@ def test_browser_workflow(tmp_path):
     client = app.test_client()
 
     missing = client.get("/")
-    assert b"No Reference Exam loaded." in missing.data
+    assert b"No Reference Exams stored." in missing.data
     blocked = client.post(
         "/format",
-        data={"teacher": (TEACHER.open("rb"), TEACHER.name)},
+        data={
+            "grade": "8",
+            "subject": "Science",
+            "teacher": (TEACHER.open("rb"), TEACHER.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
-    assert b"No Reference Exam loaded." in blocked.data
+    assert b"No Reference Exam found for Grade 8 / Science." in blocked.data
 
     rejected = client.post(
         "/reference",
-        data={"reference": (b"not a docx", "notes.txt")},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "reference": (b"not a docx", "notes.txt"),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
@@ -68,7 +76,11 @@ def test_browser_workflow(tmp_path):
 
     uploaded = client.post(
         "/reference",
-        data={"reference": (REFERENCE.open("rb"), REFERENCE.name)},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "reference": (REFERENCE.open("rb"), REFERENCE.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
@@ -84,7 +96,11 @@ def test_browser_workflow(tmp_path):
 
     formatted = client.post(
         "/format",
-        data={"teacher": (TEACHER.open("rb"), TEACHER.name)},
+        data={
+            "grade": "10",
+            "subject": "English",
+            "teacher": (TEACHER.open("rb"), TEACHER.name),
+        },
         content_type="multipart/form-data",
         follow_redirects=True,
     )
@@ -115,8 +131,12 @@ def test_browser_workflow(tmp_path):
     still_there = restarted.get("/")
     assert b"Reference Exam English 10 WORD.docx" in still_there.data
 
-    client.post("/reference/delete", follow_redirects=True)
+    client.post(
+        "/reference/delete",
+        data={"grade": "10", "subject": "English"},
+        follow_redirects=True,
+    )
     cleared = client.get("/")
-    assert b"No Reference Exam loaded." in cleared.data
+    assert b"No Reference Exams stored." in cleared.data
     assert REFERENCE.exists()
     assert (ROOT / "input" / "Teacher Exam English 10 Actual.docx").exists()
