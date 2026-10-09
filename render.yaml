@@ -1,19 +1,39 @@
+# Adapted from REV1. Put this file and the application files at the repo root.
 services:
   - type: web
     name: exam-paper-formatter
     runtime: python
-    plan: starter
+    # Plan omitted to preserve the existing service's compute plan.
+    # A new service uses Render's default paid web-service plan.
     region: virginia
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: bash start.sh
     healthCheckPath: /health
     autoDeployTrigger: commit
+    numInstances: 1
+
+    # SQLite, sessions, job files, and subject references persist here.
+    # Persistent disks require a paid web service.
+    disk:
+      name: exam-formatter-data
+      mountPath: /var/data
+      sizeGB: 1
 
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.10
+      - key: APP_ENV
+        value: prod
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: EXAM_DATA_ROOT
+        value: /var/data
+      - key: LOG_LEVEL
+        value: INFO
+      - key: COOKIE_SECURE
+        value: "true"
 
-      # Same Meta/WhatsApp variable names used by ExamHelper / Student Evaluator.
+      # Same names and /webhook endpoint as REV1.
       - key: VERIFY_TOKEN
         sync: false
       - key: WHATSAPP_TOKEN
@@ -22,25 +42,30 @@ services:
         sync: false
       - key: WHATSAPP_GRAPH_VERSION
         value: v25.0
-
-      # Existing ExamPaperFormatter/OpenAI setting.
-      - key: OPENAI_API_KEY
+      - key: WHATSAPP_APP_SECRET
         sync: false
-      - key: EXAM_REDO_MODEL
-        value: gpt-4.1
-
-      # Project-specific Flask/WhatsApp runtime settings.
       - key: WHATSAPP_ASYNC
         value: "true"
       - key: WHATSAPP_HTTP_TIMEOUT
         value: "60"
-      - key: GUNICORN_WORKERS
-        value: "1"
-      - key: GUNICORN_THREADS
-        value: "4"
-      - key: GUNICORN_TIMEOUT
-        value: "300"
-      - key: LOG_LEVEL
-        value: INFO
-      - key: GUNICORN_LOG_LEVEL
-        value: info
+
+      # Same OpenAI names; REV2 preserves Avnish's supplied model.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: EXAM_REDO_MODEL
+        value: gpt-6-astra
+      - key: OPENAI_REASONING_EFFORT
+        value: high
+
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WEB_TEACHER_ACCESS_CODE
+        sync: false
+      - key: MAX_UPLOAD_MB
+        value: "15"
+      - key: SESSION_MINUTES
+        value: "30"
+      - key: RETENTION_DAYS
+        value: "7"
+      # Set WHATSAPP_ALLOWED_SENDERS in the dashboard if a beta allowlist is needed.
+      # Render provides PORT at runtime; do not hardcode it in this Blueprint.

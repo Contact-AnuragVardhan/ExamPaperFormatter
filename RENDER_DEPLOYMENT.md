@@ -1,168 +1,111 @@
-# ExamPaperFormatter — Render deployment
+# Exam Formatter REV2 Render deployment
 
-This project is a Flask web application with the existing browser UI plus the
-WhatsApp Cloud API webhook.
+These files adapt the Render setup from your REV1 application to the REV2 web and WhatsApp service. Both interfaces run in one FastAPI/Uvicorn process and share Avnish’s formatter. This package supplies configuration and instructions; it does not deploy or change your Render account.
+
+## Included Render files
+
+| File | Purpose |
+| --- | --- |
+| `render.yaml` | Blueprint, health check, runtime environment, and persistent disk |
+| `.python-version` | Python 3.12.10, matching REV1 |
+| `start.sh` | Runtime data initialization and one Uvicorn process |
+| `render.env.example` | Environment checklist with your existing names |
+| `bootstrap.py` | First-start setup of the three bundled references |
+| `RENDER_DEPLOYMENT.md` | This deployment guide |
+| `requirements.txt` | REV2 Python dependencies, including FastAPI and Uvicorn |
+
+REV2’s application target is `server:app`. Keep `startCommand: bash start.sh`. REV1’s Gunicorn target `web.app:app` and `GUNICORN_*` settings do not apply to this ASGI service.
 
 ## Public endpoints
 
 | Purpose | Endpoint |
-|---|---|
+| --- | --- |
 | Browser UI | `/` |
 | Health check | `/health` |
-| Meta webhook verification | `GET /webhook` |
-| WhatsApp inbound events | `POST /webhook` |
+| Meta verification | `GET /webhook` |
+| WhatsApp messages and delivery updates | `POST /webhook` |
 
-Meta callback URL:
+Your callback is **https://YOUR-EXISTING-RENDER-HOST/webhook** when updating the same service. `/webhooks/whatsapp` remains an alias from the first REV2 package. Use the real hostname shown in your Render dashboard; the attachment does not establish a specific deployed hostname.
 
-`https://<your-render-service>.onrender.com/webhook`
+## Updating your existing Render service
 
-## Render files added
+1. Put the contents of `exam_formatter_rev2/` in the repository root used by your existing service. Keep `.python-version`, `render.yaml`, and `start.sh` alongside `server.py`.
+2. In the existing service settings, use:
 
-- `render.yaml` — Render Blueprint definition.
-- `.python-version` — Python 3.12.10.
-- `start.sh` — production Gunicorn startup command.
-- `render.env.example` — environment-variable checklist.
-- `gunicorn` added to `requirements.txt`.
-
-The production target is `web.app:app`.
-
-## Required Render environment variables
-
-Set these values in Render:
-
-```text
-OPENAI_API_KEY
-VERIFY_TOKEN
-WHATSAPP_TOKEN
-WHATSAPP_PHONE_NUMBER_ID
-```
-
-Recommended/default values from `render.yaml`:
-
-```text
-EXAM_REDO_MODEL=gpt-4.1
-WHATSAPP_GRAPH_VERSION=v25.0
-WHATSAPP_ASYNC=true
-WHATSAPP_HTTP_TIMEOUT=60
-GUNICORN_WORKERS=1
-GUNICORN_THREADS=4
-GUNICORN_TIMEOUT=300
-```
-
-`WHATSAPP_APP_SECRET` is optional but recommended. When configured, incoming
-Meta webhook POSTs are validated with `X-Hub-Signature-256`.
-
-## Deploy with the Blueprint
-
-1. Put the `ExamPaperFormatter` folder in a Git repository and push it to your
-   Git provider.
-2. In Render choose **New > Blueprint** and select the repository containing
-   `render.yaml`.
-3. Enter the secret environment variables when Render asks for the values.
-4. Deploy the service.
-5. Open `https://<service>.onrender.com/health`. It should return:
-
-   ```json
-   {"status":"ok"}
+   ```text
+   Build Command: pip install --upgrade pip && pip install -r requirements.txt
+   Start Command: bash start.sh
+   Health Check Path: /health
    ```
 
-6. Open the base Render URL in a browser and verify the existing formatter web
-   page still works.
-7. Make sure an active Reference Exam is available from the browser UI before
-   using WhatsApp formatting.
-8. In Meta WhatsApp configuration, set the callback URL to:
+3. Set `PYTHON_VERSION=3.12.10` or retain the matching `.python-version` file.
+4. Add or retain a persistent disk at `/var/data`, and set `EXAM_DATA_ROOT=/var/data`. The included Blueprint uses a 1 GB disk. For an existing disk, retain its mount path and current size if they differ; update `EXAM_DATA_ROOT` to match. Do not shrink or replace an existing disk containing data.
+5. Set the environment variables in the table below. Save secrets directly in Render rather than committing a populated `.env`.
+6. Deploy the existing service. The startup script seeds the bundled Math 10, Chemistry 11, and English 10 references only if its REV2 `references/index.json` does not exist. Existing REV2 references and teacher job records stay authoritative across restarts.
+7. Open `/health`, then `/`. Sign in and verify subject selection. English remains disabled until staff validate it.
+8. In Meta, retain the same host and `/webhook`, verify with `VERIFY_TOKEN`, and subscribe to `messages`.
+9. Run the acceptance checks in `TESTING.md` with Avnish.
 
-   `https://<service>.onrender.com/webhook`
+Updating the existing service keeps its current hostname. Creating a separate service generates a separate host, so that host would need to be configured in Meta.
 
-9. Use the same value in Meta's verification-token field as the Render
-   `VERIFY_TOKEN` value.
-10. Subscribe the Meta app to WhatsApp `messages` events.
+## Blueprint deployment
 
-## Manual Render setup instead of Blueprint
+If using New Blueprint, place `render.yaml` in your repository root and select that repository. Enter the secret values marked `sync: false`, review the service/disk configuration, and create the deployment. The name `exam-paper-formatter` and region `virginia` come from REV1. The plan field is omitted so an existing service retains its compute plan; a new service uses Render’s default paid web-service plan. The disk configuration requires paid compute.
 
-If you do not use `render.yaml`, create a Python Web Service with:
+If the application stays in a subfolder in your repository, set the Blueprint Path to that subfolder’s `render.yaml` and add `rootDir: exam_formatter_rev2` to its service definition. For a manual service, set its Root Directory to the same folder. Adjust this value to your actual folder name.
 
-```text
-Build Command: pip install --upgrade pip && pip install -r requirements.txt
-Start Command: bash start.sh
-Health Check Path: /health
-```
+## Environment variables
 
-## Important storage limitation
+| Name | Value or purpose |
+| --- | --- |
+| `APP_ENV` | `prod` |
+| `PYTHON_VERSION` | `3.12.10` |
+| `OPENAI_API_KEY` | Your API key |
+| `EXAM_REDO_MODEL` | `gpt-6-astra`, the supplied REV2 model; must be available to your account |
+| `OPENAI_REASONING_EFFORT` | `high` |
+| `VERIFY_TOKEN` | Your chosen Meta webhook verification token |
+| `WHATSAPP_TOKEN` | Your Meta Cloud API access token |
+| `WHATSAPP_PHONE_NUMBER_ID` | The business phone-number ID |
+| `WHATSAPP_GRAPH_VERSION` | `v25.0` from REV1, configurable to the version supported by your app |
+| `WHATSAPP_APP_SECRET` | Required for signed incoming POST requests |
+| `WHATSAPP_ASYNC` | `true` in production |
+| `WHATSAPP_HTTP_TIMEOUT` | `60` seconds |
+| `EXAM_DATA_ROOT` | `/var/data`, matching the disk mount |
+| `LOG_LEVEL` | `INFO` |
+| `PYTHONUNBUFFERED` | `1` |
+| `ADMIN_PASSWORD` | A strong administrator password |
+| `WEB_TEACHER_ACCESS_CODE` | The shared beta teacher access code |
+| `COOKIE_SECURE` | `true` for HTTPS |
+| `MAX_UPLOAD_MB` | `15` |
+| `SESSION_MINUTES` | `30` |
+| `RETENTION_DAYS` | `7` |
+| `WHATSAPP_ALLOWED_SENDERS` | Optional comma-separated international numbers without `+` |
+| `PORT` | Render supplies it; `start.sh` reads it automatically |
 
-The formatter currently stores its active reference, generated exams,
-WhatsApp sessions, and message-deduplication information in local files under
-`data/`.
+The WhatsApp/OpenAI/data variable names match REV1. The additional authentication, reasoning, and retention settings belong to REV2. The `render.env.example` file is a checklist; Render does not automatically import it.
 
-Render's normal service filesystem is ephemeral. On the Free plan it is also
-lost when the service spins down. Therefore:
+## Storage and startup
 
-- a newly uploaded reference can disappear after a restart/redeploy/spin-down;
-- generated exam history can disappear;
-- an in-progress WhatsApp conversation can disappear;
-- local message-deduplication state can disappear.
+The disk stores `references/`, `jobs/`, `pending/`, `service.sqlite3`, and activity/usage records. Only files beneath the mounted path are durable. The startup script initializes references after Render mounts the disk; the build command does not access that disk.
 
-For a short POC this is acceptable, but it is not durable production storage.
+The older single-reference `active.docx`/`active.json` format is not a REV2 index. When an old data folder has no `references/index.json`, startup adds the bundled REV2 references and index while retaining old files. REV1 exam history/session records are not imported into the new SQLite service.
 
-If you later use a Render persistent disk, mount it at `/var/data` and set:
+Keep one application process and one instance. Job processing, incoming menus, and outgoing delivery use background threads within it. A known OpenAI response is resumed after restart; unresolved submissions are held for administrator review. Persistent disks prevent loss of that recovery metadata across deploys. The Free plan cannot attach this persistent disk; an ephemeral test would lose its durability guarantees.
 
-```text
-EXAM_DATA_ROOT=/var/data
-```
+## Deployment verification
 
-For a multi-instance or stronger production design, move session/index/files to
-PostgreSQL/object storage instead of local JSON/files.
+- `/health` returns `{"status":"ok"}`.
+- Teacher and administrator sign-in work over HTTPS.
+- Math and Chemistry are enabled; English is visibly unavailable pending validation.
+- Hi returns the introduction and main menu through WhatsApp.
+- Real DOCX upload, confirmation, result delivery, and error handling pass independently for each validated subject.
+- Reference changes and completed job history survive a service restart.
+- Logs show sanitized job IDs and operational failures, not exam text or API secrets.
 
-## Why Gunicorn uses one worker
+Mock tests and startup checks in this package do not verify your Render account, real model access, Meta permissions, or final academic formatting quality.
 
-The current WhatsApp session store and web exam index are JSON/local-file based.
-Multiple Gunicorn worker processes could update those files concurrently.
-`start.sh` therefore defaults to one worker with four threads:
+## Official Render references
 
-```text
-GUNICORN_WORKERS=1
-GUNICORN_THREADS=4
-```
-
-Do not increase the worker count until the shared state has been moved to a
-proper shared store such as PostgreSQL/Redis.
-
-## Render settings aligned with ExamHelper
-
-The non-project-specific Render settings intentionally match ExamHelper:
-
-```text
-plan: starter
-region: virginia
-PYTHON_VERSION=3.12.10
-WHATSAPP_GRAPH_VERSION=v25.0
-VERIFY_TOKEN
-WHATSAPP_TOKEN
-WHATSAPP_PHONE_NUMBER_ID
-```
-
-The settings that remain different are project-specific: this application is Flask/Gunicorn rather than FastAPI/Uvicorn, uses `EXAM_REDO_MODEL=gpt-4.1`, and currently keeps formatter/session state in local files rather than PostgreSQL.
-
-## Render formatting logs
-
-The application writes progress logs to stdout so they are visible in **Render -> Logs** while a file is being processed. The same staged logging is used for browser and WhatsApp formatting. Typical entries include:
-
-```text
-[browser:<exam-id>] Formatting started
-[browser:<exam-id>] Extracting teacher DOCX
-[browser:<exam-id>] OpenAI hierarchy discovery started
-[browser:<exam-id>] OpenAI hierarchy discovery complete
-[browser:<exam-id>] DOCX rendering started
-[browser:<exam-id>] Format integrity check passed
-[browser:<exam-id>] Formatting completed successfully
-
-[whatsapp:<exam-id>] Formatting started
-[whatsapp:<exam-id>] OpenAI hierarchy discovery started
-[whatsapp:<exam-id>] DOCX rendering complete
-[whatsapp:<exam-id>] Uploading formatted DOCX to WhatsApp
-[whatsapp:<exam-id>] Formatting completed and document sent
-```
-
-`start.sh` uses Gunicorn `--capture-output` and stdout/error log output so these messages appear in the Render service log stream. Set `LOG_LEVEL=INFO` for normal progress logging.
-
-The WhatsApp conversation currently asks only for **class/grade** and **subject** before formatting. It no longer asks for exam name/type.
+- [Blueprint YAML reference](https://render.com/docs/blueprint-spec)
+- [Persistent disks](https://render.com/docs/disks)
+- [Python version configuration](https://render.com/docs/python-version)

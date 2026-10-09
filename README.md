@@ -1,62 +1,256 @@
-CORE Phase 1 reads the fixed teacher exam, discovers one hierarchy for the whole document, then numbers that hierarchy in code.
+# Exam Formatter REV2 — Web and WhatsApp
 
+This package extends Avnish’s supplied REV2 Python application with a browser interface and Meta WhatsApp Cloud API integration. Windows Tkinter, browser Check Exam / Format Exam, and WhatsApp all call the same `job.run` formatter with exactly one subject reference and the teacher’s original DOCX. `instructions.py` remains unchanged. Python handles orchestration, file validation, menus, persistence, and delivery; it does not rebuild or repair academic content.
+
+## Start locally on Windows
+
+Use Python 3.12 or newer. In this folder:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
-python run_core.py
+
+Fill in `.env`:
+
+```dotenv
+OPENAI_API_KEY=your_api_key
+EXAM_REDO_MODEL=gpt-6-astra
+OPENAI_REASONING_EFFORT=high
+ADMIN_PASSWORD=choose_a_strong_admin_password
+WEB_TEACHER_ACCESS_CODE=choose_a_teacher_access_code
+COOKIE_SECURE=false
 ```
 
-Inputs are the files in `input/`. They are read only. Outputs are `output/hierarchy.json`, `output/hierarchy.txt`, and `output/integrity.txt`.
+Keep Avnish’s model / reasoning settings unless you deliberately validate a different configuration. The model must be available to your API account. No credentials from the uploaded ZIP are included in this package.
 
-Discovery uses one OpenAI structured call (`EXAM_REDO_MODEL`, default `gpt-4.1`) when `OPENAI_API_KEY` is set. The model returns types and parents for existing source ids. It does not rewrite question text and it does not assign final labels.
+```powershell
+python -m uvicorn server:app --host 127.0.0.1 --port 8000 --workers 1
+```
 
-## WhatsApp layer
+Open **http://127.0.0.1:8000**. Alternatively, run `run_web.bat` after installing the dependencies. The original Windows app still runs with `python main.py` / `run.bat`.
 
-The Flask app now exposes a WhatsApp Cloud API webhook at `/webhook`.
+On Linux/macOS use `python3 -m venv .venv`, `source .venv/bin/activate`, then the same pip and uvicorn commands.
 
-- `GET /webhook` handles Meta webhook verification.
-- `POST /webhook` receives WhatsApp events.
-- A received Word `.docx` document is downloaded from WhatsApp.
-- The bot asks, one at a time, for class/grade and subject.
-- After those answers, it calls the existing formatter without changing its formatting logic.
-- If formatting succeeds, the generated `.docx` is uploaded to WhatsApp and sent back to the same sender.
-- `CANCEL`, `STOP`, or `RESET` clears a sender's pending conversation.
+## Compatibility with your attached application
 
-The WhatsApp workflow uses the same active reference exam as the browser UI. An administrator must upload that reference first on the web page. The metadata collected in WhatsApp is saved for the workflow/future use; the current formatting algorithm itself still uses only the teacher DOCX and the active reference DOCX.
+The primary Meta callback remains **GET /webhook** for verification and **POST /webhook** for incoming events. Use the same public host followed by `/webhook` when deploying REV2 at your existing service. The earlier REV2 URL `/webhooks/whatsapp` remains a working alias. No public hostname was established by the attachment; it contains only deployment placeholders.
 
-Copy `.env.example` to `.env` and set at least:
+| Setting | Primary name from attached code | First REV2 name accepted as fallback |
+| --- | --- | --- |
+| Meta verification token | `VERIFY_TOKEN` | `WHATSAPP_VERIFY_TOKEN` |
+| Meta access token | `WHATSAPP_TOKEN` | `WHATSAPP_ACCESS_TOKEN` |
+| Business phone ID | `WHATSAPP_PHONE_NUMBER_ID` | Same name |
+| Graph API version | `WHATSAPP_GRAPH_VERSION` | `WHATSAPP_API_VERSION` |
+| App signature secret | `WHATSAPP_APP_SECRET` | Same name |
+| Media/message HTTP timeout | `WHATSAPP_HTTP_TIMEOUT` | Previously hardcoded; now defaults to 60 seconds |
+| Webhook asynchronous handling | `WHATSAPP_ASYNC` | Defaults to true |
+| Persistent data folder | `EXAM_DATA_ROOT` | `EXAM_DATA_DIR` |
+| OpenAI API key | `OPENAI_API_KEY` | Same name |
+| Formatter model | `EXAM_REDO_MODEL` | `OPENAI_MODEL` |
+| Runtime environment | `APP_ENV` | Defaults to dev |
+| Log level | `LOG_LEVEL` | Defaults to INFO |
+| Hosting port | `PORT` | Used by start.sh / container_start.py |
+
+Primary nonempty values take precedence over their aliases. `WHATSAPP_ASYNC=false` is supported for **local development only**: incoming menus/media are handled before responding; paid formatting still runs in its background worker. Production (`APP_ENV=prod`) requires true to acknowledge webhooks promptly. `WHATSAPP_APP_SECRET` is required in REV2 for signed webhook POSTs, although your attached Flask app treated it as optional.
+
+Reuse your existing variable **names**, not every old value without review. In particular, the old app selected `gpt-4.1`; REV2’s supplied model remains `gpt-6-astra`. Set `EXAM_REDO_MODEL` to the intended REV2 model. Its `EXAM_DATA_ROOT` needs the three REV2 references and `index.json`; the older `active.docx` / `active.json` reference layout is not that index.
+
+Administrator password, teacher access code, reasoning effort, upload/session/retention limits, and optional sender allowlist are additional REV2 settings because the attached code has no matching settings. Existing `GUNICORN_*` variables are unused: REV2 is an ASGI service launched with Uvicorn and one worker. `start.sh` reuses your existing Render start filename and `PORT` / `LOG_LEVEL` values.
+
+## Browser functionality
+
+- Teacher / administrator sign-in with server-managed credentials and HttpOnly session cookies.
+- Subject/class selection from configured references; disabled subjects are clearly unavailable.
+- Check Exam and Format Exam, Word upload, drag/drop, and confirmation showing filename and subject.
+- Asynchronous request progress, saved history, queued cancellation, safe manual retry, formatted-exam and issues-report downloads.
+- Teacher requests are isolated by signed-in browser session. The shared teacher code is a beta access gate, not a school account directory. Signing out and signing in creates a new session and a new history; admins can access retained requests.
+- Administrator reference view/download, add/replace, enable/disable, delete, all-request monitoring, delivery retry, unresolved request reconciliation, activity log, and estimated usage costs.
+- Responsive desktop/mobile layout. Help explains errors, review requirements, and WhatsApp use.
+
+The supplied references are **Math 10**, **Chemistry 11**, and **English 10**. English is disabled initially because the detailed guide explicitly identifies an unresolved structural issue. Staff must test its real output before enabling it in Administration. This package does not fix or certify that academic formatting issue.
+
+## Connect Meta WhatsApp Cloud API
+
+This implementation uses **Meta Cloud API**, not Twilio or WhatsApp Web automation. If your earlier project uses another provider, its webhook is not a drop-in match. This standalone service can be deployed separately or its `service` package adapted into your existing Python application.
+
+1. Configure a WhatsApp Business Platform app and business phone number in Meta.
+2. Add these server environment values (or local `.env`):
+
+```dotenv
+WHATSAPP_TOKEN=your_cloud_api_access_token
+WHATSAPP_PHONE_NUMBER_ID=your_business_phone_number_id
+WHATSAPP_APP_SECRET=your_meta_app_secret
+VERIFY_TOKEN=choose_your_own_webhook_verification_token
+WHATSAPP_GRAPH_VERSION=the_supported_version_selected_in_your_meta_app
+WHATSAPP_ALLOWED_SENDERS=15551234567,919876543210
+```
+
+Use an appropriate long-lived system-user token with the messaging/media permissions required by Meta. `WHATSAPP_GRAPH_VERSION` defaults to the attached app’s `v25.0` and remains configurable. Set a version supported by your Meta app. The allowlist is optional; numbers use international format without `+`. During beta, use it to restrict who can invoke the paid formatter.
+
+3. Deploy this service to a public HTTPS URL, using the hosting setup below.
+4. Set Meta’s callback URL to **https://YOUR-HOST/webhook**. Enter the exact `VERIFY_TOKEN` chosen above.
+5. Subscribe the WhatsApp app to the **messages** webhook field. This includes incoming messages and delivery statuses. Configure the business account/app subscription required by Meta.
+6. Send **Hi** from an allowed test phone, then exercise subject selection, DOCX upload, confirmation, and result delivery.
+
+The GET `/webhook` endpoint responds to Meta verification. POST requests require a valid HMAC-SHA256 `X-Hub-Signature-256` and the configured phone-number ID. With the default `WHATSAPP_ASYNC=true`, webhooks only persist incoming messages and acknowledge; separate worker threads download documents, process jobs, and send replies.
+
+Transport reference links:
+- [Meta webhook setup](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/create-webhook-endpoint/)
+- [Meta media API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/media)
+- [Meta document messages](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/document-messages)
+- [OpenAI Code Interpreter](https://developers.openai.com/api/docs/guides/tools-code-interpreter)
+- [OpenAI background responses](https://developers.openai.com/api/docs/guides/background)
+
+## WhatsApp introduction and menus
+
+Every **Hi** (case-insensitive, with common greeting punctuation accepted) displays:
+
+> 👋 Welcome to **Exam Formatter**!
+>
+> Turn your Word exam into a consistent, classroom-ready paper using your school’s subject and class format. Choose your subject, attach your .docx exam, and we’ll return a formatted Word file while preserving your questions and academic content. You can also check an exam and receive a report of changes needed. Please review every result before use.
+>
+> **MAIN MENU**
+> 1. Format Exam
+> 2. Help
+> 4. Check Exam
+> 0. Exit
+>
+> Reply with a number. Say Hi anytime to return here.
+
+`3. Retry Result Delivery` appears when a saved result has a failed WhatsApp delivery. Check Exam is numbered 4 so the conditional delivery option retains a stable number. `Hello`, `Hey`, `Menu`, and `Start` also open the main menu.
+
+**Subject/class:** enabled references are numbered dynamically, initially Math 10 and Chemistry 11. `0. Back` returns to the main menu. English appears only after an administrator enables it following validation.
+
+**Upload:** “Please attach your Word (.docx) exam.” `0. Cancel` clears the pending upload and returns to the main menu. PDF and images are rejected. A newer valid document replaces the earlier pending document before confirmation.
+
+**Confirmation:** displays subject/class and filename:
 
 ```text
-OPENAI_API_KEY=...
-VERIFY_TOKEN=...
-WHATSAPP_TOKEN=...
-WHATSAPP_PHONE_NUMBER_ID=...
+1. Start Formatting (or Start Checking)
+2. Change Subject
+3. Replace File
+0. Cancel
 ```
 
-`WHATSAPP_GRAPH_VERSION` defaults to the same `v25.0` used by ExamHelper and is configurable so the Meta Graph API version is not embedded in the formatter logic. `WHATSAPP_APP_SECRET` is optional; when present, incoming POST requests are verified using `X-Hub-Signature-256`.
+**Processing:** acknowledges the queued request and waits asynchronously. `0` cancels only if the formatter has not claimed the job. Once processing starts, it explains that cancellation is unavailable here. A status question never starts another request.
 
-For local testing, `http://127.0.0.1:5000/webhook` is not reachable by Meta. Expose the Flask app through an HTTPS tunnel such as ngrok/Cloudflare Tunnel, or deploy it, and configure the resulting public HTTPS URL plus `/webhook` in the Meta app. The verification token entered in Meta must match `VERIFY_TOKEN`.
+**Result:** sends the exact DOCX bytes returned by the engine. Successful formatting and issues reports have different filenames/captions. Then:
 
-WhatsApp state is stored under `data/whatsapp/`. This JSON/thread implementation is intended for the current POC; a production deployment should use a persistent database/queue instead of local JSON files and background Flask threads.
+```text
+1. Format Another Exam
+2. Help
+0. Main Menu
+```
 
+**Error:** a safe manual retry is offered only when the processing result is known to have failed safely:
 
-## Render deployment
+```text
+1. Try Again (only when safe)
+2. Choose Another Subject
+3. Upload Another File
+0. Main Menu
+```
 
-Render deployment support is included in this project. The existing browser UI
-and `/webhook` WhatsApp endpoint run from the same Flask application.
+**Help:** four practical steps, then `0. Back`. Say Hi from any menu to reset navigation. Hi does not stop or delete an already active formatter job. The earlier result is still delivered, and the active-job guard prevents another paid request until its state is resolved. A late result does not overwrite a Hi-reset main menu.
 
-Deployment files:
+## Reliability and error behavior
 
-- `render.yaml`
-- `.python-version`
-- `start.sh`
-- `render.env.example`
-- `RENDER_DEPLOYMENT.md`
+- Inputs and a reference snapshot are stored separately under `data/jobs/<request-id>/`. The reference version is its SHA256. Reference replacement cannot change an already submitted request.
+- DOCX validation checks extension, bounded byte size, ZIP integrity, required document parts, standard Word content type, and XML readability. Macro-enabled packages and excessive expanded ZIPs are rejected. This validates file structure, not perfect visual/academic quality.
+- Only `PASS` + a valid result file is a completed formatting job. `OK` is a completed check with no file. `FORMAT ERROR` / `STRUCTURAL ERROR` return a clearly labeled issues report and a “Changes needed” state. Missing/invalid output and incomplete OpenAI responses never become apparently successful formatted exams.
+- The original teacher file is never overwritten. Output bytes are copied without opening/re-saving the generated DOCX locally.
+- SQLite persists jobs, sessions, incoming webhook IDs, an outgoing delivery queue, credentials sessions, and reference enablement. Web browser submission IDs and WhatsApp message IDs prevent repeated requests; repeated confirmation while active cannot charge twice.
+- A known OpenAI background response ID is saved and resumed after restart. A crash or lost network response around the paid create call is marked **Status unresolved** and blocks another request. Administration can resume a known response; if no response ID exists, an administrator must check the OpenAI dashboard and explicitly confirm no request remains active before releasing the job.
+- No automatic retry of a paid formatter POST. Explicit rate-limit rejection may be manually retried. OpenAI’s normal processing timeout is 25 minutes. Cancellation must be confirmed before timeout is treated as safely retryable.
+- WhatsApp delivery uses up to three attempts with bounded delays. Uploaded result media IDs are reused. Retrying delivery sends the saved result and does not rerun the formatter. Delivery callbacks distinguish API acceptance, actual delivery, read, and failure.
+- Meta does not provide an application transaction spanning “send” and the local DB update. A lost send acknowledgement can cause a duplicate document delivery; it cannot cause a second formatting request. This integration provides deduplicated processing and at-least-once outbound delivery, not a guarantee of exactly-once message display.
+- Menu expiry: 30 minutes by default. Confirmed jobs survive menu expiry. Pending uploads expire; completed/failed/cancelled job files and related job records expire after seven days. Active/unresolved jobs and queued deliveries are not silently removed. Cleanup runs hourly while the service runs. Reference files are retained until explicitly deleted. Original usage/activity logs retain the desktop engine’s existing retention behavior.
+- Logs contain request IDs and sanitized operational states, not exam text or API tokens. Public errors do not echo provider response content.
+- Existing engine cost calculations are displayed as estimates using its shipped rates. These are not live billing data. Confirm actual charges and model access in the OpenAI dashboard.
 
-The production server starts `web.app:app` with Gunicorn. `GET /health` is the
-Render health-check endpoint. See `RENDER_DEPLOYMENT.md` for the exact Render
-and Meta configuration.
+## Hosting and persistent storage
 
-## Reference nonconformance corrections
+This package deliberately uses one application process, one formatter worker, one inbox worker, and one delivery worker. Start with **`--workers 1`**, **one replica**, and no auto-reload in production. Multiple processes or replicas require a coordinated external queue; they are not supported by this SQLite implementation.
 
-Before the normal formatting pipeline runs, browser and WhatsApp uploads are checked against the active reference exam for required header roles and reference Sections A-D. If required items are missing, the formatter does not call the normal OpenAI formatting pipeline. Instead it returns `<original>_CORRECTIONS.docx`, preserving the teacher exam and inserting yellow `ERROR:` / `FIX:` paragraphs that explain what must be corrected. The teacher should make the corrections, delete the yellow notes, and upload/send the corrected DOCX again.
+Render files are included: `render.yaml`, `.python-version`, `start.sh`, `render.env.example`, and `RENDER_DEPLOYMENT.md`. Follow `RENDER_DEPLOYMENT.md` for updating your existing service or using a Blueprint.
 
-This behavior is covered by `tests/test_nonconformance.py` and a WhatsApp regression test in `tests/test_whatsapp.py`.
+For Render or a similar Python host, the commands are:
+
+```text
+Build: python -m pip install -r requirements.txt
+Start: bash start.sh
+Health: /health
+```
+
+Use a **persistent disk** for `EXAM_DATA_ROOT`. `start.sh` initializes the bundled references on first start after the disk is mounted, and preserves existing REV2 references on later starts. Ephemeral filesystems lose sessions, requests, and references on replacement/restart; they cannot provide this service’s persistence guarantees. Supply secrets through the hosting environment, set `COOKIE_SECURE=true`, and expose only HTTPS. Keep disk/data private and backed up. No deployment is performed by this package.
+
+A Dockerfile and `compose.yaml` are included. The container initializer copies bundled reference files into an empty mounted data volume on first start.
+
+```bash
+cp .env.example .env
+# Fill the required credentials and access codes before starting.
+docker compose up --build -d
+```
+
+The compose local URL is http://localhost:8000. Keep `COOKIE_SECURE=false` for that local HTTP test, and use true behind your production HTTPS proxy. Do not mount `data` as a public static directory. Do not edit reference files simultaneously from the desktop and service administrator windows.
+
+## Test and staff acceptance
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+Automated tests use fake OpenAI/Meta transports; they do not spend API credits, send real WhatsApp messages, or certify exam quality. See `TESTING.md` for the required joint live acceptance runs with Avnish. The service remains configurable code until your own credentials, HTTPS host, and Meta webhook are set up.
+
+## Troubleshooting an unresolved request
+
+`state: uncertain` means the service cannot safely rule out an existing remote
+formatting request. It blocks another submission to avoid duplicating that call.
+It does not mean the English reference or the teacher exam was judged invalid.
+
+Sign in as **Administrator**, open **Administration**, find the request ID, and
+expand **Administrator error details**. For new failures this shows the processing
+stage, sanitized error message, HTTP status, and available OpenAI request/response
+IDs. These details are also included in authenticated `GET /api/admin/overview`;
+teacher job endpoints do not return them. The server console logs the job ID,
+stage, error type, and HTTP status without credentials or exam content.
+
+Definite rejection of the response submission (such as HTTP 400, 401, 403, or 404)
+now produces `failed`, rather than `uncertain`. Correct the reported configuration
+error before starting a fresh request. Lost acknowledgements, timeouts, and server
+errors during submission remain unresolved until checked. Automatic paid retries
+remain disabled.
+
+For an unresolved request with a saved response ID, **Reconcile processing**
+resumes that same response without submitting a new formatting request. If no
+response ID was saved, first verify in your OpenAI project logs that no request
+remains active, then use the reconciliation action to confirm and release it.
+Do not delete the database or clear the request simply to unblock the upload.
+
+Older failures discarded their underlying error. Installing this update cannot
+reconstruct those errors, so they display that limitation explicitly. Preserve
+your existing `.env` and `EXAM_DATA_ROOT` directory when replacing the code. The
+database upgrade adds the diagnostics column without erasing history or enabling
+English automatically. Restart the server and hard-refresh the browser afterward.
+
+## Project map
+
+```text
+main.py                 Original Windows interface
+instructions.py         Original REV2 prompts, unchanged
+job.py                  Shared engine + isolated outputs / response recovery
+records.py              Original references / logs / estimated costs
+server.py               ASGI entry point
+service/app.py          Web API, sign-in, administration, signed webhook
+service/core.py         Shared jobs, workers, delivery, retention
+service/whatsapp.py     Numbered menus and global Hi reset
+service/meta.py         Meta media and messaging transport
+service/storage.py      Durable SQLite records
+service/files.py        Bounded DOCX validation
+web/                    HTML / CSS / JavaScript browser interface
+tests/                 Mocked integration and engine tests
+```
