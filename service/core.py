@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import logging
 import shutil
@@ -28,6 +29,9 @@ class Service:
         records.LOG=settings.data/'activity.log'
         records.USAGE=settings.data/'usage.jsonl'
         self.db=Store(settings.data)
+        # A process restart requires fresh admin authentication, including after
+        # a Render change to ADMIN_PASSWORD. Web cookies use a separate table.
+        self.db.execute('DELETE FROM whatsapp_admin')
         self.engine=engine or job.run
         self.meta=meta or MetaClient(settings)
         self.lock=threading.RLock()
@@ -35,6 +39,89 @@ class Service:
         self.threads=[]
         (settings.data/'jobs').mkdir(exist_ok=True)
         (settings.data/'pending').mkdir(exist_ok=True)
+        (settings.data/'admin_downloads').mkdir(exist_ok=True)
+
+    def admin_authenticated(self,sender,touch=False):
+        row=self.db.one('SELECT * FROM whatsapp_admin WHERE sender=? AND expires>?',(sender,time.time()))
+        if row and touch:
+            self.db.execute('UPDATE whatsapp_admin SET expires=? WHERE sender=?',(time.time()+self.s.session_minutes*60,sender))
+        return bool(row)
+
+    def admin_logout(self,sender):
+        self.db.execute('DELETE FROM whatsapp_admin WHERE sender=?',(sender,))
+
+    def password_proof(self,sender,mid,text):
+        # Bind to this sender and webhook message; never store a password or a
+        # reusable password hash. The proof is verified with the current secret.
+        value=json.dumps([sender,mid,text],ensure_ascii=False).encode('utf-8')
+        return hmac.new(self.s.admin_password.encode('utf-8'),value,hashlib.sha256).hexdigest()
+
+    def prepare_incoming(self,sender,mid,message):
+        message=json.loads(json.dumps(message))
+        message.pop('_admin_password_proof',None)
+        if message.get('type')=='text':
+            text=str(message.get('text',{}).get('body',''))
+            message['_admin_password_proof']=self.password_proof(sender,mid,text)
+            login=self.db.session(sender,self.s.session_minutes)['state']=='admin_login'
+            secret_match=bool(self.s.admin_password and hmac.compare_digest(text.encode('utf-8'),self.s.admin_password.encode('utf-8')))
+            if (login and text.strip().casefold().strip(' !.,?') not in ('hi','hello','hey','menu','start','help')) or secret_match:
+                message['text']={'body':''}
+        return message
+
+    def admin_reference(self,rid):
+        ref=next((r for r in self.references() if r['id']==rid),None)
+        if not ref: raise UserError('Reference no longer exists. Refresh the reference list.')
+        return ref
+
+    def save_reference(self,subject,grade,data,enabled=False,expected_version=None):
+        subject=subject.strip();grade=grade.strip()
+        if not subject or len(subject)>80 or not grade or len(grade)>20 or any(ord(c)<32 for c in subject+grade):
+            raise UserError('Enter a subject (up to 80 characters) and class (up to 20 characters).')
+        validate_docx(data,'reference.docx',self.s.max_bytes)
+        with self.lock:
+            existing=records.find_reference(subject,grade)
+            version=hashlib.sha256(existing.path.read_bytes()).hexdigest() if existing and existing.path.is_file() else ''
+            if expected_version is not None and version!=expected_version:
+                raise UserError('This reference changed while you were uploading. Start the upload again to review the latest reference.')
+            action,ref=records.save_reference(subject,grade,data)
+            self.db.execute('INSERT OR REPLACE INTO reference_settings VALUES(?,?)',(ref.path.stem,int(enabled)))
+        event(log,'reference.saved',reference_id=ref.path.stem,subject=subject,grade=grade,enabled=enabled,bytes=len(data),action=action)
+        return self.admin_reference(ref.path.stem)
+
+    def enable_reference(self,rid,enabled):
+        with self.lock:
+            self.admin_reference(rid)
+            self.db.execute('INSERT OR REPLACE INTO reference_settings VALUES(?,?)',(rid,int(enabled)))
+        event(log,'reference.enabled_changed',reference_id=rid,enabled=enabled)
+
+    def delete_reference(self,rid,expected_version=None):
+        with self.lock:
+            ref=self.admin_reference(rid)
+            if expected_version is not None and ref['version']!=expected_version:
+                raise UserError('This reference changed. Review it again before deleting.')
+            records.delete_reference(ref['subject'],ref['grade'])
+            self.db.execute('DELETE FROM reference_settings WHERE id=?',(rid,))
+        event(log,'reference.deleted',reference_id=rid)
+
+    def reconcile(self,jid,confirmed_no_remote_request=False):
+        with self.lock:
+            row=self.get(jid)
+            if not row or row['state']!='uncertain': raise UserError('Only unresolved requests can be reconciled.')
+            remote=json.loads(row['remote'] or '{}')
+            if remote.get('response_id'):
+                self.update(jid,state='queued',message='Resuming the existing response.')
+                return 'Resuming the existing response without a new formatting request.'
+            if not confirmed_no_remote_request:
+                raise UserError('Check the OpenAI dashboard and confirm no remote request remains active before releasing this request.')
+            self.update(jid,state='failed',retryable=1,message='Administrator confirmed that no remote request remains active. You may retry.')
+            return 'Request released for a safe manual retry.'
+
+    def admin_document(self,sender,data,name,caption,dedupe):
+        validate_docx(data,name,self.s.max_bytes)
+        folder=self.s.data/'admin_downloads'/uuid.uuid4().hex;folder.mkdir()
+        path=folder/filename(name);path.write_bytes(data)
+        self.db.enqueue(sender,'document',{'path':str(path),'caption':caption,'admin_only':True},dedupe=dedupe)
+        event(log,'whatsapp.admin.document_queued',bytes=len(data),sender_key=actor_key(sender))
 
     def references(self):
         result=[]
@@ -307,10 +394,18 @@ class Service:
         claimed=self.db.execute("UPDATE inbox SET state='processing' WHERE id=? AND state='queued'",(message_id,))
         if not claimed: return False
         row=self.db.one('SELECT * FROM inbox WHERE id=?',(message_id,))
+        message=json.loads(row['payload'])
+        if self.db.session(row['sender'],self.s.session_minutes)['state']=='admin_login' and message.get('type')=='text':
+            # Also cover a password queued immediately behind the Admin tap.
+            # Preserve greetings; remove login text before processing/logging.
+            text=str(message.get('text',{}).get('body',''))
+            if text.strip().casefold().strip(' !.,?') not in ('hi','hello','hey','menu','start','help'):
+                message['text']={'body':''}
+            self.db.execute('UPDATE inbox SET payload=? WHERE id=?',(json.dumps(message),message_id))
         event(log,'whatsapp.message.started',message_id=message_id,sender_key=actor_key(row['sender']))
         try:
             with log_context(message_id=message_id,sender_key=actor_key(row['sender'])):
-                WhatsAppFlow(self).handle(row['sender'],json.loads(row['payload']),row['id'])
+                WhatsAppFlow(self).handle(row['sender'],message,row['id'])
             self.db.execute("UPDATE inbox SET state='done' WHERE id=?",(row['id'],))
             event(log,'whatsapp.message.finished',message_id=message_id)
         except Exception as exc:
@@ -350,6 +445,10 @@ class Service:
             if row['kind']=='text': mid=self.meta.send_text(row['sender'],payload['text'])
             elif row['kind']=='interactive': mid=self.meta.send_interactive(row['sender'],payload)
             else:
+                if payload.get('admin_only') and not self.admin_authenticated(row['sender']):
+                    self.db.execute("UPDATE outbox SET state='cancelled' WHERE id=?",(row['id'],))
+                    event(log,'whatsapp.admin.download.cancelled',outbox_id=row['id'],reason='admin_access_expired')
+                    return True
                 path=Path(payload['path'])
                 if not payload.get('media_id'):
                     payload['media_id']=self.meta.upload(path)
@@ -373,6 +472,10 @@ class Service:
                 self.db.emit(row['sender'],'The result is saved, but delivery failed. Say Hi and tap Retry Delivery to send the same file.',dedupe='deliveryerror:'+row['job_id'])
                 from .whatsapp import WhatsAppFlow
                 self.emit_reply(row['sender'],WhatsAppFlow(self).current_menu(row['sender']),dedupe='deliverymenu:'+row['job_id'])
+            elif n>=3 and row['kind']=='document' and not row['job_id']:
+                self.db.emit(row['sender'],'The admin file could not be delivered. Open the latest menu and choose Download again.',dedupe='admin-deliveryerror:'+str(row['id']))
+                from .whatsapp import WhatsAppFlow
+                self.emit_reply(row['sender'],WhatsAppFlow(self).current_menu(row['sender']),dedupe='admin-deliverymenu:'+str(row['id']))
         return True
     def retry_delivery(self,jid,owner):
         event(log,'whatsapp.delivery.retry_requested',job_id=jid,actor=actor_key(owner))
@@ -413,8 +516,14 @@ class Service:
                 shutil.rmtree(folder,ignore_errors=True);removed_pending+=1
         self.db.execute('DELETE FROM rates WHERE until<?',(time.time(),))
         self.db.execute('DELETE FROM auth WHERE expires<?',(time.time(),))
+        self.db.execute('DELETE FROM whatsapp_admin WHERE expires<?',(time.time(),))
+        for folder in (self.s.data/'admin_downloads').iterdir():
+            if folder.stat().st_mtime<cutoff:
+                pending=self.db.all("SELECT payload FROM outbox WHERE job_id IS NULL AND kind='document' AND state IN ('queued','sending')")
+                if not any(Path(json.loads(r['payload'])['path']).parent==folder for r in pending):
+                    shutil.rmtree(folder,ignore_errors=True)
         self.db.execute('DELETE FROM sessions WHERE updated<?',(time.time()-self.s.session_minutes*60,))
         self.db.execute("DELETE FROM inbox WHERE created<? AND state IN ('done','failed')",(cutoff,))
-        self.db.execute("DELETE FROM outbox WHERE created<? AND job_id IS NULL AND state IN ('sent','failed')",(cutoff,))
+        self.db.execute("DELETE FROM outbox WHERE created<? AND job_id IS NULL AND state IN ('sent','failed','cancelled')",(cutoff,))
         event(log,'storage.cleanup.completed',removed_jobs=removed_jobs,removed_pending=removed_pending,
               elapsed_ms=round((time.monotonic()-started)*1000))

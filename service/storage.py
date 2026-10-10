@@ -26,6 +26,7 @@ class Store:
               payload TEXT NOT NULL, job_id TEXT, dedupe TEXT UNIQUE, state TEXT NOT NULL DEFAULT 'queued',
               attempts INTEGER NOT NULL DEFAULT 0, due REAL NOT NULL, meta_id TEXT, created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS reference_settings (id TEXT PRIMARY KEY, enabled INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS whatsapp_admin (sender TEXT PRIMARY KEY, expires REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS rates (key TEXT PRIMARY KEY, count INTEGER NOT NULL, until REAL NOT NULL);
             ''')
             # Upgrade existing REV2 installations without resetting their jobs.

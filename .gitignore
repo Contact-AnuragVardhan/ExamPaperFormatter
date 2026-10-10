@@ -6,6 +6,7 @@ __pycache__/
 data/jobs/
 data/pending/
 data/results/
+data/admin_downloads/
 data/*.sqlite3*
 data/activity.log
 data/usage.jsonl

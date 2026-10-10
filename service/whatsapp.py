@@ -21,7 +21,7 @@ GREETINGS=('hi','hello','hey','menu','start')
 class WhatsAppFlow:
     def __init__(self,service): self.v=service;self.db=service.db
     def main(self,sender):
-        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('menu.help','Help')]
+        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('main.admin','Admin'),('menu.help','Help')]
         if self.db.one("SELECT id FROM jobs WHERE owner=? AND output IS NOT NULL AND delivery='failed' ORDER BY created DESC LIMIT 1",('wa:'+sender,)):
             choices.append(('delivery.retry','Retry Delivery'))
         choices.append(('main.exit','Exit'))
@@ -68,6 +68,9 @@ class WhatsAppFlow:
     def current_menu(self,sender,state=None):
         state=state or self.db.session(sender,self.v.s.session_minutes)
         name=state['state']
+        if name.startswith('admin_'):
+            from .whatsapp_admin import WhatsAppAdmin
+            return WhatsAppAdmin(self).current_menu(sender,state)
         if name=='subject':
             result=self.subject_menu(state);self.db.save_session(sender,state);return result
         if name=='upload': return self.upload_menu()
@@ -107,6 +110,7 @@ class WhatsAppFlow:
             if note: content['body']['text']=(note+'\n\n'+content['body']['text'])[:1024]
             say(content)
         if text in GREETINGS:
+            self.v.admin_logout(sender)
             self.discard(state);state={'state':'main'};save();say(self.main(sender));return
         action='menu.help' if text=='help' else None
         if message.get('type')=='interactive':
@@ -117,7 +121,11 @@ class WhatsAppFlow:
                 event(log,'whatsapp.menu.stale_selection',level=logging.WARNING)
                 show('Please use the latest menu below.');return
         if action=='menu.main':
+            self.v.admin_logout(sender)
             self.discard(state);state={'state':'main'};save();say(self.main(sender));return
+        if action=='main.admin' or state['state'].startswith('admin_'):
+            from .whatsapp_admin import WhatsAppAdmin
+            return WhatsAppAdmin(self).handle(sender,message,message_id,state,action)
         if action=='menu.help':
             if state['state']!='help': state['previous']=state['state']
             state['state']='help';save();say(self.help_menu());return

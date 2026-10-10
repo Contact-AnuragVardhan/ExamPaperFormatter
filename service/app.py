@@ -171,17 +171,13 @@ def create_app(settings=None,service=None,start_workers=True):
         auth(request,True);subject=subject.strip();grade=grade.strip()
         if not subject or len(subject)>80 or not grade or len(grade)>20: raise UserError('Enter a subject and class.')
         data=await read_upload(file)
-        with service.lock:
-            _,ref=records.save_reference(subject,grade,data)
-            service.db.execute('INSERT OR REPLACE INTO reference_settings VALUES(?,?)',(ref.path.stem,int(enabled=='true')))
-        event(log,'reference.saved',reference_id=ref.path.stem,subject=subject,grade=grade,enabled=enabled=='true',bytes=len(data))
+        service.save_reference(subject,grade,data,enabled=='true')
         return {'ok':True}
     @app.post('/api/admin/references/{rid}/enabled')
     async def enable_reference(rid:str,request:Request):
         auth(request,True);body=await request.json()
         if not any(r['id']==rid for r in service.references()): raise HTTPException(404,'Reference not found.')
-        service.db.execute('INSERT OR REPLACE INTO reference_settings VALUES(?,?)',(rid,int(body.get('enabled') is True)))
-        event(log,'reference.enabled_changed',reference_id=rid,enabled=body.get('enabled') is True)
+        service.enable_reference(rid,body.get('enabled') is True)
         return {'ok':True}
     @app.get('/api/admin/references/{rid}/download')
     def download_reference(rid:str,request:Request):
@@ -192,11 +188,8 @@ def create_app(settings=None,service=None,start_workers=True):
     @app.delete('/api/admin/references/{rid}')
     def delete_reference(rid:str,request:Request):
         auth(request,True)
-        with service.lock:
-            ref=next((r for r in service.references() if r['id']==rid),None)
-            if not ref: raise HTTPException(404,'Reference not found.')
-            records.delete_reference(ref['subject'],ref['grade'])
-        event(log,'reference.deleted',reference_id=rid)
+        if not any(r['id']==rid for r in service.references()): raise HTTPException(404,'Reference not found.')
+        service.delete_reference(rid)
         return {'ok':True}
     @app.post('/api/admin/jobs/{jid}/delivery')
     def redeliver(jid:str,request:Request):
@@ -206,15 +199,8 @@ def create_app(settings=None,service=None,start_workers=True):
     @app.post('/api/admin/jobs/{jid}/resolve')
     async def resolve_uncertain(jid:str,request:Request):
         auth(request,True);row=service.get(jid)
-        if not row or row['state']!='uncertain': raise UserError('Only unresolved requests can be reconciled.')
-        remote=json.loads(row['remote'] or '{}')
-        if remote.get('response_id'):
-            service.update(jid,state='queued',message='Resuming the existing response.')
-            return {'ok':True,'message':'Resuming the existing response without a new formatting request.'}
         body=await request.json()
-        if body.get('confirmed_no_remote_request') is not True: raise UserError('Check the OpenAI dashboard and confirm no remote request remains active before releasing this request.')
-        service.update(jid,state='failed',retryable=1,message='Administrator confirmed that no remote request remains active. You may retry.')
-        return {'ok':True}
+        return {'ok':True,'message':service.reconcile(jid,body.get('confirmed_no_remote_request') is True)}
     @app.get('/webhooks/whatsapp',include_in_schema=False)
     @app.get('/webhook')
     def verify(request:Request):
@@ -272,7 +258,8 @@ def create_app(settings=None,service=None,start_workers=True):
                     if service.db.limited('wa:'+sender,60,60):
                         limited+=1;event(log,'webhook.message.rate_limited',level=logging.WARNING,sender_key=actor_key(sender))
                         continue
-                    service.db.execute('INSERT OR IGNORE INTO inbox(id,sender,payload,created) VALUES(?,?,?,?)',(mid,sender,json.dumps(message),time.time()))
+                    safe_message=service.prepare_incoming(sender,mid,message)
+                    service.db.execute('INSERT OR IGNORE INTO inbox(id,sender,payload,created) VALUES(?,?,?,?)',(mid,sender,json.dumps(safe_message),time.time()))
                     accepted.append(mid)
                     event(log,'webhook.message.queued',message_id=mid,sender_key=actor_key(sender),message_type=message.get('type','unknown'))
         # Local debug compatibility with the original WHATSAPP_ASYNC flag.
