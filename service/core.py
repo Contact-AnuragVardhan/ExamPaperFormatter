@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path
 import job
 import records
+import reporting
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
@@ -299,13 +300,19 @@ class Service:
                 target.write_bytes(payload)  # Deliver exact engine bytes, without re-saving in python-docx.
                 output=str(target)
                 event(log,'job.output.saved',job_id=jid,bytes=len(payload),result_status=result.status)
-            if result.status=='PASS' and output:
-                state='completed';message='Formatted exam ready. Please review it before use.'
-            elif result.status=='OK' and row['kind']=='check':
-                state='completed';message='Check complete. No significant formatting or structural problem was found.'
-            elif result.status in ('FORMAT ERROR','STRUCTURAL ERROR') and output:
-                state='needs_changes';message='Your exam needs changes. Download the issues report, fix your original Word file, and upload it again.'
+            report=reporting.assess_engine(result.status, result.detail)
+            if report and report.status==reporting.ALL_GOOD and result.status=='PASS' and output:
+                state='completed';message=report.message
+            elif report and report.status==reporting.ALL_GOOD and result.status=='OK' and row['kind']=='check':
+                state='completed';message=report.message
+            elif report and report.proceed and result.status in ('FORMAT ERROR','STRUCTURAL ERROR') and output:
+                state='completed';message=report.message
+                # An issues file is not a formatted exam, so a clear proceed result does not offer it as one.
+                if report.status==reporting.ALL_GOOD: output=None
+            elif report and report.status==reporting.STRUCTURAL and output:
+                state='needs_changes';message=report.message
             else:
+                report=None
                 state='uncertain' if result.uncertain else 'failed'
                 diagnostic=dict(result.diagnostic or {})
                 detail=diagnostic.pop('message',result.detail)
@@ -325,9 +332,11 @@ class Service:
                     'provider_failed':'Formatting failed. Please try again later or contact the administrator.'}
                 message='Processing status is unresolved. Please contact the administrator before retrying.' if result.uncertain else errors.get(result.error_code,'The formatter could not produce a complete result. Please try again later or contact the administrator.')
                 output=None
-            self.update(jid,state=state,result_status=result.status,message=message,output=output,retryable=int(result.retryable and not result.uncertain))
+            shown=report.status if report else result.status
+            if report: reporting.remember(report,engine_status=result.status,engine_detail=result.detail,job_id=jid,logger=log)
+            self.update(jid,state=state,result_status=shown,message=message,output=output,retryable=int(result.retryable and not result.uncertain))
             if state in ('completed','needs_changes'): self.update(jid,diagnostic=None)
-            records.log(row['subject'],row['grade'],row['kind'].upper(),result.status)
+            records.log(row['subject'],row['grade'],row['kind'].upper(),shown)
         except UserError as exc:
             self.diagnostic(jid,str(exc),stage='validate_output',error_type=type(exc).__name__)
             self.update(jid,state='failed',result_status='SYSTEM ERROR',message='No valid Word result file was produced. Please contact the administrator.',output=None,retryable=0)

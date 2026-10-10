@@ -17,6 +17,7 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import job
 import records
+import reporting
 
 HEADLINES = {
     "OK": "No significant formatting or structural problems detected.",
@@ -31,8 +32,11 @@ HEADLINES = {
 COLORS = {
     "OK": "#0b6b2f",
     "PASS": "#0b6b2f",
+    "ALL GOOD": "#0b6b2f",
     "FORMAT ERROR": "#8a5a00",
+    "FORMATTING": "#8a5a00",
     "STRUCTURAL ERROR": "#8d1d1d",
+    "STRUCTURAL": "#8d1d1d",
     "REFERENCE NOT FOUND": "#8d1d1d",
     "SYSTEM ERROR": "#8d1d1d",
     "Ready": "#333333",
@@ -224,16 +228,21 @@ class App(tk.Tk):
             self.after(200, self._poll)
 
     def _show_result(self, result: job.Result) -> None:
-        if result.status == "SYSTEM ERROR":
-            detail = result.detail
-        else:
-            parts = [HEADLINES.get(result.status, "")]
-            if result.detail:
-                parts.append(result.detail)
-            if result.saved_path is not None:
-                parts.append(str(result.saved_path))
-            detail = "\n\n".join(part for part in parts if part)
-        self._show(result.status, detail, result.saved_path)
+        report = None if result.status == "SYSTEM ERROR" else reporting.assess_engine(result.status, result.detail)
+        if report is None:
+            if result.status == "SYSTEM ERROR":
+                detail = result.detail
+            else:
+                parts = [HEADLINES.get(result.status, "")]
+                if result.detail:
+                    parts.append(result.detail)
+                if result.saved_path is not None:
+                    parts.append(str(result.saved_path))
+                detail = "\n\n".join(part for part in parts if part)
+            self._show(result.status, detail, result.saved_path)
+            return
+        reporting.remember(report, engine_status=result.status, engine_detail=result.detail)
+        self._show(report.status, report.message, result.saved_path)
 
     def _show(self, status: str, detail: str, path: Path | None = None) -> None:
         self.result_label.configure(text=status)
