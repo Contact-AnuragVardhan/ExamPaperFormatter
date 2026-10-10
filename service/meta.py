@@ -47,14 +47,27 @@ class MetaClient:
         event(log,'meta.media.download.started',media_id=media_id)
         info=self._json('GET',media_id)
         if int(info.get('file_size',0))>self.s.max_bytes: raise UserError('This document exceeds the upload limit.')
-        url=info.get('url',''); p=urlparse(url)
-        if p.scheme!='https' or not (p.hostname or '').endswith(('.facebook.com','.fbcdn.net')):
-            raise DeliveryError('Unexpected Meta media host')
+        url=info.get('url','')
+        try:
+            p=urlparse(url)
+            host=(p.hostname or '').lower()
+            # Meta returns Cloud API attachments from lookaside.fbsbx.com.
+            # Keep an explicit allowlist before sending the bearer token.
+            allowed=host=='lookaside.fbsbx.com' or host.endswith(('.facebook.com','.fbcdn.net'))
+            valid=(p.scheme=='https' and allowed and p.port in (None,443)
+                   and not p.username and not p.password and not p.fragment)
+        except (ValueError,TypeError,AttributeError):
+            host='';valid=False
+        if not valid:
+            event(log,'meta.media.url_rejected',level=logging.ERROR,media_id=media_id,
+                  reason='unexpected_media_origin',host=host)
+            raise DeliveryError('Unexpected Meta media host or URL')
+        event(log,'meta.media.url_accepted',media_id=media_id,host=host)
         if info.get('mime_type')!=DOCX_MIME: raise UserError('Please send a Word .docx file.')
         with httpx.Client(timeout=self.s.wa_http_timeout,follow_redirects=False) as client:
             with client.stream('GET',url,headers=self.headers) as r:
                 event(log,'meta.media.http_response',media_id=media_id,http_status=r.status_code)
-                if r.status_code>=400:
+                if r.status_code>=300:
                     exc=DeliveryError(f'Media HTTP {r.status_code}');exc.status_code=r.status_code
                     raise exc
                 out=bytearray()

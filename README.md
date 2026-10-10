@@ -112,7 +112,7 @@ Every **Hi** (case-insensitive, with common greeting punctuation accepted) retur
 
 | Screen | Native choices |
 | --- | --- |
-| Main menu | Format Exam, Check Exam, Help, Exit; Retry Delivery when a saved delivery failed |
+| Main menu | Format Exam, Check Exam, Admin, Help, Exit; Retry Delivery when a saved delivery failed |
 | Subject/class | Enabled subject/class rows; Back to Main Menu; More/Previous Subjects when needed |
 | Upload | Cancel, Help; attach the DOCX using WhatsApp's attachment icon |
 | Confirmation | Start Formatting or Start Checking, Change Subject, Replace File, Cancel |
@@ -129,6 +129,46 @@ Selections have identifiers tied to the current menu. A stale, expired, forged, 
 Queued requests can be cancelled; requests already running explain that cancellation is unavailable. Check Status never starts another formatter call. Help's Back button returns to result/error menus as well as the earlier upload/confirmation screens. Hi clears pending navigation while preserving an active job, and a late result does not overwrite the current menu. Result delivery retry sends the saved document without reformatting. Interactive menu delivery failures are logged and do not mark a previously sent result document as failed.
 
 The outgoing queue stores native interactive payloads and sends them through Meta's `type: interactive` messages API. No numeric-choice fallback is sent. Real WhatsApp account permissions and end-to-end delivery still require live acceptance with your account.
+
+### WhatsApp document download correction
+
+If logs show `media_lookup` HTTP 200 followed immediately by `DeliveryError`,
+before `meta.media.http_response`, the earlier URL guard rejected Meta's
+`lookaside.fbsbx.com` attachment host. The corrected `service/meta.py` accepts
+that HTTPS host and retains the existing Facebook/fbcdn host checks. Logs now
+show `meta.media.url_accepted` or `meta.media.url_rejected` with a safe host/reason,
+without the signed URL or token. Unexpected origins, userinfo, nonstandard ports,
+and redirect responses are rejected before credentials can reach another host.
+MIME, size, checksum, and downstream DOCX structure validation remain in effect.
+
+Deploy the updated `service/meta.py` (the new transport tests and docs are also
+included), then send a fresh DOCX attachment. No environment changes are needed.
+The same transport fixes teacher exam and admin reference uploads. No formatter
+request is created until the download succeeds and the user confirms submission.
+
+## WhatsApp administrator flow
+
+Send **Hi → Open Menu → Admin**, then send the exact **ADMIN_PASSWORD** from your local `.env` or Render Environment as a text message. It is the same password used by the web and Windows administrator interfaces. The teacher access code does not grant admin access. No new environment variables or webhook endpoints are needed.
+
+| Admin menu | Actions |
+| --- | --- |
+| Reference Papers | Select any stored subject/class, including disabled subjects; download/view the actual reference DOCX, replace it, enable/disable teacher access, or delete it |
+| Upload New Reference | Choose subject/class from paginated lists; Other Subject/Class permits new text values; attach DOCX, review filename and availability, then Save Reference |
+| Exam Requests | All, Errors/Unresolved, Active, or Failed Deliveries; select a request, refresh status, inspect diagnostics, download a saved output, cancel while queued, safely retry a failed request, retry saved delivery, or reconcile unresolved status |
+| Activity Log | Recent activity, newest first; Older/Newer pages and refresh |
+| Cost Totals | Today/month/all-time local estimates, with unpriced usage identified |
+| System Status | Configuration readiness, actual configured model, subject availability, and request counts; no secret values |
+| Admin Help / Logout | Instructions and end administrator access |
+
+The reference list, files, enablement, jobs, activity, and costs are shared with the web interface in `EXAM_DATA_ROOT`. The original Windows UI supports add/view/replace/delete and activity/costs; it shares those records when using the same local `data/` directory. Web and WhatsApp also expose subject enablement and service job recovery. New reference pairs default to disabled. Replacing a pair retains its reference identity and configured enablement unless you explicitly toggle the confirmation's Enable/Disable After Save option. Existing active exams retain their pinned reference snapshot. Saving a reference never invokes the formatter. Concurrent reference replacements are checked before confirmation commits.
+
+Password entry, file attachment, and optional custom subject/class names require input; every choice and navigation step uses native lists/buttons. Reference save/delete, availability changes, and job recovery actions show explicit confirmation. Download Reference sends an independent copy to the authenticated administrator; teachers cannot download the stored reference. Download Result sends the saved bytes to the administrator without changing the original teacher's delivery status. Retry Formatting may create a new charged request after confirmation; Retry Delivery only resends the saved file to the original teacher.
+
+Admin access is bound to the sender, limited to five password attempts per five minutes, and expires after **SESSION_MINUTES** of admin inactivity (default 30). Hi, Hello, Hey, Menu, Start, Main Menu, and Logout end admin access; running teacher jobs continue. Restart/redeploy also requires a fresh WhatsApp admin login. Reserved greeting words should not be used as the admin password because they reset navigation. Outgoing notifications cannot extend admin authorization. Expired/stale buttons cannot perform admin operations, and pending privileged downloads are cancelled when access has expired. Successful passwords are removed from inbox text; login attempts are scrubbed before handling and are not printed in logs or echoed in replies. WhatsApp itself still displays the text message you send in your chat.
+
+Unresolved requests with a saved response ID resume that existing response. Without an ID, the confirmation requires the administrator to first check the OpenAI dashboard and confirm no remote request remains active. This releases the request for a later manual retry and does not submit a paid job automatically.
+
+For this update, commit `service/whatsapp_admin.py` and the updated `service/app.py`, `service/core.py`, `service/storage.py`, `service/whatsapp.py`, tests, and documentation. Keep `runtime_logging.py`, `service/menus.py`, and the existing Render/startup files from the earlier update. Do not commit populated `.env`, runtime SQLite, teacher uploads, job/output files, or `data/admin_downloads/`. Deploy and send Hi for fresh menus.
 
 ## Reliability and error behavior
 
