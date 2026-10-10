@@ -6,12 +6,14 @@ This module does not read exam content or decide formatting.
 from __future__ import annotations
 
 import os
+import logging
 import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 import records
+from runtime_logging import event,error_fields
 from instructions import CHECK_INSTRUCTIONS, FORMAT_INSTRUCTIONS
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -24,6 +26,7 @@ FILE_FOR_STATUS = {
     "FORMAT ERROR": "details.docx",
     "STRUCTURAL ERROR": "details.docx",
 }
+log = logging.getLogger('exam.engine')
 
 
 @dataclass
@@ -75,12 +78,16 @@ def run(
     stage = "configuration"
     model = (os.environ.get("EXAM_REDO_MODEL", "").strip()
              or os.environ.get("OPENAI_MODEL", "").strip() or "gpt-6-astra")
+    event(log,'openai.job.started',kind=kind,subject=subject,grade=grade,model=model,
+          resume_existing=bool(remote_state.get('response_id')))
     try:
         api_key = os.environ.get("OPENAI_API_KEY", "").strip()
         if not api_key:
+            event(log,'openai.configuration.missing',level=logging.ERROR,setting='OPENAI_API_KEY')
             return Result("SYSTEM ERROR", "OPENAI_API_KEY is not set.", error_code="configuration")
         effort = os.environ.get("OPENAI_REASONING_EFFORT", "").strip() or "high"
         if effort not in {"low", "medium", "high", "xhigh", "max"}:
+            event(log,'openai.configuration.invalid',level=logging.ERROR,setting='OPENAI_REASONING_EFFORT')
             return Result(
                 "SYSTEM ERROR",
                 "OPENAI_REASONING_EFFORT must be low, medium, high, xhigh, or max.",
@@ -92,15 +99,20 @@ def run(
             container_id = remote_state["container_id"]
             response_id = remote_state["response_id"]
             stage = "retrieve_response"
+            event(log,'openai.response.resuming',response_id=response_id,container_id=container_id)
             response = client.responses.retrieve(response_id)
         else:
             stage = "create_container"
+            event(log,'openai.container.creating',memory=MEMORY)
             container = client.containers.create(name="exam-formatter-rev2", memory_limit=MEMORY)
             container_id = container.id
+            event(log,'openai.container.created',container_id=container_id)
             on_remote({"container_id": container_id})
             stage = "upload_reference"
+            event(log,'openai.file.uploading',role='reference',bytes=reference_path.stat().st_size)
             reference = _upload(client, container_id, "reference.docx", reference_path)
             stage = "upload_teacher"
+            event(log,'openai.file.uploading',role='teacher',bytes=teacher_path.stat().st_size)
             teacher = _upload(client, container_id, "teacher.docx", teacher_path)
             # Persist intent before the paid POST. A crash in this narrow window is
             # marked uncertain instead of automatically repeating a paid request.
@@ -108,6 +120,7 @@ def run(
             on_remote({"container_id": container_id, "submitting": True, "submitted_at": submitted_at})
             submitting = True
             stage = "submit_response"
+            event(log,'openai.response.submitting',model=model,reasoning_effort=effort,container_id=container_id)
             response = client.responses.create(
                 model=model,
                 instructions=instructions,
@@ -119,14 +132,24 @@ def run(
                 background=True,
             )
             response_id = response.id
+            event(log,'openai.response.submitted',response_id=response_id,status=response.status)
             stage = "persist_response"
             on_remote({"container_id": container_id, "response_id": response_id, "submitted_at": submitted_at})
         elapsed_before_resume = max(0, time.time() - remote_state.get("submitted_at", time.time()))
         deadline = started + max(0, DEADLINE_SECONDS - elapsed_before_resume)
+        heartbeat_at=0
+        last_status=None
         while response.status in {"queued", "in_progress"}:
+            now=time.monotonic()
+            event(log,'openai.response.poll',level=logging.DEBUG,response_id=response_id,status=response.status)
+            if response.status!=last_status or now-heartbeat_at>=30:
+                event(log,'openai.response.waiting',response_id=response_id,status=response.status,
+                      elapsed_seconds=round(elapsed_before_resume+now-started),deadline_seconds=DEADLINE_SECONDS)
+                heartbeat_at=now;last_status=response.status
             if time.monotonic() > deadline:
                 confirmed = _cancel(client, response_id)
                 uncertain = not confirmed
+                event(log,'openai.response.timeout',level=logging.ERROR,response_id=response_id,cancellation_confirmed=confirmed)
                 return Result(
                     "SYSTEM ERROR",
                     f"ChatGPT did not finish within 25 minutes. Response {response_id}.",
@@ -140,20 +163,25 @@ def run(
             stage = "retrieve_response"
             response = client.responses.retrieve(response_id)
         stage = "inspect_response"
+        event(log,'openai.response.finished',response_id=response_id,status=response.status,
+              elapsed_seconds=round(time.monotonic()-started,2))
         usage = _usage_dict(response)
         if response.status != "completed":
+            event(log,'openai.response.incomplete',level=logging.ERROR,response_id=response_id,status=response.status)
             return Result("SYSTEM ERROR", _response_error(response), retryable=True,
                           error_code="incomplete" if response.status == "incomplete" else "provider_failed")
 
         text = response.output_text or ""
         status, note = _status_line(text, allowed)
         if status is None:
+            event(log,'openai.result.unrecognized',level=logging.ERROR,response_id=response_id)
             return Result(
                 "SYSTEM ERROR",
                 "ChatGPT did not return a recognized result.\n\n" + text.strip(),
                 error_code="unrecognized",
             )
         if status == "OK":
+            event(log,'openai.result.classified',result_status=status,response_id=response_id)
             on_remote({"container_id":container_id,"response_id":response_id,
                        "result_status":status,"output_file":None})
             return Result(status, note)
@@ -161,8 +189,10 @@ def run(
         on_progress("Saving the Word file...")
         filename = FILE_FOR_STATUS[status]
         stage = "download_output"
+        event(log,'openai.output.downloading',response_id=response_id,result_status=status,expected_file=filename)
         data, present = _download(client, container_id, response, filename)
         if data is None:
+            event(log,'openai.output.missing',level=logging.ERROR,expected_file=filename,file_count=len(present))
             listed = ", ".join(present) if present else "none"
             return Result(
                 "SYSTEM ERROR",
@@ -170,6 +200,7 @@ def run(
                 error_code="missing_output",
             )
         if not records.is_word_package(data):
+            event(log,'openai.output.invalid',level=logging.ERROR,bytes=len(data))
             return Result(
                 "SYSTEM ERROR",
                 "ChatGPT returned a file that is not a Word document.",
@@ -186,6 +217,7 @@ def run(
         on_remote({"container_id":container_id,"response_id":response_id,
                    "result_status":status,"output_file":saved.name})
         detail = note
+        event(log,'openai.output.saved',result_status=status,bytes=len(data),response_id=response_id)
         return Result(status, detail.strip(), saved)
     except Exception as exc:
         status_code = getattr(exc, "status_code", None)
@@ -198,6 +230,8 @@ def run(
         if submitting and rejected and not response_id:
             on_remote({"container_id":container_id, "submitting":False,
                        "response_rejected":True, "http_status":status_code})
+        event(log,'openai.request.failed',level=logging.ERROR,stage=stage,model=model,
+              response_id=response_id,uncertain=uncertain,**error_fields(exc))
         return Result("SYSTEM ERROR", _public_error(exc),
                       retryable=(status_code in {429, 503}) and not uncertain, uncertain=uncertain,
                       error_code="busy" if status_code == 429 else ("configuration" if rejected else "provider_failed"),
@@ -210,13 +244,18 @@ def run(
                 records.record_usage(
                     records.price_call(usage, time.monotonic() - started, model, MEMORY)
                 )
-            except Exception:
-                pass
+                event(log,'openai.usage.recorded',response_id=response_id,elapsed_seconds=round(time.monotonic()-started,2),
+                      input_tokens=(usage or {}).get('input_tokens'),output_tokens=(usage or {}).get('output_tokens'))
+            except Exception as exc:
+                event(log,'openai.usage.failed',level=logging.WARNING,**error_fields(exc))
         if client is not None and container_id and not uncertain:
             try:
                 client.containers.delete(container_id)
-            except Exception:
-                pass
+                event(log,'openai.container.deleted',container_id=container_id)
+            except Exception as exc:
+                event(log,'openai.container.cleanup_failed',level=logging.WARNING,container_id=container_id,**error_fields(exc))
+        elif container_id and uncertain:
+            event(log,'openai.container.retained',container_id=container_id,response_id=response_id,reason='unresolved_request')
 
 
 def _upload(client, container_id: str, name: str, path: Path):
@@ -316,10 +355,13 @@ def _response_error(response) -> str:
 
 
 def _cancel(client, response_id: str) -> bool:
+    event(log,'openai.response.cancel_requested',response_id=response_id)
     try:
         response = client.responses.cancel(response_id)
+        event(log,'openai.response.cancel_result',response_id=response_id,status=response.status)
         return response.status == "cancelled"
-    except Exception:
+    except Exception as exc:
+        event(log,'openai.response.cancel_failed',level=logging.ERROR,response_id=response_id,**error_fields(exc))
         return False
 
 

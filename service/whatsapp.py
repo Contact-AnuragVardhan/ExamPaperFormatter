@@ -1,7 +1,9 @@
 """Numbered teacher menus, with Hi as a global navigation command."""
 import json
+import logging
 import shutil
 import uuid
+from runtime_logging import event,error_fields
 from .files import UserError,filename,validate_docx
 
 INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
@@ -11,6 +13,7 @@ INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
 HELP=('HELP\n1. Choose Format Exam or Check Exam.\n2. Select your subject and class.\n'
       '3. Attach your exam as a Word .docx document.\n4. Confirm and wait for the result.\n'
       '5. Review the returned Word file or issues report.\n\n0. Back\nSay Hi at any time for the main menu.')
+log=logging.getLogger('exam.whatsapp')
 
 class WhatsAppFlow:
     def __init__(self,service): self.v=service;self.db=service.db
@@ -32,6 +35,22 @@ class WhatsAppFlow:
     def discard(self,state):
         if state.get('pending_id'): shutil.rmtree(self.v.s.data/'pending'/state['pending_id'],ignore_errors=True)
     def handle(self,sender,message,message_id):
+        before=self.db.session(sender,self.v.s.session_minutes)
+        body=str(message.get('text',{}).get('body','')).strip()
+        if message.get('type')=='interactive':
+            body=message.get('interactive',{}).get('button_reply',{}).get('id','') or message.get('interactive',{}).get('list_reply',{}).get('id','')
+        command=body.casefold().strip(' !.,?')
+        if command not in ('hi','hello','hey','menu','start','help','0','1','2','3','4','5','6','7','8','9'): command='other'
+        kind=message.get('type')
+        if kind not in ('text','interactive','document','image','audio','video','sticker','location','contacts'): kind='other'
+        event(log,'whatsapp.menu.input',message_id=message_id,menu=before['state'],command=command,message_type=kind)
+        try:
+            return self._handle(sender,message,message_id)
+        finally:
+            after=self.db.session(sender,self.v.s.session_minutes)
+            event(log,'whatsapp.menu.state',message_id=message_id,previous=before['state'],current=after['state'],
+                  job_id=after.get('job_id'),reference_id=after.get('reference_id'),has_pending_file=bool(after.get('pending_id')))
+    def _handle(self,sender,message,message_id):
         state=self.db.session(sender,self.v.s.session_minutes)
         body=str(message.get('text',{}).get('body','')).strip()
         if message.get('type')=='interactive':
@@ -89,13 +108,18 @@ class WhatsAppFlow:
             try:
                 if not name.lower().endswith('.docx'): raise UserError('Please send a Word .docx file. PDF and images are not supported.')
                 data=self.v.meta.download(document['id'],name);validate_docx(data,name,self.v.s.max_bytes)
+                event(log,'whatsapp.upload.validated',bytes=len(data),reference_id=state.get('reference_id'),replacing=bool(state.get('pending_id')))
                 self.discard(state)
                 pid=uuid.uuid4().hex;folder=self.v.s.data/'pending'/pid;folder.mkdir()
                 (folder/'teacher.docx').write_bytes(data)
                 state.update(pending_id=pid,filename=name,state='confirm')
                 text=self.confirm_menu(state);save();say(text)
-            except UserError as e: say(str(e)+'\n'+self.upload_menu())
-            except Exception: say('We could not download that file. Please attach the Word document again.')
+            except UserError as e:
+                event(log,'whatsapp.upload.rejected',level=logging.WARNING,reason='document_validation',**error_fields(e))
+                say(str(e)+'\n'+self.upload_menu())
+            except Exception as exc:
+                event(log,'whatsapp.upload.failed',level=logging.ERROR,**error_fields(exc))
+                say('We could not download that file. Please attach the Word document again.')
             return
         if state['state']=='confirm':
             if body=='0': self.discard(state);state={'state':'main'};save();say(self.main(sender));return
@@ -111,7 +135,9 @@ class WhatsAppFlow:
                 self.discard(state)
                 state={'state':'processing','job_id':row['id']};save()
                 say('CHECKING IN PROGRESS\nYour exam is being checked. We will send the result when ready.\n0. Cancel if it has not started\nSay Hi for the main menu.' if row['kind']=='check' else 'FORMATTING IN PROGRESS\nYour exam is being formatted. Please wait; we will send the Word file when ready.\n0. Cancel if it has not started\nSay Hi for the main menu.')
-            except UserError as e: say(str(e)+'\nSay Hi to choose your subject again.')
+            except UserError as e:
+                event(log,'whatsapp.confirmation.rejected',level=logging.WARNING,reference_id=state.get('reference_id'),**error_fields(e))
+                say(str(e)+'\nSay Hi to choose your subject again.')
             return
         if state['state']=='processing':
             row=self.v.get(state['job_id'])

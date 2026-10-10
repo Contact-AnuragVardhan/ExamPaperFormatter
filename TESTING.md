@@ -12,7 +12,8 @@ Run these with real teacher exam files. Do not use an output-only DOCX-open chec
 
 ## WhatsApp acceptance
 
-- [ ] Configure Meta test sender, app credentials, supported Graph API version, and signed webhook.
+- [ ] Configure Meta test sender, app credentials, and supported Graph API version. For beta, set `WHATSAPP_VERIFY_SIGNATURE=false`; for signed webhooks, set it to true and supply the app secret.
+- [ ] Verify GET token matching in both modes; verify unsigned POST acceptance only in beta mode and invalid-signature rejection in signed mode.
 - [ ] Send Hi on first contact: friendly introduction and main menu appear.
 - [ ] Send Hi during subject selection, upload, confirmation, help, processing, result, and error: returns to main menu.
 - [ ] Hi during processing preserves the active job; selecting another exam does not create another paid request.

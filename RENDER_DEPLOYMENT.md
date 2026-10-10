@@ -67,11 +67,12 @@ If the application stays in a subfolder in your repository, set the Blueprint Pa
 | `WHATSAPP_TOKEN` | Your Meta Cloud API access token |
 | `WHATSAPP_PHONE_NUMBER_ID` | The business phone-number ID |
 | `WHATSAPP_GRAPH_VERSION` | `v25.0` from REV1, configurable to the version supported by your app |
-| `WHATSAPP_APP_SECRET` | Required for signed incoming POST requests |
+| `WHATSAPP_VERIFY_SIGNATURE` | `false` for this beta setup; application default is `true` |
+| `WHATSAPP_APP_SECRET` | May be blank when signature validation is false; required when true |
 | `WHATSAPP_ASYNC` | `true` in production |
 | `WHATSAPP_HTTP_TIMEOUT` | `60` seconds |
 | `EXAM_DATA_ROOT` | `/var/data`, matching the disk mount |
-| `LOG_LEVEL` | `INFO` |
+| `LOG_LEVEL` | `INFO` for stage logs; `DEBUG` adds every polling cycle |
 | `PYTHONUNBUFFERED` | `1` |
 | `ADMIN_PASSWORD` | A strong administrator password |
 | `WEB_TEACHER_ACCESS_CODE` | The shared beta teacher access code |
@@ -81,6 +82,8 @@ If the application stays in a subfolder in your repository, set the Blueprint Pa
 | `RETENTION_DAYS` | `7` |
 | `WHATSAPP_ALLOWED_SENDERS` | Optional comma-separated international numbers without `+` |
 | `PORT` | Render supplies it; `start.sh` reads it automatically |
+
+For this beta deployment, set `WHATSAPP_VERIFY_SIGNATURE=false` in the existing Render service and redeploy. Incoming POSTs then do not validate `X-Hub-Signature-256`, and `WHATSAPP_APP_SECRET` may be unset or blank. The included Blueprint and environment checklist explicitly select this mode. To enable validation later, set the flag to `true` and supply the Meta app secret. GET webhook verification still uses `VERIFY_TOKEN`; other WhatsApp credentials and phone-number checks remain required.
 
 The WhatsApp/OpenAI/data variable names match REV1. The additional authentication, reasoning, and retention settings belong to REV2. The `render.env.example` file is a checklist; Render does not automatically import it.
 
@@ -109,3 +112,9 @@ Mock tests and startup checks in this package do not verify your Render account,
 - [Blueprint YAML reference](https://render.com/docs/blueprint-spec)
 - [Persistent disks](https://render.com/docs/disks)
 - [Python version configuration](https://render.com/docs/python-version)
+
+## Console logs
+
+Set `LOG_LEVEL=DEBUG` in the existing Render service's Environment settings and redeploy for the most detailed application logs. The default `INFO` already includes webhook intake, menu state, job IDs, formatter stages, processing heartbeats, delivery attempts and retries, and failures. Open the service logs and search for a `job_id`, `message_id`, or event such as `webhook.not_configured` or `openai.request.failed`. The logs list missing configuration variable names without revealing their values.
+
+For local development, set the same variable in `.env`, restart Uvicorn, and view the terminal or PyCharm Run console. See README for event fields and examples.

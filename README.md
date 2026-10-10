@@ -45,6 +45,7 @@ The primary Meta callback remains **GET /webhook** for verification and **POST /
 | Business phone ID | `WHATSAPP_PHONE_NUMBER_ID` | Same name |
 | Graph API version | `WHATSAPP_GRAPH_VERSION` | `WHATSAPP_API_VERSION` |
 | App signature secret | `WHATSAPP_APP_SECRET` | Same name |
+| Validate webhook signatures | `WHATSAPP_VERIFY_SIGNATURE` | New; defaults to true |
 | Media/message HTTP timeout | `WHATSAPP_HTTP_TIMEOUT` | Previously hardcoded; now defaults to 60 seconds |
 | Webhook asynchronous handling | `WHATSAPP_ASYNC` | Defaults to true |
 | Persistent data folder | `EXAM_DATA_ROOT` | `EXAM_DATA_DIR` |
@@ -54,7 +55,7 @@ The primary Meta callback remains **GET /webhook** for verification and **POST /
 | Log level | `LOG_LEVEL` | Defaults to INFO |
 | Hosting port | `PORT` | Used by start.sh / container_start.py |
 
-Primary nonempty values take precedence over their aliases. `WHATSAPP_ASYNC=false` is supported for **local development only**: incoming menus/media are handled before responding; paid formatting still runs in its background worker. Production (`APP_ENV=prod`) requires true to acknowledge webhooks promptly. `WHATSAPP_APP_SECRET` is required in REV2 for signed webhook POSTs, although your attached Flask app treated it as optional.
+Primary nonempty values take precedence over their aliases. `WHATSAPP_ASYNC=false` is supported for **local development only**: incoming menus/media are handled before responding; paid formatting still runs in its background worker. Production (`APP_ENV=prod`) requires true to acknowledge webhooks promptly. `WHATSAPP_VERIFY_SIGNATURE` defaults to `true`, which requires `WHATSAPP_APP_SECRET` for signed webhook POSTs. Set `WHATSAPP_VERIFY_SIGNATURE=false` explicitly for beta operation without signature checks; the app secret may then be blank. The included Render Blueprint and Render environment example select this beta mode. Existing Render services must set the variable in their Environment settings and redeploy.
 
 Reuse your existing variable **names**, not every old value without review. In particular, the old app selected `gpt-4.1`; REV2’s supplied model remains `gpt-6-astra`. Set `EXAM_REDO_MODEL` to the intended REV2 model. Its `EXAM_DATA_ROOT` needs the three REV2 references and `index.json`; the older `active.docx` / `active.json` reference layout is not that index.
 
@@ -82,6 +83,7 @@ This implementation uses **Meta Cloud API**, not Twilio or WhatsApp Web automati
 ```dotenv
 WHATSAPP_TOKEN=your_cloud_api_access_token
 WHATSAPP_PHONE_NUMBER_ID=your_business_phone_number_id
+WHATSAPP_VERIFY_SIGNATURE=true
 WHATSAPP_APP_SECRET=your_meta_app_secret
 VERIFY_TOKEN=choose_your_own_webhook_verification_token
 WHATSAPP_GRAPH_VERSION=the_supported_version_selected_in_your_meta_app
@@ -95,7 +97,7 @@ Use an appropriate long-lived system-user token with the messaging/media permiss
 5. Subscribe the WhatsApp app to the **messages** webhook field. This includes incoming messages and delivery statuses. Configure the business account/app subscription required by Meta.
 6. Send **Hi** from an allowed test phone, then exercise subject selection, DOCX upload, confirmation, and result delivery.
 
-The GET `/webhook` endpoint responds to Meta verification. POST requests require a valid HMAC-SHA256 `X-Hub-Signature-256` and the configured phone-number ID. With the default `WHATSAPP_ASYNC=true`, webhooks only persist incoming messages and acknowledge; separate worker threads download documents, process jobs, and send replies.
+The GET `/webhook` endpoint responds to Meta verification. POST requests require the configured phone-number ID. When `WHATSAPP_VERIFY_SIGNATURE=true`, they also require a valid HMAC-SHA256 `X-Hub-Signature-256`. When false, the signature header is ignored, whether absent or present, and no app secret is required. `VERIFY_TOKEN` is still required for GET verification in either mode. With the default `WHATSAPP_ASYNC=true`, webhooks only persist incoming messages and acknowledge; separate worker threads download documents, process jobs, and send replies.
 
 Transport reference links:
 - [Meta webhook setup](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/create-webhook-endpoint/)
@@ -237,6 +239,29 @@ your existing `.env` and `EXAM_DATA_ROOT` directory when replacing the code. The
 database upgrade adds the diagnostics column without erasing history or enabling
 English automatically. Restart the server and hard-refresh the browser afterward.
 
+## Console logging
+
+Use the existing `LOG_LEVEL` setting in `.env` locally and in the Render service's Environment settings. Restart or redeploy after changing it.
+
+```dotenv
+LOG_LEVEL=DEBUG
+```
+
+`INFO` (the default) prints startup/readiness, missing WhatsApp setting names, webhook validation and intake, duplicate/rate-limited messages, menu commands and state transitions, document validation failures, job queuing and state changes, OpenAI container/upload/response/output stages, processing heartbeats every 30 seconds, delivery attempts/retries/status callbacks, restart recovery, cleanup, and shutdown. `DEBUG` additionally prints every OpenAI polling cycle, successful DOCX validation, health requests, and ignored delivery callbacks. `WARNING` and `ERROR` reduce the output.
+
+Each event has a timestamp, severity, logger, event name, and JSON metadata. Use `job_id` to follow an exam, `message_id` for an incoming WhatsApp message, `outbox_id` for a delivery attempt, and `request_id` for a web request. HTTP responses also include `X-Request-ID`. Sender/session identifiers are logged as stable hashes; uploaded filenames, exam contents, arbitrary message text, prompts, provider response bodies, passwords, and access tokens are not printed. Provider failures include stage, HTTP status, exception type, provider error code/parameter when available, and provider request/response IDs. Detailed sanitized formatter diagnostics remain available to administrators.
+
+Example lines (illustrative IDs):
+
+```text
+INFO exam.web event=webhook.message.queued {"request_id":"request123","message_id":"wamid.example","sender_key":"abc123","message_type":"document"}
+INFO exam.service event=job.queued {"job_id":"job123","channel":"whatsapp","kind":"format","subject":"math","grade":"10"}
+ERROR exam.engine event=openai.request.failed {"job_id":"job123","stage":"submit_response","http_status":400,"provider_code":"unsupported_parameter","provider_param":"reasoning.effort"}
+ERROR exam.service event=whatsapp.delivery.failed {"job_id":"job123","outbox_id":12,"attempt":1,"retry":true,"retry_seconds":2}
+```
+
+The server writes these events directly to standard output, so they appear in the terminal/PyCharm Run console locally and the Render service logs when hosted. No separate log viewer or log file is required. HTTP-library debug output is suppressed, and Uvicorn access logs omit query strings so webhook verification tokens are not printed.
+
 ## Project map
 
 ```text
@@ -245,7 +270,7 @@ instructions.py         Original REV2 prompts, unchanged
 job.py                  Shared engine + isolated outputs / response recovery
 records.py              Original references / logs / estimated costs
 server.py               ASGI entry point
-service/app.py          Web API, sign-in, administration, signed webhook
+service/app.py          Web API, sign-in, administration, configurable webhook signature validation
 service/core.py         Shared jobs, workers, delivery, retention
 service/whatsapp.py     Numbered menus and global Hi reset
 service/meta.py         Meta media and messaging transport

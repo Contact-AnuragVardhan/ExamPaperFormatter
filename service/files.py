@@ -2,7 +2,11 @@ from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile, BadZipFile
 import re
+import logging
 from xml.etree import ElementTree as ET
+from runtime_logging import event
+
+log=logging.getLogger('exam.files')
 
 class UserError(Exception): pass
 
@@ -13,6 +17,16 @@ def filename(name):
 
 
 def validate_docx(data, name, limit):
+    try:
+        _validate_docx(data,name,limit)
+    except UserError as exc:
+        # These reasons are fixed messages from the validator, never file text.
+        event(log,'document.validation.rejected',level=logging.WARNING,bytes=len(data),reason=str(exc))
+        raise
+    event(log,'document.validation.completed',level=logging.DEBUG,bytes=len(data))
+
+
+def _validate_docx(data, name, limit):
     if not str(name).lower().endswith('.docx'): raise UserError('Please send a Word .docx file. PDF and images are not supported.')
     if not data or len(data)>limit: raise UserError('The file is empty or exceeds the upload limit.')
     try:

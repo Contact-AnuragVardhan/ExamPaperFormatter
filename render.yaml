@@ -42,8 +42,10 @@ services:
         sync: false
       - key: WHATSAPP_GRAPH_VERSION
         value: v25.0
-      - key: WHATSAPP_APP_SECRET
-        sync: false
+      # Explicit beta setting. To enable validation, set this to true and add
+      # WHATSAPP_APP_SECRET as a secret in the Render dashboard.
+      - key: WHATSAPP_VERIFY_SIGNATURE
+        value: "false"
       - key: WHATSAPP_ASYNC
         value: "true"
       - key: WHATSAPP_HTTP_TIMEOUT

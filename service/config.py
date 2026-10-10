@@ -34,11 +34,15 @@ class Settings:
     wa_async: bool = True
     app_env: str = 'dev'
     log_level: str = 'INFO'
+    wa_verify_signature: bool = True
 
     @classmethod
     def load(cls):
         records.load_env()
         app_env=env_value('APP_ENV',default='dev').lower()
+        signature_mode=env_value('WHATSAPP_VERIFY_SIGNATURE',default='true').lower()
+        if signature_mode not in ('1','true','yes','on','0','false','no','off'):
+            raise ValueError('WHATSAPP_VERIFY_SIGNATURE must be true or false.')
         return cls(data=Path(env_value('EXAM_DATA_ROOT','EXAM_DATA_DIR',str(records.ROOT/'data'))).resolve(),
             teacher_code=env_value('WEB_TEACHER_ACCESS_CODE'),
             admin_password=env_value('ADMIN_PASSWORD'),
@@ -54,6 +58,7 @@ class Settings:
             wa_allowed_senders=env_value('WHATSAPP_ALLOWED_SENDERS'),
             wa_http_timeout=int(env_value('WHATSAPP_HTTP_TIMEOUT',default='60')),
             wa_async=env_value('WHATSAPP_ASYNC',default='true').lower() in ('1','true','yes','on'),
+            wa_verify_signature=signature_mode in ('1','true','yes','on'),
             app_env=app_env,
             log_level=env_value('LOG_LEVEL',default='INFO').upper())
 
@@ -61,4 +66,5 @@ class Settings:
     def max_bytes(self): return self.max_upload_mb * 1024 * 1024
     @property
     def whatsapp_ready(self):
-        return all([self.wa_token,self.wa_phone_id,self.wa_app_secret,self.wa_verify_token,self.wa_version])
+        return (all([self.wa_token,self.wa_phone_id,self.wa_verify_token,self.wa_version])
+                and (not self.wa_verify_signature or bool(self.wa_app_secret)))
