@@ -2,7 +2,7 @@
 
 Latest automated validation date: October 10, 2026 (UTC).
 
-- **102 automated tests passed** using pytest on Python 3.12. Tests cover all configured subjects with independent references, Word-package validation, menu navigation, the global Hi reset, repeated confirmation, webhook signatures and deduplication, output classification, exact output bytes, owner/admin permissions, reference management, safe cancellation/retry, delivery retry/callbacks, retention, timeout confirmation, incomplete/missing output, lost response acknowledgement, response-ID recovery, and cached result recovery after remote container cleanup.
+- **125 automated tests passed** using pytest on Python 3.12. Tests cover all configured subjects with independent references, Word-package validation, menu navigation, the global Hi reset, repeated confirmation, webhook signatures and deduplication, output classification, exact output bytes, owner/admin permissions, reference management, safe cancellation/retry, delivery retry/callbacks, retention, timeout confirmation, incomplete/missing output, lost response acknowledgement, response-ID recovery, and cached result recovery after remote container cleanup.
 - **Earlier browser smoke test passed** in headless Chromium on October 8: teacher login, subject selection, DOCX upload, confirmation, asynchronous mocked completion, download, history, help, logout, administrator login, and all three reference entries.
 - **Downloaded bytes matched the mock engine result exactly.** No JavaScript runtime errors occurred.
 - **Desktop and mobile screenshots were inspected.** At 390px mobile width there was no horizontal page overflow.
@@ -57,3 +57,21 @@ Meta or OpenAI calls were made.
 Added timestamped console events for startup/configuration readiness, HTTP correlation IDs/timings, webhook intake/signature mode/deduplication, menu transitions, upload validation, job states, OpenAI lifecycle/polling/output/errors, Meta transport/delivery retries/status callbacks, recovery, cleanup, and worker shutdown. Reused `LOG_LEVEL`; `DEBUG` adds individual polling cycles, while INFO includes 30-second processing heartbeats.
 
 **102 tests passed**, including eight additional logging checks for correlation, state/stage visibility, missing-setting diagnostics, secret/message/filename privacy, provider error codes without raw provider bodies, verification-query suppression, context reset, and nonduplicated stdout handlers. A real local Uvicorn startup also verified stdout output, health and empty webhook requests, shutdown events, and verification-token suppression. No OpenAI or Meta network calls were made.
+
+## Native WhatsApp menu update
+
+Replaced numbered replies with Meta interactive list messages and reply buttons
+for every navigation choice, including subject/class, confirmation, Help/Back,
+queued cancellation/status, result/error choices, Exit/Start Again, and saved
+result delivery retry. Subjects paginate within native row limits. Current-menu
+identifiers reject stale confirmations without paid calls. Typed numbers do
+not select options. Detailed logs and optional beta signature mode remain.
+
+**125 tests passed**, including 23 new cases for payload limits, every menu
+screen, numeric-input rejection, stale/expired menus, Help Back from results
+and errors, subject pagination/disablement, honest cancellation, safe/unsafe
+retry, both webhook routes, exact DOCX delivery, saved-file native retry, and
+Meta interactive request encoding. Native menu failures do not mark sent
+result documents as failed. Tests use mocked Meta/OpenAI transports; no real
+WhatsApp messages were sent and no API credits were spent. Live phone-level
+acceptance is still required.

@@ -17,10 +17,13 @@ Run these with real teacher exam files. Do not use an output-only DOCX-open chec
 - [ ] Send Hi on first contact: friendly introduction and main menu appear.
 - [ ] Send Hi during subject selection, upload, confirmation, help, processing, result, and error: returns to main menu.
 - [ ] Hi during processing preserves the active job; selecting another exam does not create another paid request.
-- [ ] Format and Check menus select only enabled subject/class references.
+- [ ] Tap native Format and Check list rows; subject lists show only enabled references.
+- [ ] Confirm list messages and short reply-button menus appear on the phone; typing numbers does not navigate.
+- [ ] Old/expired confirmation taps produce fresh controls without a new paid request.
+- [ ] Paginated subject lists offer More Subjects, Previous Subjects, and Back to Main Menu when needed.
 - [ ] Upload normal DOCX; confirm the filename and class before submitting.
 - [ ] Change subject retains the pending exam; Replace File clears the pending upload; a newer valid attachment before confirmation replaces the earlier file.
-- [ ] Invalid option keeps the appropriate state. Back, Cancel, and Done use their shown meanings.
+- [ ] Invalid input keeps the appropriate state. Native Back, Cancel Request, Main Menu, Exit, and Start Again work; Help Back returns to result/error screens too.
 - [ ] Queue cancellation succeeds; in-progress cancellation honestly explains that processing has started.
 - [ ] Duplicate webhook and repeated confirmation produce one formatter response.
 - [ ] Normal result sends a formatted exam. Structural/formatting failure sends an issues report, not an apparently completed exam.

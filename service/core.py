@@ -264,7 +264,24 @@ class Service:
             self.update(row['id'],delivery='not_required')
             self.db.emit(sender,row['message'],row['id'],'error:'+row['id'])
             self.set_finished_session(sender,row)
-            self.db.emit(sender,self.navigation_menu(sender,row),row['id'],'next:'+row['id'])
+            self.emit_reply(sender,self.navigation_menu(sender,row),row['id'],'next:'+row['id'])
+    def emit_reply(self,sender,content,job_id=None,dedupe=None):
+        if isinstance(content,dict):
+            from .menus import replies
+            with self.lock:
+                if dedupe and self.db.one('SELECT id FROM outbox WHERE dedupe=?',(dedupe,)): return
+                content=json.loads(json.dumps(content))
+                token=uuid.uuid4().hex[:12]
+                actions={}
+                for choice in replies(content):
+                    command=choice['id'];choice['id']='ef:'+token+':'+command
+                    actions[choice['id']]=command
+                state=self.db.session(sender,self.s.session_minutes)
+                state['menu_actions']=actions;state['menu_version']=token
+                self.db.save_session(sender,state)
+                event(log,'whatsapp.menu.queued',job_id=job_id,menu=state['state'],menu_type=content['type'],choices=len(actions))
+                self.db.emit(sender,content,job_id,dedupe)
+        else: self.db.emit(sender,content,job_id,dedupe)
     def set_finished_session(self,sender,row):
         state=self.db.session(sender,self.s.session_minutes)
         # A Hi reset or another menu must not be overwritten by a late result.
@@ -273,19 +290,16 @@ class Service:
                 'reference_id':row['reference_id']}
             self.db.save_session(sender,state)
     def navigation_menu(self,sender,row):
+        from .whatsapp import WhatsAppFlow
+        flow=WhatsAppFlow(self)
         state=self.db.session(sender,self.s.session_minutes)
         if state.get('job_id')==row['id'] and state.get('state') in ('result','error'):
             return self.result_menu(row)
-        if state.get('state')=='main':
-            from .whatsapp import WhatsAppFlow
-            return WhatsAppFlow(self).main(sender)
-        return 'Your earlier exam request has finished. Your current menu selection remains active. Say Hi for the main menu.'
+        return flow.current_menu(sender,state)
 
     def result_menu(self,row):
-        if row['state'] in ('completed','needs_changes'):
-            return 'NEXT STEP\n1. Format Another Exam\n2. Help\n0. Main Menu\n\nSay Hi at any time to return to the main menu.'
-        retry='1. Try Again\n' if row['retryable'] else ''
-        return 'UNABLE TO FORMAT\n'+retry+'2. Choose Another Subject\n3. Upload Another File\n0. Main Menu'
+        from .whatsapp import WhatsAppFlow
+        return WhatsAppFlow(self).result_menu(row)
 
     def handle_incoming(self,message_id):
         """Claim one persisted message atomically, including in local sync mode."""
@@ -301,6 +315,7 @@ class Service:
             event(log,'whatsapp.message.finished',message_id=message_id)
         except Exception as exc:
             self.db.emit(row['sender'],'We could not handle that message. Please send it again, or say Hi for the main menu.',dedupe='inboxerror:'+row['id'])
+            self.emit_reply(row['sender'],WhatsAppFlow(self).current_menu(row['sender']),dedupe='inboxmenu:'+row['id'])
             self.db.execute("UPDATE inbox SET state='failed' WHERE id=?",(row['id'],))
             event(log,'whatsapp.message.failed',level=logging.ERROR,message_id=row['id'],**error_fields(exc))
         return True
@@ -333,6 +348,7 @@ class Service:
               attempt=row['attempts']+1,sender_key=actor_key(row['sender']))
         try:
             if row['kind']=='text': mid=self.meta.send_text(row['sender'],payload['text'])
+            elif row['kind']=='interactive': mid=self.meta.send_interactive(row['sender'],payload)
             else:
                 path=Path(payload['path'])
                 if not payload.get('media_id'):
@@ -345,16 +361,18 @@ class Service:
             if row['kind']=='document' and row['job_id']:
                 current=self.get(row['job_id']);self.update(row['job_id'],delivery='sent')
                 self.set_finished_session(row['sender'],current)
-                self.db.emit(row['sender'],self.navigation_menu(row['sender'],current),row['job_id'],'next:'+row['job_id'])
+                self.emit_reply(row['sender'],self.navigation_menu(row['sender'],current),row['job_id'],'next:'+row['job_id'])
         except Exception as exc:
             n=row['attempts']+1
             event(log,'whatsapp.delivery.failed',level=logging.ERROR,outbox_id=row['id'],job_id=row['job_id'],
                   kind=row['kind'],attempt=n,retry=n<3,retry_seconds=min(60,2**n) if n<3 else None,**error_fields(exc))
             self.db.execute('UPDATE outbox SET state=?,attempts=?,due=? WHERE id=?',
                 ('failed' if n>=3 else 'queued',n,time.time()+min(60,2**n),row['id']))
-            if n>=3 and row['job_id']:
+            if n>=3 and row['job_id'] and row['kind']=='document':
                 self.update(row['job_id'],delivery='failed')
-                self.db.emit(row['sender'],'The result is saved, but delivery failed. Say Hi and select 3 to retry delivery of the same file.',dedupe='deliveryerror:'+row['job_id'])
+                self.db.emit(row['sender'],'The result is saved, but delivery failed. Say Hi and tap Retry Delivery to send the same file.',dedupe='deliveryerror:'+row['job_id'])
+                from .whatsapp import WhatsAppFlow
+                self.emit_reply(row['sender'],WhatsAppFlow(self).current_menu(row['sender']),dedupe='deliverymenu:'+row['job_id'])
         return True
     def retry_delivery(self,jid,owner):
         event(log,'whatsapp.delivery.retry_requested',job_id=jid,actor=actor_key(owner))

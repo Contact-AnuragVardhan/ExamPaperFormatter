@@ -60,7 +60,7 @@ class Store:
         self.execute('INSERT INTO sessions VALUES(?,?,?) ON CONFLICT(sender) DO UPDATE SET data=excluded.data,updated=excluded.updated',
                      (sender,json.dumps(data),time.time()))
     def emit(self,sender,text,job_id=None,dedupe=None):
-        self.enqueue(sender,'text',{'text':text},job_id,dedupe)
+        self.enqueue(sender,'interactive' if isinstance(text,dict) else 'text',text if isinstance(text,dict) else {'text':text},job_id,dedupe)
     def enqueue(self,sender,kind,payload,job_id=None,dedupe=None):
         self.execute('INSERT OR IGNORE INTO outbox(sender,kind,payload,job_id,dedupe,due,created) VALUES(?,?,?,?,?,?,?)',
                      (sender,kind,json.dumps(payload),job_id,dedupe,time.time(),time.time()))

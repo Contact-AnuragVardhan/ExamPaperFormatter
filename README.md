@@ -108,55 +108,27 @@ Transport reference links:
 
 ## WhatsApp introduction and menus
 
-Every **Hi** (case-insensitive, with common greeting punctuation accepted) displays:
+Every **Hi** (case-insensitive, with common greeting punctuation accepted) returns a friendly Exam Formatter introduction and a native WhatsApp **Open Menu** control. Teachers tap list rows or reply buttons; they do not type option numbers. Hello, Hey, Menu, and Start also return to the main menu.
 
-> 👋 Welcome to **Exam Formatter**!
->
-> Turn your Word exam into a consistent, classroom-ready paper using your school’s subject and class format. Choose your subject, attach your .docx exam, and we’ll return a formatted Word file while preserving your questions and academic content. You can also check an exam and receive a report of changes needed. Please review every result before use.
->
-> **MAIN MENU**
-> 1. Format Exam
-> 2. Help
-> 4. Check Exam
-> 0. Exit
->
-> Reply with a number. Say Hi anytime to return here.
+| Screen | Native choices |
+| --- | --- |
+| Main menu | Format Exam, Check Exam, Help, Exit; Retry Delivery when a saved delivery failed |
+| Subject/class | Enabled subject/class rows; Back to Main Menu; More/Previous Subjects when needed |
+| Upload | Cancel, Help; attach the DOCX using WhatsApp's attachment icon |
+| Confirmation | Start Formatting or Start Checking, Change Subject, Replace File, Cancel |
+| Processing | Check Status, Cancel Request, Main Menu |
+| Result | Format Another Exam, Check Another Exam, Help, Main Menu |
+| Error | Try Again only when safe, Choose Another Subject, Upload Another File, Help, Main Menu |
+| Help | Back to the previous screen, Main Menu |
+| Exit | Start Again |
 
-`3. Retry Result Delivery` appears when a saved result has a failed WhatsApp delivery. Check Exam is numbered 4 so the conditional delivery option retains a stable number. `Hello`, `Hey`, `Menu`, and `Start` also open the main menu.
+Menus with more choices use WhatsApp list messages; short menus use reply buttons. Subject lists are paginated to stay within Meta's row limits. Confirmation shows the subject/class and filename. Changing subject keeps the pending DOCX; replacing a file clears it, and a newer valid attachment before confirmation replaces it. PDFs, images, and corrupt files are rejected with native controls for the next action.
 
-**Subject/class:** enabled references are numbered dynamically, initially Math 10 and Chemistry 11. `0. Back` returns to the main menu. English appears only after an administrator enables it following validation.
+Selections have identifiers tied to the current menu. A stale, expired, forged, or repeated old-menu tap returns fresh controls without starting another paid request. A typed number redisplays the current controls and does not select an option. On deployment, teachers with old numbered menus should send Hi to receive the new controls.
 
-**Upload:** “Please attach your Word (.docx) exam.” `0. Cancel` clears the pending upload and returns to the main menu. PDF and images are rejected. A newer valid document replaces the earlier pending document before confirmation.
+Queued requests can be cancelled; requests already running explain that cancellation is unavailable. Check Status never starts another formatter call. Help's Back button returns to result/error menus as well as the earlier upload/confirmation screens. Hi clears pending navigation while preserving an active job, and a late result does not overwrite the current menu. Result delivery retry sends the saved document without reformatting. Interactive menu delivery failures are logged and do not mark a previously sent result document as failed.
 
-**Confirmation:** displays subject/class and filename:
-
-```text
-1. Start Formatting (or Start Checking)
-2. Change Subject
-3. Replace File
-0. Cancel
-```
-
-**Processing:** acknowledges the queued request and waits asynchronously. `0` cancels only if the formatter has not claimed the job. Once processing starts, it explains that cancellation is unavailable here. A status question never starts another request.
-
-**Result:** sends the exact DOCX bytes returned by the engine. Successful formatting and issues reports have different filenames/captions. Then:
-
-```text
-1. Format Another Exam
-2. Help
-0. Main Menu
-```
-
-**Error:** a safe manual retry is offered only when the processing result is known to have failed safely:
-
-```text
-1. Try Again (only when safe)
-2. Choose Another Subject
-3. Upload Another File
-0. Main Menu
-```
-
-**Help:** four practical steps, then `0. Back`. Say Hi from any menu to reset navigation. Hi does not stop or delete an already active formatter job. The earlier result is still delivered, and the active-job guard prevents another paid request until its state is resolved. A late result does not overwrite a Hi-reset main menu.
+The outgoing queue stores native interactive payloads and sends them through Meta's `type: interactive` messages API. No numeric-choice fallback is sent. Real WhatsApp account permissions and end-to-end delivery still require live acceptance with your account.
 
 ## Reliability and error behavior
 

@@ -66,7 +66,15 @@ def test_engine_crash_diagnostic_retained_without_unsafe_retry(env,word):
     assert json.loads(row['diagnostic'])['message']=='worker unexpected failure'
 
 def send(flow,body='',typ='text',mid=None):
-    msg={'type':typ,'text':{'body':body}} if typ=='text' else {'type':'document','document':{'id':'media','filename':body}}
+    if typ=='text' and (body.startswith(('main.','menu.','confirm.','help.','upload.','processing.','error.','subject.'))):
+        state=flow.db.session('15551230000',30)
+        action=body
+        if body.startswith('subject.') and body.split('.',1)[1] in ('math','chemistry','english'):
+            action='subject.'+next(r['id'] for r in flow.v.references() if r['subject']==body.split('.',1)[1])
+        selected=next(k for k,v in state['menu_actions'].items() if v==action)
+        msg={'type':'interactive','interactive':{'list_reply':{'id':selected}}}
+    else:
+        msg={'type':typ,'text':{'body':body}} if typ=='text' else {'type':'document','document':{'id':'media','filename':body}}
     flow.handle('15551230000',msg,mid or str(time.time_ns()))
 
 def submit(svc,word,kind='format',idem='one',rid=None,owner='web:test',channel='web'):
@@ -132,13 +140,13 @@ def test_hi_from_every_state(env):
     for state in ('main','subject','upload','confirm','processing','result','error','help'):
         svc.db.save_session('15551230000',{'state':state,'job_id':'old'})
         send(flow,'Hi')
-        assert svc.db.session('15551230000',30)=={'state':'main'}
-        last=json.loads(svc.db.all('SELECT * FROM outbox ORDER BY id DESC LIMIT 1')[0]['payload'])['text']
-        assert 'Welcome to *Exam Formatter*' in last and '*MAIN MENU*' in last
+        assert svc.db.session('15551230000',30)['state']=='main'
+        last=json.loads(svc.db.all('SELECT * FROM outbox ORDER BY id DESC LIMIT 1')[0]['payload'])
+        assert 'Welcome to *Exam Formatter*' in last['body']['text'] and 'Main Menu' in last['header']['text']
 
 def test_whatsapp_happy_path_double_confirm_and_hi(env,word):
     svc,_,meta=env;meta.input=word;flow=WhatsAppFlow(svc);svc.engine=mock_engine('PASS',word)
-    send(flow,'Hi');send(flow,'1');send(flow,'1');send(flow,'Exam.docx','document');send(flow,'1',mid='confirm')
+    send(flow,'Hi');send(flow,'main.format');send(flow,'subject.math');send(flow,'Exam.docx','document');send(flow,'confirm.start',mid='confirm')
     state=svc.db.session('15551230000',30);assert state['state']=='processing'
     send(flow,'1',mid='double-confirm');assert len(svc.db.all('SELECT * FROM jobs'))==1
     send(flow,'Hi');assert svc.active('wa:15551230000')
@@ -151,19 +159,19 @@ def test_whatsapp_happy_path_double_confirm_and_hi(env,word):
 
 def test_whatsapp_check_and_help_back(env,word):
     svc,_,meta=env;meta.input=word;flow=WhatsAppFlow(svc)
-    send(flow,'Hi');send(flow,'4');send(flow,'1');send(flow,'help');send(flow,'0')
+    send(flow,'Hi');send(flow,'main.check');send(flow,'subject.math');send(flow,'menu.help');send(flow,'help.back')
     assert svc.db.session('15551230000',30)['state']=='upload'
-    send(flow,'file.docx','document');send(flow,'1')
+    send(flow,'file.docx','document');send(flow,'confirm.start')
     assert svc.db.all('SELECT * FROM jobs')[0]['kind']=='check'
 
 def test_bad_option_invalid_file_replace_change_subject(env,word):
     svc,_,meta=env;meta.input=word;flow=WhatsAppFlow(svc)
-    send(flow,'Hi');send(flow,'1');send(flow,'99');assert svc.db.session('15551230000',30)['state']=='subject'
-    send(flow,'1');send(flow,'file.pdf','document');assert svc.db.session('15551230000',30)['state']=='upload'
+    send(flow,'Hi');send(flow,'main.format');send(flow,'99');assert svc.db.session('15551230000',30)['state']=='subject'
+    send(flow,'subject.math');send(flow,'file.pdf','document');assert svc.db.session('15551230000',30)['state']=='upload'
     send(flow,'one.docx','document');send(flow,'two.docx','document');assert svc.db.session('15551230000',30)['filename']=='two.docx'
-    send(flow,'2');send(flow,'2');state=svc.db.session('15551230000',30);assert state['state']=='confirm'
+    send(flow,'confirm.subject');send(flow,'subject.chemistry');state=svc.db.session('15551230000',30);assert state['state']=='confirm'
     assert svc.resolve(state['reference_id'])[0]['subject']=='chemistry'
-    send(flow,'0');assert svc.db.session('15551230000',30)['state']=='main'
+    send(flow,'confirm.cancel');assert svc.db.session('15551230000',30)['state']=='main'
     assert not list((svc.s.data/'pending').iterdir())
 
 def test_delivery_retry_same_file_without_new_engine_run(env,word):

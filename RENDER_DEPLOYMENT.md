@@ -100,7 +100,8 @@ Keep one application process and one instance. Job processing, incoming menus, a
 - `/health` returns `{"status":"ok"}`.
 - Teacher and administrator sign-in work over HTTPS.
 - Math and Chemistry are enabled; English is visibly unavailable pending validation.
-- Hi returns the introduction and main menu through WhatsApp.
+- Hi returns the introduction and native Open Menu control through WhatsApp.
+- Native subject lists, confirmation actions, Help/Back, cancellation, and result/error menus can be tapped on the phone. After upgrading from numbered menus, send Hi for fresh controls.
 - Real DOCX upload, confirmation, result delivery, and error handling pass independently for each validated subject.
 - Reference changes and completed job history survive a service restart.
 - Logs show sanitized job IDs and operational failures, not exam text or API secrets.

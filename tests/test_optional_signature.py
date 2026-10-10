@@ -31,7 +31,7 @@ def test_beta_accepts_unsigned_hi_without_secret(env,endpoint,secret,signature):
     assert svc.handle_incoming('beta-hi')
     assert svc.db.session('15551230000',30)['state']=='main'
     assert svc.deliver_one()
-    assert 'Exam Formatter' in meta.texts[0][1]
+    assert 'Exam Formatter' in meta.interactives[0][1]['body']['text']
     assert svc.db.all('SELECT * FROM jobs')==[]
     assert c.get(endpoint+'?hub.mode=subscribe&hub.verify_token=verify&hub.challenge=123').text=='123'
     assert c.get(endpoint+'?hub.mode=subscribe&hub.verify_token=wrong&hub.challenge=123').status_code==403

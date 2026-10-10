@@ -15,7 +15,7 @@ ROOT=Path(__file__).resolve().parents[1]
 REFS=ROOT/'data'/'references'
 
 class FakeMeta:
-    def __init__(self,s): self.real=MetaClient(s);self.documents=[];self.texts=[];self.fail=False;self.uploads=[];self.input=b''
+    def __init__(self,s): self.real=MetaClient(s);self.documents=[];self.texts=[];self.interactives=[];self.fail=False;self.uploads=[];self.input=b''
     def signature_valid(self,*args): return self.real.signature_valid(*args)
     def download(self,*_): return self.input
     def upload(self,p): self.uploads.append(p.read_bytes());return 'uploaded'
@@ -23,6 +23,7 @@ class FakeMeta:
         if self.fail: raise RuntimeError('delivery failed')
         self.documents.append((s,mid,name,caption));return 'wamid.result'
     def send_text(self,s,t): self.texts.append((s,t));return 'wamid.text.'+str(len(self.texts))
+    def send_interactive(self,s,p): self.interactives.append((s,p));return 'wamid.interactive.'+str(len(self.interactives))
 
 @pytest.fixture
 def env(tmp_path):

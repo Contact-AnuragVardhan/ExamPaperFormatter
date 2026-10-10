@@ -68,6 +68,9 @@ class MetaClient:
     def send_text(self,sender,text):
         event(log,'meta.text.send',characters=min(len(text),4096))
         return self._send(sender,'text',{'body':text[:4096],'preview_url':False})
+    def send_interactive(self,sender,payload):
+        event(log,'meta.interactive.send',menu_type=payload['type'])
+        return self._send(sender,'interactive',payload)
     def upload(self,path):
         event(log,'meta.media.upload',bytes=path.stat().st_size)
         with path.open('rb') as handle:
