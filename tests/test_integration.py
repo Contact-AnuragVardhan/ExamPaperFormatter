@@ -117,7 +117,7 @@ def test_isolation_and_idempotency(env,word):
     assert (folder/'reference.docx').read_bytes()==pinned
     assert other['subject']=='chemistry'
 
-@pytest.mark.parametrize('status,kind,output,state',[('PASS','format',True,'completed'),('OK','check',False,'completed'),('FORMAT ERROR','check',True,'needs_changes'),('STRUCTURAL ERROR','format',True,'needs_changes'),('SYSTEM ERROR','format',False,'failed'),('PASS','format',False,'failed')])
+@pytest.mark.parametrize('status,kind,output,state',[('PASS','format',True,'completed'),('OK','check',False,'completed'),('FORMAT ERROR','check',True,'completed'),('STRUCTURAL ERROR','format',True,'needs_changes'),('SYSTEM ERROR','format',False,'failed'),('PASS','format',False,'failed')])
 def test_engine_outcomes(env,word,status,kind,output,state):
     svc,_,_=env;svc.engine=mock_engine(status,word if output else None)
     row=submit(svc,word,kind)

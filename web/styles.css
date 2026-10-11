@@ -3,3 +3,8 @@
 .dropzone strong{max-width:calc(100% - 24px);overflow-wrap:anywhere}.job-row strong,.job-row p,.ref-row strong{overflow-wrap:anywhere}
 
 .diagnostic{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:7px}.diagnostic summary{font-size:12px;cursor:pointer;color:var(--ink)}.diagnostic pre{overflow-wrap:anywhere;line-height:1.6}
+
+/* Match Windows report severities, even when FORMATTING is completed. */
+.badge.result-all-good{background:#e9f5ef;color:#26764f}
+.badge.result-formatting{background:#fff0d5;color:#865900}
+.badge.result-structural{background:#fff0ef;color:#992d2a}
