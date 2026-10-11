@@ -7,9 +7,14 @@ from .files import UserError,filename,validate_docx
 from .menus import menu
 
 INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
-       'Turn your Word exam into a consistent, classroom-ready paper using your school’s subject and class format. '
-       'Choose your subject, attach your .docx exam, and we’ll return a formatted Word file while preserving your questions and academic content. '
-       'You can also check an exam and receive a report of changes needed. Please review every result before use.\n\n'
+       'Turn your Word Exam into a consistent, classroom-ready Word Exam using your school’s preferred Exam format.\n\n'
+       'Choose your subject, attach your .docx exam, and FORMAT will return a new formatted Word file,  while preserving your questions and academic content. You can also CHECK an Exam and receive a report of issues.\n\n'
+       'Formatting issues, such as incorrect numbering, can be fixed by the App.\n'
+       'Structural issues, such as missing sections. must be fixed by you.\n\n'
+       'Please review every return file result before use in Exam.\n\n'
+       '\n\n'
+       'Revision 2.1\n'
+       '(c) 2026 Jalta Sitara Foundation\n\n'
        'Tap Open Menu to choose what you would like to do.')
 HELP=('Choose Format Exam or Check Exam from the main menu.\n'
       'Select your subject and class, then attach your exam as a Word .docx file.\n'
