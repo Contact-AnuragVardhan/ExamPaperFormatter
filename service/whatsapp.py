@@ -57,9 +57,31 @@ class WhatsAppFlow:
         return menu('Exam Request Status',body,[('processing.status','Check Status'),('processing.cancel','Cancel Request'),('menu.main','Main Menu')])
     def help_menu(self):
         return menu('How to Use Exam Formatter',HELP,[('help.back','Back'),('menu.main','Main Menu')])
+    @staticmethod
+    def document_caption(row):
+        """Describe the actual attachment, independent of the completed job state.
+
+        The formatter may finish with FORMATTING while producing an issues report,
+        not a formatted exam. WhatsApp captions are limited to 1024 characters.
+        """
+        status = row.get('result_status')
+        message = row.get('message') or 'Your exam request has finished.'
+        if status in ('FORMATTING', 'STRUCTURAL'):
+            caption = 'Issues report (not a formatted exam).\n' + message
+            if len(caption) > 1024:
+                return ('Issues report (not a formatted exam). '
+                        'Review the attached Word report for the issues to address.')
+            return caption
+        return message[:1024]
+
     def result_menu(self,row):
         if row and row['state'] in ('completed','needs_changes'):
-            return menu('Next Step',row['message'] or 'Your exam request has finished.',
+            title = {
+                'ALL GOOD': 'ALL GOOD',
+                'FORMATTING': 'FORMATTING — You Can Proceed',
+                'STRUCTURAL': 'STRUCTURAL — Fix Required',
+            }.get(row.get('result_status'), 'Next Step')
+            return menu(title,row['message'] or 'Your exam request has finished.',
                         [('main.format','Format Another Exam'),('main.check','Check Another Exam'),('menu.help','Help'),('menu.main','Main Menu')],force_list=True)
         choices=[]
         if row and row['retryable'] and row['state']=='failed': choices.append(('error.retry','Try Again'))

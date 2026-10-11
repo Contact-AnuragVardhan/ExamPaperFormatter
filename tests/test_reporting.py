@@ -145,4 +145,4 @@ def test_service_and_whatsapp_share_the_four_results(env, word):
     for _ in range(10):
         if not svc.deliver_one():
             break
-    assert meta.documents[-1][3] == both["message"]
+    assert meta.documents[-1][3] == "Issues report (not a formatted exam).\n" + both["message"]

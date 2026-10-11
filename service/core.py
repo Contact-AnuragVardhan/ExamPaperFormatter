@@ -351,12 +351,18 @@ class Service:
         return True
 
     def finish_whatsapp(self,row):
+        """WhatsApp delivery adapter; exam classification remains unchanged."""
+        from .whatsapp import WhatsAppFlow
         event(log,'whatsapp.result.queued',job_id=row['id'],document=bool(row['output']),state=row['state'])
         sender=row['owner'][3:]
+        flow=WhatsAppFlow(self)
         if row['output']:
-            self.db.enqueue(sender,'document',{'path':row['output'],'caption':row['message']},row['id'],'result:'+row['id'])
+            self.db.enqueue(sender,'document',
+                {'path':row['output'],'caption':flow.document_caption(row)},
+                row['id'],'result:'+row['id'])
             self.update(row['id'],delivery='queued')
         else:
+            # With no output, keep the existing message and menu delivery flow.
             self.update(row['id'],delivery='not_required')
             self.db.emit(sender,row['message'],row['id'],'error:'+row['id'])
             self.set_finished_session(sender,row)
