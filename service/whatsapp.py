@@ -12,7 +12,7 @@ INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
        'Formatting issues, such as incorrect numbering, can be fixed by the App.\n'
        'Structural issues, such as missing sections. must be fixed by you.\n\n'
        'Please review every return file result before use in Exam.\n\n'
-       '>>>\n\n'
+       '\n\n'
        'Revision 2.1\n'
        '(c) 2026 Jalta Sitara Foundation\n\n'
        'Tap Open Menu to choose what you would like to do.')
