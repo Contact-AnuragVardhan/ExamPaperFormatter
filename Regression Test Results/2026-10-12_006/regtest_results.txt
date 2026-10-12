@@ -1,0 +1,91 @@
+EXAM FORMAT REV2 - REGRESSION TEST
+
+Run Date: 2026-10-12
+Model: gpt-6-astra
+
+EXAM FORMAT REV2 REGRESSION TEST
+
+Found 2 subjects.
+Found 2 exam test cases.
+SKIPPED: xEnglish 10
+
+WARNING:
+This will DELETE existing reference registrations
+and replace them with regression references.
+
+Initializing references...
+
+================================
+INITIALIZATION - KNOWN STATE
+================================
+
+Existing references deleted: 3
+
+Chemistry 11
+  Reference: chemistry11_reference.docx
+  Loaded: PASS
+  Activated: PASS
+  Verified: PASS
+
+Math 10
+  Reference: math10_reference.docx
+  Loaded: PASS
+  Activated: PASS
+  Verified: PASS
+
+INITIALIZATION RESULT: PASS
+
+Chemistry 11 ............ PASS
+Math 10 ................. PASS
+
+KNOWN STATE ESTABLISHED
+
+Running regression tests...
+
+================================
+REGRESSION TEST RESULTS
+================================
+
+[1/2] Chemistry 11 - OK .................. FAIL
+
+TEST 001
+Subject: Chemistry 11
+Exam: chemistry11_OK.docx
+Reference: chemistry11_reference.docx
+Expected: ALL GOOD
+Actual: FORMATTING
+Result: FAIL
+Reason: [Download the short report](sandbox:/mnt/data/details.docx). The teacher file was not modified.
+Time: 85.7 seconds
+Estimated API cost: $0.5587
+
+[2/2] Math 10 - FORMAT ................... PASS
+
+TEST 002
+Subject: Math 10
+Exam: math10_FORMAT ERROR.docx
+Reference: math10_reference.docx
+Expected: FORMATTING
+Actual: FORMATTING
+Result: PASS
+Time: 88.0 seconds
+Estimated API cost: $0.5831
+
+REGRESSION COMPLETE
+
+================================
+REGRESSION TEST SUMMARY
+================================
+
+Total Tests: 2
+PASSED: 1
+FAILED: 1
+
+Initialization: PASS
+Total Time: 187.2 seconds
+Estimated API Cost: $1.1418
+
+================================
+
+Report:
+Regression Test Results/2026-10-12_006/

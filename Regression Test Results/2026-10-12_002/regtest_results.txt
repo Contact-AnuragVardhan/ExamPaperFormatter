@@ -1,0 +1,35 @@
+EXAM FORMAT REV2 - REGRESSION TEST
+
+Run Date: 2026-10-12
+Model: gpt-6-astra
+
+EXAM FORMAT REV2 REGRESSION TEST
+
+Found 3 subjects.
+Found 2 exam test cases.
+
+ADMIN_PASSWORD is not set. Add it to the environment before running.
+================================
+INITIALIZATION - KNOWN STATE
+================================
+
+Existing references deleted: 0
+
+INITIALIZATION RESULT: FAIL
+ADMIN authentication failed.
+================================
+REGRESSION TEST SUMMARY
+================================
+
+Total Tests: 0
+PASSED: 0
+FAILED: 0
+
+Initialization: FAIL
+Total Time: 0.1 seconds
+Estimated API Cost: not available
+
+================================
+
+Report:
+Regression Test Results/2026-10-12_002/
