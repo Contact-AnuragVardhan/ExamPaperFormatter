@@ -291,3 +291,8 @@ service/files.py        Bounded DOCX validation
 web/                    HTML / CSS / JavaScript browser interface
 tests/                 Mocked integration and engine tests
 ```
+
+
+## Registering teachers (web and WhatsApp admin)
+
+Exam Formatter uses Teacher Helper's `teacher_profile` table through `DATABASE_URL`. The web Administrator page and password-protected WhatsApp Admin menu both offer **Add Teacher**. Enter the teacher's WhatsApp number (with country code), name, grade and subject; school and language are automatically **Parivaar School** and **Hinglish**. Duplicate numbers are rejected. The database role must be able to read and insert rows into `public.teacher_profile`. Windows is unchanged. See `TEACHER_AUTH_SETUP.md`.
