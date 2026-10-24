@@ -13,6 +13,7 @@ import reporting
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
+from .teacher_registry import TeacherRegistry
 from .meta import MetaClient
 
 log=logging.getLogger('exam.service')
@@ -30,6 +31,7 @@ class Service:
         records.LOG=settings.data/'activity.log'
         records.USAGE=settings.data/'usage.jsonl'
         self.db=Store(settings.data)
+        self.teacher_registry=TeacherRegistry(settings.teacher_registry_database_url)
         # A process restart requires fresh admin authentication, including after
         # a Render change to ADMIN_PASSWORD. Web cookies use a separate table.
         self.db.execute('DELETE FROM whatsapp_admin')

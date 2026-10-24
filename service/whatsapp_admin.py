@@ -11,6 +11,10 @@ import records
 from runtime_logging import event,actor_key,error_fields
 from .files import UserError,filename,validate_docx
 from .menus import menu
+from .teacher_registry import (
+    SCHOOL_NAME, PREFERRED_LANGUAGE, TeacherAlreadyExists,
+    TeacherRegistryUnavailable, InvalidTeacherDetails, valid_teacher_details,
+)
 
 log=logging.getLogger('exam.whatsapp.admin')
 
@@ -23,7 +27,7 @@ class WhatsAppAdmin:
 
     def home(self):
         return menu('Exam Formatter — Admin','Manage reference papers, subject availability, requests, activity, and estimated costs. Choose an option.',[
-            ('admin.refs','Reference Papers'),('admin.add','Upload New Reference'),('admin.jobs','Exam Requests'),
+            ('admin.refs','Reference Papers'),('admin.add','Upload New Reference'),('admin.teacher.add','Add Teacher'),('admin.jobs','Exam Requests'),
             ('admin.activity','Activity Log'),('admin.cost','Cost Totals'),('admin.system','System Status'),
             ('admin.help','Admin Help'),('admin.logout','Logout')],force_list=True)
 
@@ -131,7 +135,23 @@ class WhatsAppAdmin:
             self.flow.discard(state);self.db.save_session(sender,{'state':'admin_login'})
             return self.login_menu()
         name=state['state']
-        if name=='admin_refs': result=self.ref_list(state)
+        if name=='admin_teacher_number':
+            result=menu('Add Teacher — WhatsApp Number','Enter the teacher’s WhatsApp number with country code, for example +919876543210.',[('admin.home','Cancel')])
+        elif name=='admin_teacher_name':
+            result=menu('Add Teacher — Name','Enter the teacher’s full name.',[('admin.home','Cancel')])
+        elif name=='admin_teacher_grade':
+            result=menu('Add Teacher — Grade','Enter the teacher’s default class or grade, for example 10.',[('admin.home','Cancel')])
+        elif name=='admin_teacher_subject':
+            result=menu('Add Teacher — Subject','Enter the teacher’s default subject, for example Mathematics.',[('admin.home','Cancel')])
+        elif name=='admin_teacher_confirm':
+            result=menu('Confirm New Teacher',
+                f'WhatsApp: {state["teacher_whatsapp_number"]}\n'
+                f'Name: {state["teacher_name"]}\n'
+                f'Grade: {state["teacher_grade"]}\n'
+                f'Subject: {state["teacher_subject"]}\n'
+                f'School: {SCHOOL_NAME}\nLanguage: {PREFERRED_LANGUAGE}\n\nSave this teacher?',
+                [('admin.teacher.save','Save Teacher'),('admin.teacher.add','Start Over'),('admin.home','Cancel')])
+        elif name=='admin_refs': result=self.ref_list(state)
         elif name=='admin_ref': result=self.ref_detail(state)
         elif name=='admin_subject': result=self.subject_options(state)
         elif name=='admin_grade': result=self.grade_options(state)
@@ -177,7 +197,7 @@ class WhatsAppAdmin:
             body=f'WhatsApp configured: {"Yes" if self.v.s.whatsapp_ready else "No"}\nWebhook signature verification: {"Enabled" if self.v.s.wa_verify_signature else "Optional / disabled"}\nAsync webhooks: {self.v.s.wa_async}\nModel: {os.getenv("EXAM_REDO_MODEL", "").strip() or os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-astra"}\nReferences: {len(self.v.references())}\nEnabled subjects: {sum(r["enabled"] for r in self.v.references())}\nAdmin idle timeout: {self.v.s.session_minutes} minutes\n\nRequests:\n'+'\n'.join(f'{r["state"]}: {r["count"]}' for r in counts)
             result=menu('System Status',self.clean(body),[('admin.system','Refresh Status'),('admin.home','Admin Menu')])
         elif name=='admin_help':
-            result=menu('Admin Help','Reference Papers: download/view, replace, enable/disable, or delete a paper.\nUpload New Reference: select subject and class, attach .docx, review and save. Choose Other Subject/Class only when you need a new name.\nExam Requests: view errors and available safe recovery actions.\nActivity/Cost: view the same records as the web/Windows admin.\n\nAll choices use menus. Password, new names, and file attachments require input. Say Hi or Logout to end admin access.',[('admin.home','Admin Menu'),('admin.logout','Logout')])
+            result=menu('Admin Help','Add Teacher: enter WhatsApp number, name, grade, and subject, then confirm. School and language are filled automatically.\nReference Papers: download/view, replace, enable/disable, or delete a paper.\nUpload New Reference: select subject and class, attach .docx, review and save. Choose Other Subject/Class only when you need a new name.\nExam Requests: view errors and available safe recovery actions.\nActivity/Cost: view the same records as the web/Windows admin.\n\nAll choices use menus. Password, new names, and file attachments require input. Say Hi or Logout to end admin access.',[('admin.home','Admin Menu'),('admin.logout','Logout')])
         else: result=self.home()
         self.db.save_session(sender,state)
         return result
@@ -229,6 +249,35 @@ class WhatsAppAdmin:
         try:
             if action=='admin.home':
                 self.flow.discard(state);state={'state':'admin_home'};save();show();return
+            if action=='admin.teacher.add':
+                self.flow.discard(state)
+                state={'state':'admin_teacher_number'};save();show();return
+            if state['state'] in ('admin_teacher_number','admin_teacher_name','admin_teacher_grade','admin_teacher_subject') and message.get('type')=='text' and not action:
+                entered=str(message.get('text',{}).get('body','')).strip()
+                if state['state']=='admin_teacher_number':
+                    number=valid_teacher_details(entered,'Name','Grade','Subject')['whatsapp_number']
+                    if self.v.teacher_registry.find_by_number(number):
+                        raise UserError('This WhatsApp number is already registered.')
+                    state['teacher_whatsapp_number']=number
+                    go('admin_teacher_name');return
+                if state['state']=='admin_teacher_name':
+                    name=valid_teacher_details(state['teacher_whatsapp_number'],entered,'Grade','Subject')['teacher_name']
+                    state['teacher_name']=name
+                    go('admin_teacher_grade');return
+                if state['state']=='admin_teacher_grade':
+                    grade=valid_teacher_details(state['teacher_whatsapp_number'],state['teacher_name'],entered,'Subject')['default_grade']
+                    state['teacher_grade']=grade
+                    go('admin_teacher_subject');return
+                subject=valid_teacher_details(state['teacher_whatsapp_number'],state['teacher_name'],state['teacher_grade'],entered)['default_subject']
+                state['teacher_subject']=subject
+                go('admin_teacher_confirm');return
+            if action=='admin.teacher.save' and state['state']=='admin_teacher_confirm':
+                teacher=self.v.teacher_registry.add_teacher(
+                    state['teacher_whatsapp_number'],state['teacher_name'],
+                    state['teacher_grade'],state['teacher_subject'])
+                event(log,'admin.teacher.created',teacher_id=teacher['id'],actor=actor_key(sender))
+                state={'state':'admin_home'};save()
+                show('Teacher '+teacher['teacher_name']+' added successfully.');return
             if action in ('admin.refs','admin.jobs','admin.activity','admin.cost','admin.system','admin.help','menu.help','admin.add'):
                 targets={'admin.refs':'admin_refs','admin.jobs':'admin_job_filters','admin.activity':'admin_activity','admin.cost':'admin_cost','admin.system':'admin_system','admin.help':'admin_help','menu.help':'admin_help','admin.add':'admin_subject'}
                 self.flow.discard(state);state.pop('pending_id',None);go(targets[action],page=0);return
@@ -324,6 +373,12 @@ class WhatsAppAdmin:
                 else: note=self.v.reconcile(row['id'],op=='release')
                 state['state']='admin_job';save();event(log,'admin.job.action',operation=op,job_id=row['id'],actor=actor_key(sender));show(note);return
             show('Tap an option below. Only password, new subject/class names, and file attachments need input.')
+        except (InvalidTeacherDetails,TeacherAlreadyExists) as exc:
+            event(log,'admin.teacher.rejected',level=logging.WARNING,actor=actor_key(sender),reason=type(exc).__name__)
+            show(str(exc))
+        except TeacherRegistryUnavailable:
+            event(log,'admin.teacher.registry_unavailable',level=logging.WARNING,actor=actor_key(sender))
+            show('Teacher registration is temporarily unavailable. Please try again later.')
         except UserError as exc:
             event(log,'admin.action.rejected',level=logging.WARNING,actor=actor_key(sender),**error_fields(exc));show(str(exc))
         except (IndexError,ValueError,KeyError):

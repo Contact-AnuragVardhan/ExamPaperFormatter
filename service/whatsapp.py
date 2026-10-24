@@ -5,6 +5,7 @@ import uuid
 from runtime_logging import event,error_fields
 from .files import UserError,filename,validate_docx
 from .menus import menu
+from .teacher_registry import TeacherRegistryUnavailable
 
 INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
        'Turn your Word Exam into a consistent, classroom-ready Word Exam using your school’s preferred Exam format.\n\n'
@@ -112,6 +113,16 @@ class WhatsAppFlow:
     def discard(self,state):
         if state.get('pending_id'): shutil.rmtree(self.v.s.data/'pending'/state['pending_id'],ignore_errors=True)
     def handle(self,sender,message,message_id):
+        try:
+            teacher=self.v.teacher_registry.find_by_number(sender)
+        except TeacherRegistryUnavailable:
+            self.v.db.emit(sender,'Teacher validation is temporarily unavailable. Please try again later.',dedupe=message_id+':registry-unavailable')
+            return
+        if not teacher:
+            self.v.admin_logout(sender)
+            self.v.db.execute('DELETE FROM sessions WHERE sender=?',(sender,))
+            self.v.db.emit(sender,'Not a valid user.',dedupe=message_id+':invalid-user')
+            return
         before=self.db.session(sender,self.v.s.session_minutes)
         reply=message.get('interactive',{})
         selection=(reply.get('button_reply',{}) or reply.get('list_reply',{})).get('id','')
