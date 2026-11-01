@@ -18,6 +18,7 @@ INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
 HELP=('Choose Format Exam or Check Exam from the main menu.\n'
       'Select your subject and class, then attach your exam as a Word .docx file.\n'
       'Review the confirmation and tap Start Formatting or Start Checking.\n'
+      'Spellcheck corrects only confident spelling mistakes. It does not use a subject reference and does not change wording.\n'
       'We will send your result here. Review the Word file or issues report before use.')
 log=logging.getLogger('exam.whatsapp')
 GREETINGS=('hi','hello','hey','menu','start')
@@ -25,7 +26,7 @@ GREETINGS=('hi','hello','hey','menu','start')
 class WhatsAppFlow:
     def __init__(self,service): self.v=service;self.db=service.db
     def main(self,sender):
-        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('main.admin','Admin'),('menu.help','Help')]
+        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('main.spellcheck','Spellcheck','Spelling only, no reference'),('main.admin','Admin'),('menu.help','Help')]
         if self.db.one("SELECT id FROM jobs WHERE owner=? AND output IS NOT NULL AND delivery='failed' ORDER BY created DESC LIMIT 1",('wa:'+sender,)):
             choices.append(('delivery.retry','Retry Delivery'))
         choices.append(('main.exit','Exit'))
@@ -48,6 +49,9 @@ class WhatsAppFlow:
         return menu('Select Subject / Class',body,choices,button='Choose Subject',force_list=bool(refs))
     def upload_menu(self):
         return menu('Send Your Exam',f'Attach your Word (.docx) exam, up to {self.v.s.max_upload_mb} MB. Use the attachment icon to send the file.',
+                    [('upload.cancel','Cancel'),('menu.help','Help')])
+    def spellcheck_upload_menu(self):
+        return menu('Spellcheck Exam',f'Attach the Word (.docx) exam to spellcheck, up to {self.v.s.max_upload_mb} MB. No subject reference is used.',
                     [('upload.cancel','Cancel'),('menu.help','Help')])
     def confirm_menu(self,state):
         ref,_=self.v.resolve(state['reference_id'])
@@ -79,6 +83,12 @@ class WhatsAppFlow:
         return message[:1024]
 
     def result_menu(self,row):
+        if row and row.get('kind')=='spellcheck':
+            if row['state'] in ('completed','needs_changes'):
+                return menu('Spellcheck Ready',row['message'] or 'Spellcheck finished.',
+                            [('main.spellcheck','Spellcheck Another'),('menu.help','Help'),('menu.main','Main Menu')])
+            return menu('Spellcheck Needs Attention',row['message'] if row else 'This request is no longer available. Please start again.',
+                        [('main.spellcheck','Spellcheck Another'),('menu.help','Help'),('menu.main','Main Menu')],force_list=True)
         if row and row['state'] in ('completed','needs_changes'):
             title = {
                 'ALL GOOD': 'ALL GOOD',
@@ -100,6 +110,7 @@ class WhatsAppFlow:
         if name=='subject':
             result=self.subject_menu(state);self.db.save_session(sender,state);return result
         if name=='upload': return self.upload_menu()
+        if name=='spellcheck_upload': return self.spellcheck_upload_menu()
         if name=='confirm':
             try: return self.confirm_menu(state)
             except UserError:
@@ -170,6 +181,30 @@ class WhatsAppFlow:
             self.discard(state)
             state={'state':'subject','kind':'format' if action=='main.format' else 'check'}
             content=self.subject_menu(state);save();say(content);return
+        if action=='main.spellcheck':
+            active=self.v.active('wa:'+sender)
+            if active:
+                state={'state':'processing','job_id':active['id']};save();say(self.processing_menu(active));return
+            self.discard(state)
+            state={'state':'spellcheck_upload'};save();say(self.spellcheck_upload_menu());return
+        if state['state']=='spellcheck_upload':
+            if action=='upload.cancel':
+                self.discard(state);state={'state':'main'};save();say(self.main(sender));return
+            if message.get('type')!='document':
+                show('Please attach a Word .docx file or tap a button below.');return
+            document=message.get('document',{});name=filename(document.get('filename',''))
+            try:
+                if not name.lower().endswith('.docx'): raise UserError('Please send a Word .docx file. PDF and images are not supported.')
+                data=self.v.meta.download(document['id'],name);validate_docx(data,name,self.v.s.max_bytes)
+                event(log,'whatsapp.spellcheck.validated',bytes=len(data))
+                self.discard(state)
+                row=self.v.submit_spellcheck('wa:'+sender,'whatsapp',name,data,'wa:'+message_id)
+                state={'state':'processing','job_id':row['id']};save();say(self.processing_menu(row))
+            except UserError as exc:
+                event(log,'whatsapp.spellcheck.rejected',level=logging.WARNING,**error_fields(exc));show(str(exc))
+            except Exception as exc:
+                event(log,'whatsapp.spellcheck.failed',level=logging.ERROR,**error_fields(exc));show('We could not download that file. Please attach the Word document again.')
+            return
         if state['state']=='subject':
             if action in ('subjects.previous','subjects.next'):
                 state['subject_page']=state.get('subject_page',0)+(-1 if action=='subjects.previous' else 1)

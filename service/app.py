@@ -12,6 +12,7 @@ from fastapi import FastAPI,Request,HTTPException,UploadFile,File,Form
 from fastapi.responses import FileResponse,JSONResponse,PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 import records
+import spellcheck
 from runtime_logging import event,log_context,actor_key,error_fields
 from .config import Settings
 from .core import Service
@@ -151,6 +152,20 @@ def create_app(settings=None,service=None,start_workers=True):
         if not row['output'] or not Path(row['output']).is_file(): raise HTTPException(404,'No result file is available.')
         event(log,'web.result.download',job_id=jid,bytes=Path(row['output']).stat().st_size)
         return FileResponse(row['output'],filename=Path(row['output']).name,media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',headers={'Cache-Control':'no-store'})
+    @app.post('/api/spellcheck')
+    async def spellcheck_submit(request:Request,submission_id:str=Form(...),file:UploadFile=File(...)):
+        who=auth(request);data=await read_upload(file)
+        with service.lock:
+            row=service.submit_spellcheck(who['owner'],'web',file.filename,data,submission_id)
+        return service.public(row)
+    @app.get('/api/jobs/{jid}/spelling-report')
+    def spelling_report(jid:str,request:Request):
+        row=owned(request,jid)
+        if row['kind']!='spellcheck' or not row['output']: raise HTTPException(404,'No spelling report is available.')
+        report=spellcheck.report_path_for(row['output'])
+        if not report.is_file(): raise HTTPException(404,'No spelling report is available.')
+        event(log,'web.spellcheck.report_download',job_id=jid,bytes=report.stat().st_size)
+        return FileResponse(report,filename=report.name,media_type='text/plain; charset=utf-8',headers={'Cache-Control':'no-store'})
     @app.post('/api/jobs/{jid}/cancel')
     def cancel(jid:str,request:Request):
         row=owned(request,jid)

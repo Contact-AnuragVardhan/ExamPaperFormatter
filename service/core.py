@@ -10,6 +10,7 @@ from pathlib import Path
 import job
 import records
 import reporting
+import spellcheck
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
@@ -179,6 +180,31 @@ class Service:
                   reference_version=ref['version'][:12],teacher_bytes=len(data),reference_bytes=len(reference_data))
             return self.get(jid)
 
+    def submit_spellcheck(self,owner,channel,name,data,idem):
+        """Queue spelling correction without a reference or a FORMAT request."""
+        if not idem or len(idem)>150: raise UserError('A valid submission ID is required.')
+        with self.lock:
+            existing=self.db.one('SELECT * FROM jobs WHERE owner=? AND idem=?',(owner,idem))
+            if existing:
+                event(log,'job.submission.duplicate',job_id=existing['id'],channel=channel)
+                return existing
+            active=self.active(owner)
+            if active:
+                event(log,'job.submission.blocked',level=logging.WARNING,job_id=active['id'],reason='active_job',state=active['state'])
+                raise UserError('An exam is already being processed. Wait for its result before starting another.')
+            if self.db.limited('jobs:'+owner,20,3600):
+                event(log,'job.submission.blocked',level=logging.WARNING,actor=actor_key(owner),reason='hourly_limit')
+                raise UserError('You have reached the hourly exam limit. Please try again later.')
+            validate_docx(data,name,self.s.max_bytes)
+            jid=uuid.uuid4().hex
+            folder=self.s.data/'jobs'/jid; folder.mkdir()
+            (folder/'teacher.docx').write_bytes(data)
+            now=time.time()
+            self.db.execute('''INSERT INTO jobs(id,owner,channel,kind,reference_id,subject,grade,version,filename,state,idem,created,updated)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',(jid,owner,channel,'spellcheck','','Spellcheck','', '',filename(name),'queued',idem,now,now))
+            event(log,'job.queued',job_id=jid,actor=actor_key(owner),channel=channel,kind='spellcheck',teacher_bytes=len(data))
+            return self.get(jid)
+
     def get(self,jid): return self.db.one('SELECT * FROM jobs WHERE id=?',(jid,))
     def public(self,row):
         return {k:row[k] for k in ('id','channel','kind','subject','grade','filename','state','result_status','message','retryable','delivery','created','updated')} | {'has_output':bool(row['output'])}
@@ -271,6 +297,9 @@ class Service:
         started=time.monotonic()
         event(log,'job.started',job_id=jid,channel=row['channel'],kind=row['kind'],subject=row['subject'],grade=row['grade'])
         folder=self.s.data/'jobs'/jid
+        if row['kind']=='spellcheck':
+            self._process_spellcheck(row,jid,folder,started)
+            return True
         def progress(_): self.update(jid,message='Your exam is being checked.' if row['kind']=='check' else 'Your exam is being formatted.')
         def remote(state):
             self.update(jid,remote=json.dumps(state))
@@ -349,6 +378,50 @@ class Service:
         event(log,'job.finished',job_id=jid,state=finished['state'],result_status=finished['result_status'],
               has_output=bool(finished['output']),elapsed_seconds=round(time.monotonic()-started,2))
         return True
+
+    def _process_spellcheck(self,row,jid,folder,started):
+        """Run SPELLCHECK on the saved copy. FORMAT is not called."""
+        source=folder/'teacher.docx'
+        before=source.read_bytes()
+        try:
+            result=spellcheck.run(source,folder,stem=Path(row['filename']).stem)
+            if source.read_bytes()!=before:
+                spellcheck._remove_published(result.docx_path,result.report_path)
+                raise spellcheck.SpellcheckError('The source exam was modified and the new output was removed.')
+            message=result.summary
+            if result.skipped:
+                message+=f' Uncertain spellings left unchanged: {len(result.skipped)}.'
+            self.update(jid,state='completed',result_status='SPELLCHECK',message=message,output=str(result.docx_path),retryable=0,diagnostic=None)
+            records.log('Spellcheck','', 'SPELLCHECK','PASS' if result.corrections else 'NONE')
+            event(log,'spellcheck.job.completed',job_id=jid,corrections=result.corrections,changed_lines=result.changed_lines,
+                  skipped=len(result.skipped),elapsed_ms=round(result.elapsed_seconds*1000),api_calls=result.api_calls)
+        except UserError as exc:
+            self.diagnostic(jid,str(exc),stage='spellcheck',error_type=type(exc).__name__)
+            self.update(jid,state='failed',result_status='SYSTEM ERROR',message=str(exc),output=None,retryable=0)
+        except Exception as exc:
+            self.diagnostic(jid,str(exc),stage='spellcheck',error_type=type(exc).__name__)
+            self.update(jid,state='failed',result_status='SYSTEM ERROR',message='Spellcheck could not finish. The original exam was not changed.',output=None,retryable=0)
+            event(log,'spellcheck.job.failed',level=logging.ERROR,job_id=jid,**error_fields(exc))
+        if row['channel']=='whatsapp':
+            current=self.get(jid)
+            if current['output']:
+                self._queue_spellcheck_files(current)
+            else:
+                self.finish_whatsapp(current)
+        finished=self.get(jid)
+        event(log,'job.finished',job_id=jid,state=finished['state'],result_status=finished['result_status'],
+              has_output=bool(finished['output']),elapsed_seconds=round(time.monotonic()-started,2))
+
+    def _queue_spellcheck_files(self,row):
+        sender=row['owner'][3:]
+        report=spellcheck.report_path_for(row['output'])
+        if not report.is_file():
+            raise UserError('The spelling report was not saved.')
+        self.db.enqueue_many([
+            (sender,'document',{'path':row['output'],'caption':(row['message'] or 'Spellcheck finished.')[:1024]},row['id'],'spell-docx:'+row['id']),
+            (sender,'document',{'path':str(report),'caption':'Spelling changes report'},None,'spell-report:'+row['id']),
+        ])
+        self.update(row['id'],delivery='queued')
 
     def finish_whatsapp(self,row):
         """WhatsApp delivery adapter; exam classification remains unchanged."""

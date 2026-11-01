@@ -63,8 +63,13 @@ class Store:
     def emit(self,sender,text,job_id=None,dedupe=None):
         self.enqueue(sender,'interactive' if isinstance(text,dict) else 'text',text if isinstance(text,dict) else {'text':text},job_id,dedupe)
     def enqueue(self,sender,kind,payload,job_id=None,dedupe=None):
-        self.execute('INSERT OR IGNORE INTO outbox(sender,kind,payload,job_id,dedupe,due,created) VALUES(?,?,?,?,?,?,?)',
-                     (sender,kind,json.dumps(payload),job_id,dedupe,time.time(),time.time()))
+        self.enqueue_many([(sender,kind,payload,job_id,dedupe)])
+    def enqueue_many(self,rows):
+        now=time.time()
+        with self.connect() as db:
+            for sender,kind,payload,job_id,dedupe in rows:
+                db.execute('INSERT OR IGNORE INTO outbox(sender,kind,payload,job_id,dedupe,due,created) VALUES(?,?,?,?,?,?,?)',
+                           (sender,kind,json.dumps(payload) if not isinstance(payload,str) else payload,job_id,dedupe,now,now))
     def limited(self,key,maximum,seconds):
         now=time.time()
         with self.connect() as db:
