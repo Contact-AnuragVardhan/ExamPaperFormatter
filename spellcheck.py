@@ -334,13 +334,26 @@ def _decision(token: str) -> tuple[str, str]:
 
 
 def _english_decision(token: str) -> tuple[str, str]:
-    if token != token.lower() or not token.isalpha() or not EN_MIN_LENGTH <= len(token) <= MAX_TOKEN:
+    if not token.isalpha() or not EN_MIN_LENGTH <= len(token) <= MAX_TOKEN:
+        return ("ignore", "")
+    # Only a simple capital (Fingerprins) may take a spelling fix. All capitals
+    # and internal capitals stay put, which keeps acronyms and names like Fischer.
+    if token != token.lower():
+        if token[0].isupper() and token[1:].islower():
+            kind, chosen = _english_decision(token.lower())
+            if kind == "correct" and _plural_pair_choice(token.lower(), chosen):
+                return ("correct", chosen[:1].upper() + chosen[1:])
         return ("ignore", "")
     lexicon = _lexicon()
     if token in lexicon.en_words:
         return ("ignore", "")
+    # A dictionary entry with no usage count is not a rival spelling.
     ranked = sorted(
-        (word for word in _edits(token, "abcdefghijklmnopqrstuvwxyz") if word in lexicon.en_words),
+        (
+            word
+            for word in _edits(token, "abcdefghijklmnopqrstuvwxyz")
+            if word in lexicon.en_words and lexicon.en_freq.get(word, 0) > 0
+        ),
         key=lambda word: lexicon.en_freq.get(word, 0),
         reverse=True,
     )
@@ -348,10 +361,11 @@ def _english_decision(token: str) -> tuple[str, str]:
         return ("ignore", "")
     best = ranked[0]
     best_freq = lexicon.en_freq.get(best, 0)
-    if any(lexicon.en_freq.get(word, 0) <= 0 for word in ranked):
-        return ("skip", "uncertain")
     if _ambiguous_prefix(token, best, lexicon):
         return ("skip", "uncertain")
+    # fingerprint/fingerprints is one word. The frequency ratio does not apply.
+    if _is_plural_pair(ranked) and best_freq >= EN_MIN_FREQUENCY:
+        return ("correct", best)
     if len(ranked) > 1:
         second_freq = lexicon.en_freq.get(ranked[1], 0)
         if second_freq <= 0 or best_freq < EN_FREQUENCY_RATIO * second_freq or best_freq < EN_MIN_FREQUENCY:
@@ -359,6 +373,27 @@ def _english_decision(token: str) -> tuple[str, str]:
     elif best_freq < EN_MIN_FREQUENCY:
         return ("skip", "uncertain")
     return ("correct", best)
+
+
+def _is_plural_pair(words: list[str]) -> bool:
+    if len(words) != 2:
+        return False
+    short, long = sorted(words, key=len)
+    return long == short + "s" or long == short + "es"
+
+
+def _plural_pair_choice(token: str, chosen: str) -> bool:
+    lexicon = _lexicon()
+    ranked = sorted(
+        (
+            word
+            for word in _edits(token, "abcdefghijklmnopqrstuvwxyz")
+            if word in lexicon.en_words and lexicon.en_freq.get(word, 0) > 0
+        ),
+        key=lambda word: lexicon.en_freq.get(word, 0),
+        reverse=True,
+    )
+    return bool(ranked) and ranked[0] == chosen and _is_plural_pair(ranked)
 
 
 def _ambiguous_prefix(token: str, best: str, lexicon: _Lexicon) -> bool:
@@ -372,14 +407,22 @@ def _ambiguous_prefix(token: str, best: str, lexicon: _Lexicon) -> bool:
 
 
 def _hindi_decision(token: str) -> tuple[str, str]:
-    if _DEVANAGARI_DIGIT.search(token) or not HI_MIN_LENGTH <= len(token) <= MAX_TOKEN:
+    if _DEVANAGARI_DIGIT.search(token) or len(token) > MAX_TOKEN:
         return ("ignore", "")
     key = unicodedata.normalize("NFC", token)
     if key != token:
         return ("skip", "uncertain")
     lexicon = _lexicon()
+    # A rare dictionary entry can be a clipped word, as निय is for नियम.
+    # A short unknown token stays unchanged.
+    if len(key) < HI_MIN_LENGTH:
+        clipped = _clipped_completion(key, lexicon)
+        return ("correct", clipped) if clipped else ("ignore", "")
     if key in lexicon.hi_known:
-        return ("ignore", "")
+        if lexicon.hi_freq.get(key, 0) >= HI_MIN_FREQUENCY:
+            return ("ignore", "")
+        clipped = _clipped_completion(key, lexicon)
+        return ("correct", clipped) if clipped else ("ignore", "")
     ranked = [word for word in _edits(key, lexicon.hi_alphabet) if word in lexicon.hi_known]
     if len(ranked) != 1:
         return ("skip", "uncertain") if ranked else ("ignore", "")
@@ -387,6 +430,24 @@ def _hindi_decision(token: str) -> tuple[str, str]:
     if lexicon.hi_freq.get(candidate, 0) < HI_MIN_FREQUENCY:
         return ("skip", "uncertain")
     return ("correct", candidate)
+
+
+def _clipped_completion(key: str, lexicon: _Lexicon) -> str | None:
+    """One added letter on a rare known word, with no other common neighbor."""
+    frequency = lexicon.hi_freq.get(key, 0)
+    if len(key) < 3 or frequency <= 0 or frequency >= HI_MIN_FREQUENCY:
+        return None
+    strong = [
+        word
+        for word in _edits(key, lexicon.hi_alphabet)
+        if word in lexicon.hi_known and lexicon.hi_freq.get(word, 0) >= HI_MIN_FREQUENCY
+    ]
+    if len(strong) != 1:
+        return None
+    chosen = strong[0]
+    if chosen.startswith(key) and len(chosen) == len(key) + 1:
+        return chosen
+    return None
 
 
 def _edits(word: str, alphabet: str) -> set[str]:

@@ -135,6 +135,26 @@ def test_english_spellcheck_menu_reopens_saved_docx(env):
     assert b"studnts -> students" in meta.uploads[1]
 
 
+def test_clipped_hindi_word_does_not_guess_a_blank_heading(tmp_path):
+    source = tmp_path / "Hinidi.docx"
+    source.write_bytes(make_docx([
+        "5. न्यूटन का प्रथम गति निय किससे संबंधित है?",
+        "प्रश्न 2. रिक्त स्था की पूर्ति कीजिए।",
+        "दूरी 5 मी है।",
+    ]))
+    before = source.read_bytes()
+    result = spellcheck.run(source, tmp_path)
+    paragraphs = body_paragraphs(result.docx_path.read_bytes())
+    assert source.read_bytes() == before
+    assert paragraphs[0] == "5. न्यूटन का प्रथम गति नियम किससे संबंधित है?"
+    assert paragraphs[1] == "प्रश्न 2. रिक्त स्था की पूर्ति कीजिए।"
+    assert paragraphs[2] == "दूरी 5 मी है।"
+    report = result.report_path.read_text(encoding="utf-8")
+    assert "निय -> नियम" in report
+    assert "स्था" not in report and "मी ->" not in report
+    assert any(item.word == "स्था" and item.reason == "uncertain" for item in result.skipped)
+
+
 def test_hindi_spellcheck_menu_reopens_saved_docx(env):
     data = make_docx(HINDI)
     _, _, row = run_menu(env, "Exam H.docx", data)
@@ -207,6 +227,33 @@ def test_no_corrections_still_returns_both_files(tmp_path):
     assert result.docx_path.read_bytes() == before
     assert result.report_path.read_text(encoding="utf-8") == "No confident spelling corrections found.\n"
     assert result.corrections == 0
+
+
+def test_clear_passage_typos_keep_names_and_uncertain_words(tmp_path):
+    source = tmp_path / "Passage.docx"
+    source.write_bytes(make_docx([
+        "Fingerprins have fascinated scientists.",
+        "used by polce departments",
+        "Anees met Fischer in Jaipur.",
+        "The caet is here.",
+        "British organisations and tranquilisers stay.",
+        "Q2) Calculate x² + y² = z². (2 marks)",
+    ]))
+    before = source.read_bytes()
+    result = spellcheck.run(source, tmp_path)
+    paragraphs = body_paragraphs(result.docx_path.read_bytes())
+    assert source.read_bytes() == before
+    assert paragraphs[0] == "Fingerprints have fascinated scientists."
+    assert paragraphs[1] == "used by police departments"
+    assert paragraphs[2] == "Anees met Fischer in Jaipur."
+    assert paragraphs[3] == "The caet is here."
+    assert paragraphs[4] == "British organisations and tranquilisers stay."
+    assert paragraphs[5] == "Q2) Calculate x² + y² = z². (2 marks)"
+    report = result.report_path.read_text(encoding="utf-8")
+    assert "Fingerprins -> Fingerprints" in report
+    assert "polce -> police" in report
+    assert "Anees" not in report and "Fischer" not in report and "caet ->" not in report
+    assert any(item.word == "caet" and item.reason == "uncertain" for item in result.skipped)
 
 
 def test_uncertain_word_is_skipped_and_not_reported_as_a_correction(tmp_path):
