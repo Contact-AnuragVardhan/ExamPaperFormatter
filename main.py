@@ -18,6 +18,7 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 import job
 import records
 import reporting
+import spellcheck
 
 HEADLINES = {
     "OK": "No significant formatting or structural problems detected.",
@@ -32,6 +33,7 @@ HEADLINES = {
 COLORS = {
     "OK": "#0b6b2f",
     "PASS": "#0b6b2f",
+    "SPELLCHECK": "#0b6b2f",
     "ALL GOOD": "#0b6b2f",
     "FORMAT ERROR": "#8a5a00",
     "FORMATTING": "#8a5a00",
@@ -65,6 +67,7 @@ class App(tk.Tk):
         self.exam = tk.StringVar()
         self.events: queue.Queue = queue.Queue()
         self.busy = False
+        self.activity = ""
         self.result_path: Path | None = None
         self.admin_window: AdminWindow | None = None
         self._build()
@@ -106,8 +109,10 @@ class App(tk.Tk):
         buttons.pack(anchor="w", pady=(0, 16))
         self.check_button = ttk.Button(buttons, text="CHECK EXAM", width=18, command=self._check)
         self.format_button = ttk.Button(buttons, text="FORMAT EXAM", width=18, command=self._format)
+        self.spell_button = ttk.Button(buttons, text="SPELLCHECK", width=16, command=self._spellcheck)
         self.check_button.pack(side="left")
         self.format_button.pack(side="left", padx=(8, 0))
+        self.spell_button.pack(side="left", padx=(8, 0))
 
         self.result_label = ttk.Label(frame, text="Ready", style="Result.TLabel")
         self.result_label.pack(anchor="w", pady=(0, 8))
@@ -151,6 +156,38 @@ class App(tk.Tk):
     def _format(self) -> None:
         self._start("format")
 
+    def _spellcheck(self) -> None:
+        if self.busy:
+            return
+        exam = self.exam.get().strip()
+        exam_path = Path(exam)
+        if exam_path.suffix.lower() != ".docx" or not exam_path.is_file():
+            self._show("SYSTEM ERROR", "Choose a Word .docx exam file.")
+            return
+        try:
+            package = exam_path.read_bytes()
+        except OSError as exc:
+            self._show("SYSTEM ERROR", str(exc))
+            return
+        if not records.is_word_package(package):
+            self._show("SYSTEM ERROR", "That exam file is not a Word .docx.")
+            return
+        self.busy = True
+        self.activity = "spellcheck"
+        self._buttons(False)
+        self._show("Working", "Checking spelling in a copy of the exam. The original file is not changed.")
+        self.progress.configure(text="Looking for confident spelling corrections...")
+        threading.Thread(target=self._spell_worker, args=(exam_path,), daemon=True).start()
+        self.after(200, self._poll)
+
+    def _spell_worker(self, exam: Path) -> None:
+        try:
+            result = spellcheck.run(exam)
+        except Exception as exc:
+            self.events.put(("spell-error", str(exc)))
+            return
+        self.events.put(("spell", result))
+
     def _start(self, kind: str) -> None:
         if self.busy:
             return
@@ -188,6 +225,7 @@ class App(tk.Tk):
             return
 
         self.busy = True
+        self.activity = kind
         self._buttons(False)
         self._show("Working", f"Reference: {ref.subject} {ref.grade}")
         self.progress.configure(text="Sending the Reference and the Teacher Exam to ChatGPT...")
@@ -214,6 +252,30 @@ class App(tk.Tk):
                 break
             if item[0] == "progress":
                 self.progress.configure(text=item[1])
+                continue
+            if item[0] == "spell-error":
+                self.busy = False
+                self.activity = ""
+                self._buttons(True)
+                self.progress.configure(text="")
+                self._show("SYSTEM ERROR", item[1])
+                continue
+            if item[0] == "spell":
+                result = item[1]
+                records.log("Spellcheck", "", "SPELLCHECK", "PASS" if result.corrections else "NONE")
+                self.busy = False
+                self.activity = ""
+                self._buttons(True)
+                self.progress.configure(text="")
+                detail = "\n\n".join((
+                    result.summary,
+                    str(result.docx_path),
+                    str(result.report_path),
+                ))
+                if result.skipped:
+                    detail += f"\n\nUncertain spellings left unchanged: {len(result.skipped)}."
+                self._show("SPELLCHECK", detail, result.docx_path)
+                _open_path(result.docx_path)
                 continue
             _marker, kind, subject, grade, result = item
             action = "CHECK" if kind == "check" else "FORMAT"
@@ -263,6 +325,7 @@ class App(tk.Tk):
         state = "normal" if enabled else "disabled"
         self.check_button.configure(state=state)
         self.format_button.configure(state=state)
+        self.spell_button.configure(state=state)
         self.configure(cursor="" if enabled else "watch")
 
     def _admin(self) -> None:
@@ -286,7 +349,7 @@ class App(tk.Tk):
         if self.busy:
             if not messagebox.askokcancel(
                 "Exam Formatter",
-                "ChatGPT is still working. Close anyway?",
+                "Spellcheck is still working. Close anyway?" if self.activity == "spellcheck" else "ChatGPT is still working. Close anyway?",
                 parent=self,
             ):
                 return

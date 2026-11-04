@@ -1,6 +1,14 @@
-# Exam Formatter REV2 — Web and WhatsApp
+# Exam Formatter Revision 2.2 — Web and WhatsApp
 
 This package extends Avnish’s supplied REV2 Python application with a browser interface and Meta WhatsApp Cloud API integration. Windows Tkinter, browser Check Exam / Format Exam, and WhatsApp all call the same `job.run` formatter with exactly one subject reference and the teacher’s original DOCX. `instructions.py` remains unchanged. Python handles orchestration, file validation, menus, persistence, and delivery; it does not rebuild or repair academic content.
+
+## Merged functionality (November 2026)
+
+This version preserves the GitHub `main` branch's **Teacher Helper registration and validation**: web teachers must enter their registered WhatsApp number and the shared teacher code; WhatsApp senders are checked against `teacher_profile`; administrators can add teachers using Web Administration or WhatsApp Admin. Configure `DATABASE_URL` to point to the same Teacher Helper database. See `TEACHER_AUTH_SETUP.md`.
+
+The client's **standalone Spellcheck** is available on Windows, Web and WhatsApp. It corrects high-confidence English and Hindi spelling mistakes in a `.docx` without referencing an exam format or calling the FORMAT engine, and returns a corrected Word document plus a plain-text spelling changes report. In the Web workspace choose **Spellcheck**, upload the file, and download both outputs. In WhatsApp send **SPELLCHECK** directly (case-insensitive) or send **Hi** and select **Spellcheck**, then attach a Word document. Existing FORMAT and CHECK actions remain separate.
+
+Revision 2.2 uses shared compact activity entries (DD/MM subject/grade PASS/FAIL) for both WhatsApp Admin and Web Admin while retaining full internal diagnostics. Local Spellcheck jobs interrupted by a restart can resume without calling FORMAT/CHECK. WhatsApp tracks both attachments independently so a failed attachment can be retried without resending a successfully sent one. See `TESTING.md` and `RENDER_DEPLOYMENT.md`.
 
 ## Start locally on Windows
 
@@ -67,7 +75,7 @@ Administrator password, teacher access code, reasoning effort, upload/session/re
 - Subject/class selection from configured references; disabled subjects are clearly unavailable.
 - Check Exam and Format Exam, Word upload, drag/drop, and confirmation showing filename and subject.
 - Asynchronous request progress, saved history, queued cancellation, safe manual retry, formatted-exam and issues-report downloads.
-- Teacher requests are isolated by signed-in browser session. The shared teacher code is a beta access gate, not a school account directory. Signing out and signing in creates a new session and a new history; admins can access retained requests.
+- Teacher requests are isolated by signed-in browser session. The shared teacher code is a beta access gate alongside the Teacher Helper registration check. Signing out and signing in creates a new session and a new history; admins can access retained requests.
 - Administrator reference view/download, add/replace, enable/disable, delete, all-request monitoring, delivery retry, unresolved request reconciliation, activity log, and estimated usage costs.
 - Responsive desktop/mobile layout. Help explains errors, review requirements, and WhatsApp use.
 

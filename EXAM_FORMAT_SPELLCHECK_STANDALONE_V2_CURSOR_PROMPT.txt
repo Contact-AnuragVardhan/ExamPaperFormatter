@@ -1,0 +1,58 @@
+EXAM FORMATTER — STANDALONE SPELLCHECK COMMAND (V2)
+
+CONTEXT AND NON-NEGOTIABLE BOUNDARY
+The existing FORMAT operation and its output have been approved by teachers. Add a separate SPELLCHECK command. Do not modify FORMAT's prompts, logic, validation, output, menu path, reference handling, tests, or behavior. Do not make SPELLCHECK run automatically before or after FORMAT. It must accept an input Word .docx exam directly and write separate outputs. This command needs no reference exam and no teacher confirmation per correction.
+
+FIRST: INSPECT THE REPOSITORY
+Find the current Windows command/menu structure, shared services, the Word-file handling conventions, logging and output locations, and existing tests. Identify the smallest place to add a separate SPELLCHECK action. Note the exact files you will touch. Keep FORMAT files untouched except a minimal menu/router registration only if unavoidable; demonstrate with a diff that no FORMAT execution path changed. Do not stop for routine approval.
+
+USER FLOW
+1. Select SPELLCHECK.
+2. Choose one input .docx file. No reference selection, language dropdown, or edit dialog is required. Detect English, Hindi, or mixed text from the document itself.
+3. Run conservative spelling correction on a copy.
+4. Return two separate files together:
+   a. <input-stem>_Spellchecked.docx — complete Word document with only certain spelling errors corrected.
+   b. <input-stem>_Spelling_Changes.txt — human-readable, per-logical-line report of original and corrected text plus typo -> correction pairs.
+5. If no safe correction is found, still return the copied DOCX and a report saying "No confident spelling corrections found."
+6. Source file remains byte-for-byte unchanged. A failed run must not replace or partially publish an output.
+
+WHAT SPELLCHECK MAY DO
+Correct only an unmistakable misspelled word in the language in which that text is written. Do not translate Hindi or English. Preserve the intended word and meaning. In a mixed document, choose language by text span, not by filename, subject, or majority language. Use a conservative confidence threshold: if the correction is uncertain, leave it unchanged and optionally record it as skipped in a separate diagnostic log, not as a correction. Do not require teacher intervention.
+
+WHAT SPELLCHECK MUST NEVER DO
+No grammar, punctuation, capitalization, style, wording, or formatting improvements. Do not add, remove, move, split, or merge questions or paragraphs. Do not change headers, marks, numbering, options, academic facts, proper nouns, names, acronyms, book titles, technical terminology, URLs, identifiers, citations, or text inside images. Protect mathematical material: Word equations/OMML, equation objects, fields, variables, mathematical symbols, formulas, numeric expressions, units, and code-like expressions. Leave an uncertain text span or a word crossing incompatible formatting boundaries alone. Preserve tables, images, hyperlinks, styles, runs, sections, headers/footers, and other Word objects. Do not flatten the DOCX to plain text and reconstruct it.
+
+DOCUMENT SAFETY
+Implement spellcheck as a new service that edits only safe Word text nodes in a copy of the document. If using ChatGPT/Code Interpreter, use a separate SPELLCHECK-specific instruction and file operation, not the FORMAT instruction. The model can propose corrections; apply only validated substitutions at located text spans. Confirm each before-word occurs at the specified location and each after-word is only a spelling correction. Consider Hindi Unicode combining marks/normalization carefully; do not change characters outside the accepted word. If a word spans runs or cannot be replaced without damaging formatting, skip it. Validate that the DOCX opens and that nontext XML parts, equations, field codes, and protected data remain intact. Keep the new feature modest in cost; instrument its elapsed time and API calls if the app already does so.
+
+REPORT FORMAT
+"Line" means one logical DOCX paragraph (or one paragraph within a table cell), not a visual line wrapped by Word. Identify each changed location as Body paragraph N, Table T / row R / cell C / paragraph N, Header/Footer location, etc., using stable traversal order. For each changed logical line include:
+- Location
+- Original line: exact paragraph text before spellcheck
+- Corrected line: exact paragraph text after spellcheck
+- Corrections: one or more exact "old -> new" pairs, in occurrence order
+Include only changed lines in the main report. At the top summarize total changed lines and total word corrections. If the same typo appears twice in one line, record both occurrences. Do not claim a correction that was not present in the saved DOCX. Save the report as a separate TXT file, never embedded into the exam. A supplemental machine-readable log is optional; the TXT report is required.
+
+TWO REQUIRED END-TO-END TESTS
+Test E — English input DOCX:
+  Body paragraph: "The studnts will answer Q1."
+  Expected output paragraph: "The students will answer Q1."
+  Report contains its location, original and corrected lines, and "studnts -> students".
+  A second paragraph such as "Q2) Calculate x² + y² = z². (2 marks)" remains exactly the same; preserve its mathematical content and marks.
+
+Test H — Hindi input DOCX:
+  Body paragraph: "विदयार्थी प्रश्न 1 का उत्तर दें।"
+  Expected output paragraph: "विद्यार्थी प्रश्न 1 का उत्तर दें।"
+  Report contains its location, original and corrected lines, and "विदयार्थी -> विद्यार्थी".
+  Include "प्रश्न 2: x² + y² = z² (2 अंक)" and an embedded English technical term; both remain unchanged.
+
+Tests must exercise the actual user-visible SPELLCHECK path, reopen the output DOCX, and compare report entries with the saved document. Add a mixed-language fixture: one safe English and one safe Hindi typo in distinct spans, and a technical/proper noun left unchanged. Add a preservation fixture with a real Word equation (OMML) and a small table or image; compare the protected XML and object relationships before/after. Verify input bytes unchanged. Test a no-corrections case and an uncertain word that is skipped. These supplementary checks may be deterministic; the two English/Hindi end-to-end tests are mandatory.
+
+REGRESSION AND ACCEPTANCE
+Run existing FORMAT tests and compare representative previously approved FORMAT outputs or snapshots before and after the change. They must be unchanged. Show `git diff` so the FORMAT prompt and core are demonstrably untouched. If a live AI pass is needed for the end-to-end tests, run it and report actual results, cost/latency when available. Do not claim success from mocked model output alone. Do not weaken any existing integrity checks.
+
+DELIVERABLES
+- New SPELLCHECK command in the existing menu and an independently callable service; do not tie it to FORMAT.
+- A corrected DOCX and a separate per-line TXT change report for each successful invocation.
+- Two simple English/Hindi end-to-end fixtures, plus mixed and protected-math checks.
+- Short implementation summary: files changed, commands run, actual before/after results, protected-object checks, FORMAT regression result, and any skipped uncertain corrections.

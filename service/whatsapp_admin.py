@@ -203,7 +203,7 @@ class WhatsAppAdmin:
         return result
 
     def activity_chunks(self):
-        lines=list(reversed((records.read_log() or 'No activity yet.').splitlines()));chunks=[];part=''
+        lines=list(reversed((records.read_activity() or 'No activity yet.').splitlines()));chunks=[];part=''
         for line in lines:
             line=line[:850]
             if len(part)+len(line)+1>850: chunks.append(part);part=''

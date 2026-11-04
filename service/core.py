@@ -10,11 +10,13 @@ from pathlib import Path
 import job
 import records
 import reporting
+import spellcheck
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
 from .teacher_registry import TeacherRegistry
 from .meta import MetaClient
+from .teacher_registry import TeacherRegistry
 
 log=logging.getLogger('exam.service')
 ACTIVE=('queued','running','uncertain')
@@ -181,6 +183,31 @@ class Service:
                   reference_version=ref['version'][:12],teacher_bytes=len(data),reference_bytes=len(reference_data))
             return self.get(jid)
 
+    def submit_spellcheck(self,owner,channel,name,data,idem):
+        """Queue spelling correction without a reference or a FORMAT request."""
+        if not idem or len(idem)>150: raise UserError('A valid submission ID is required.')
+        with self.lock:
+            existing=self.db.one('SELECT * FROM jobs WHERE owner=? AND idem=?',(owner,idem))
+            if existing:
+                event(log,'job.submission.duplicate',job_id=existing['id'],channel=channel)
+                return existing
+            active=self.active(owner)
+            if active:
+                event(log,'job.submission.blocked',level=logging.WARNING,job_id=active['id'],reason='active_job',state=active['state'])
+                raise UserError('An exam is already being processed. Wait for its result before starting another.')
+            if self.db.limited('jobs:'+owner,20,3600):
+                event(log,'job.submission.blocked',level=logging.WARNING,actor=actor_key(owner),reason='hourly_limit')
+                raise UserError('You have reached the hourly exam limit. Please try again later.')
+            validate_docx(data,name,self.s.max_bytes)
+            jid=uuid.uuid4().hex
+            folder=self.s.data/'jobs'/jid; folder.mkdir()
+            (folder/'teacher.docx').write_bytes(data)
+            now=time.time()
+            self.db.execute('''INSERT INTO jobs(id,owner,channel,kind,reference_id,subject,grade,version,filename,state,idem,created,updated)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',(jid,owner,channel,'spellcheck','','Spellcheck','', '',filename(name),'queued',idem,now,now))
+            event(log,'job.queued',job_id=jid,actor=actor_key(owner),channel=channel,kind='spellcheck',teacher_bytes=len(data))
+            return self.get(jid)
+
     def get(self,jid): return self.db.one('SELECT * FROM jobs WHERE id=?',(jid,))
     def public(self,row):
         return {k:row[k] for k in ('id','channel','kind','subject','grade','filename','state','result_status','message','retryable','delivery','created','updated')} | {'has_output':bool(row['output'])}
@@ -238,16 +265,53 @@ class Service:
 
     def start(self):
         event(log,'workers.starting')
-        # Resume a known remote response; never repeat an ambiguous paid POST.
+        # Only FORMAT/CHECK use the remote-response reconciliation path.
         for row in self.db.all("SELECT * FROM jobs WHERE state='running'"):
+            if row['kind']=='spellcheck':
+                self.update(row['id'],state='queued',message='Resuming local Spellcheck from the saved exam.')
+                event(log,'spellcheck.restart.requeued',job_id=row['id'])
+                continue
             remote=json.loads(row['remote'] or '{}')
             event(log,'job.restart.recovery',job_id=row['id'],known_response=bool(remote.get('response_id')))
             if remote.get('response_id'): self.update(row['id'],state='queued',message='Resuming the existing request.')
             else: self.update(row['id'],state='uncertain',message='Processing was interrupted. An administrator must check its status before another exam can be submitted.')
+        # A completed local job needs both files. Recompute only when a saved
+        # attachment has been lost; never repeat a completed healthy job.
+        for row in self.db.all("SELECT * FROM jobs WHERE kind='spellcheck' AND state='completed'"):
+            output=Path(row['output']) if row['output'] else None
+            if not output or not output.is_file() or not spellcheck.report_path_for(output).is_file():
+                self.update(row['id'],state='queued',output=None,message='Restoring saved Spellcheck attachments.')
+                event(log,'spellcheck.restart.output_missing',job_id=row['id'])
         self.db.execute("UPDATE inbox SET state='queued' WHERE state='processing'")
+        # A send interrupted after the Meta request began may already have
+        # reached WhatsApp. Do not automatically resend an ambiguous document.
+        sending=self.db.all("SELECT * FROM outbox WHERE state='sending' AND kind='document'")
+        for item in sending:
+            self.db.execute("UPDATE outbox SET state='failed' WHERE id=?",(item['id'],))
+            if item['job_id']:
+                self.update(item['job_id'],delivery='failed')
+                self.db.emit(item['sender'],
+                    'A document send was interrupted during restart. Ask the admin to check Meta delivery before selecting Retry Delivery.',
+                    dedupe='interrupted-delivery:'+str(item['id']))
         self.db.execute("UPDATE outbox SET state='queued' WHERE state='sending'")
         for row in self.db.all("SELECT * FROM jobs WHERE channel='whatsapp' AND delivery IS NULL AND state IN ('completed','needs_changes','failed','uncertain')"):
-            self.finish_whatsapp(row)
+            if row['kind']=='spellcheck' and row['output']:
+                try: self._queue_spellcheck_files(row)
+                except (OSError,UserError):
+                    self.update(row['id'],state='queued',output=None,message='Restoring saved Spellcheck attachments.')
+            else:
+                self.finish_whatsapp(row)
+        # Repair a crash between updating the outbox and updating the job.
+        # Two accepted Meta sends must not be transmitted a second time.
+        for row in self.db.all("SELECT * FROM jobs WHERE kind='spellcheck' AND channel='whatsapp' AND state='completed' AND (delivery IS NULL OR delivery='queued')"):
+            documents=self.db.all("SELECT state FROM outbox WHERE job_id=? AND kind='document'",(row['id'],))
+            if any(item['state']=='failed' for item in documents):
+                self.update(row['id'],delivery='failed')
+            elif len(documents)==2 and all(item['state']=='sent' for item in documents):
+                self.update(row['id'],delivery='sent')
+                sender=row['owner'][3:]
+                self.set_finished_session(sender,row)
+                self.emit_reply(sender,self.navigation_menu(sender,row),row['id'],'next:'+row['id'])
         for target in (self.jobs_loop,self.messages_loop,self.delivery_loop):
             thread=threading.Thread(target=target,daemon=True,name=target.__name__);thread.start();self.threads.append(thread)
             event(log,'worker.started',worker=target.__name__)
@@ -273,6 +337,9 @@ class Service:
         started=time.monotonic()
         event(log,'job.started',job_id=jid,channel=row['channel'],kind=row['kind'],subject=row['subject'],grade=row['grade'])
         folder=self.s.data/'jobs'/jid
+        if row['kind']=='spellcheck':
+            self._process_spellcheck(row,jid,folder,started)
+            return True
         def progress(_): self.update(jid,message='Your exam is being checked.' if row['kind']=='check' else 'Your exam is being formatted.')
         def remote(state):
             self.update(jid,remote=json.dumps(state))
@@ -342,15 +409,66 @@ class Service:
         except UserError as exc:
             self.diagnostic(jid,str(exc),stage='validate_output',error_type=type(exc).__name__)
             self.update(jid,state='failed',result_status='SYSTEM ERROR',message='No valid Word result file was produced. Please contact the administrator.',output=None,retryable=0)
+            records.log(row['subject'],row['grade'],row['kind'].upper(),'FAIL')
         except Exception as exc:
             # Unknown engine failure must not invite a second paid call.
             self.diagnostic(jid,str(exc),stage='service_processing',error_type=type(exc).__name__)
             self.update(jid,state='uncertain',result_status='SYSTEM ERROR',message='Processing was interrupted. Please contact the administrator before retrying.',retryable=0)
+            records.log(row['subject'],row['grade'],row['kind'].upper(),'FAIL')
         if row['channel']=='whatsapp': self.finish_whatsapp(self.get(jid))
         finished=self.get(jid)
         event(log,'job.finished',job_id=jid,state=finished['state'],result_status=finished['result_status'],
               has_output=bool(finished['output']),elapsed_seconds=round(time.monotonic()-started,2))
         return True
+
+    def _process_spellcheck(self,row,jid,folder,started):
+        """Run SPELLCHECK on the saved copy. FORMAT is not called."""
+        source=folder/'teacher.docx'
+        try:
+            before=source.read_bytes()
+            validate_docx(before,row['filename'],self.s.max_bytes)
+            result=spellcheck.run(source,folder,stem=Path(row['filename']).stem)
+            validate_docx(result.docx_path.read_bytes(),result.docx_path.name,self.s.max_bytes)
+            result.report_path.read_text(encoding='utf-8')
+            if source.read_bytes()!=before:
+                spellcheck._remove_published(result.docx_path,result.report_path)
+                raise spellcheck.SpellcheckError('The source exam was modified and the new output was removed.')
+            message=result.summary
+            if result.skipped:
+                message+=f' Uncertain spellings left unchanged: {len(result.skipped)}.'
+            self.update(jid,state='completed',result_status='SPELLCHECK',message=message,output=str(result.docx_path),retryable=0,diagnostic=None)
+            records.log('Spellcheck','', 'SPELLCHECK','PASS')
+            event(log,'spellcheck.job.completed',job_id=jid,corrections=result.corrections,changed_lines=result.changed_lines,
+                  skipped=len(result.skipped),elapsed_ms=round(result.elapsed_seconds*1000),api_calls=result.api_calls)
+        except UserError as exc:
+            self.diagnostic(jid,str(exc),stage='spellcheck',error_type=type(exc).__name__)
+            self.update(jid,state='failed',result_status='SYSTEM ERROR',message=str(exc),output=None,retryable=0)
+            records.log('Spellcheck','','SPELLCHECK','FAIL')
+        except Exception as exc:
+            self.diagnostic(jid,str(exc),stage='spellcheck',error_type=type(exc).__name__)
+            self.update(jid,state='failed',result_status='SYSTEM ERROR',message='Spellcheck could not finish. The original exam was not changed.',output=None,retryable=0)
+            records.log('Spellcheck','','SPELLCHECK','FAIL')
+            event(log,'spellcheck.job.failed',level=logging.ERROR,job_id=jid,**error_fields(exc))
+        if row['channel']=='whatsapp':
+            current=self.get(jid)
+            if current['output']:
+                self._queue_spellcheck_files(current)
+            else:
+                self.finish_whatsapp(current)
+        finished=self.get(jid)
+        event(log,'job.finished',job_id=jid,state=finished['state'],result_status=finished['result_status'],
+              has_output=bool(finished['output']),elapsed_seconds=round(time.monotonic()-started,2))
+
+    def _queue_spellcheck_files(self,row):
+        sender=row['owner'][3:]
+        report=spellcheck.report_path_for(row['output'])
+        if not report.is_file():
+            raise UserError('The spelling report was not saved.')
+        self.db.enqueue_many([
+            (sender,'document',{'path':row['output'],'caption':(row['message'] or 'Spellcheck finished.')[:1024]},row['id'],'spell-docx:'+row['id']),
+            (sender,'document',{'path':str(report),'caption':'Spelling changes report'},row['id'],'spell-report:'+row['id']),
+        ])
+        self.update(row['id'],delivery='queued')
 
     def finish_whatsapp(self,row):
         """WhatsApp delivery adapter; exam classification remains unchanged."""
@@ -475,7 +593,13 @@ class Service:
                   meta_message_id=mid,elapsed_ms=round((time.monotonic()-started)*1000))
             self.db.execute("UPDATE outbox SET state='sent',meta_id=? WHERE id=?",(mid,row['id']))
             if row['kind']=='document' and row['job_id']:
-                current=self.get(row['job_id']);self.update(row['job_id'],delivery='sent')
+                current=self.get(row['job_id'])
+                if current['kind']=='spellcheck' and self.db.one(
+                    "SELECT id FROM outbox WHERE job_id=? AND kind='document' AND state!='sent' LIMIT 1",
+                    (row['job_id'],)
+                ):
+                    return True
+                self.update(row['job_id'],delivery='sent')
                 self.set_finished_session(row['sender'],current)
                 self.emit_reply(row['sender'],self.navigation_menu(row['sender'],current),row['job_id'],'next:'+row['job_id'])
         except Exception as exc:
@@ -515,6 +639,11 @@ class Service:
                 self.update(row['job_id'],delivery='failed')
                 self.db.execute("UPDATE outbox SET state='failed' WHERE id=?",(row['id'],))
         elif status in rank and rank[status]>=rank.get(current['delivery'],0):
+            if current['kind']=='spellcheck' and self.db.one(
+                "SELECT id FROM outbox WHERE job_id=? AND kind='document' AND state!='sent' LIMIT 1",
+                (row['job_id'],)
+            ):
+                return
             self.update(row['job_id'],delivery=status)
     def cleanup(self):
         started=time.monotonic();removed_jobs=0;removed_pending=0

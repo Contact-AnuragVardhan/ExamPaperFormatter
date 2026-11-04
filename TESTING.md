@@ -1,56 +1,15 @@
-# Joint acceptance checklist for Anurag and Avnish
+# Testing the merged source
 
-Run these with real teacher exam files. Do not use an output-only DOCX-open check as proof that content/layout is correct. Compare questions, figures, wording, language, answers, and layout against the original teacher file and the selected reference.
+Install the dependencies listed in `requirements.txt` and `requirements-dev.txt`, then run `python -m pytest -q` from the project root.
 
-## Subject validation
+The suite covers the legacy FORMAT/CHECK orchestration, WhatsApp menus and administrator actions, web endpoints, teacher registry allow/deny and revocation checks, bilingual standalone Spellcheck, Word package preservation, web/WhatsApp Spellcheck output, and retriable WhatsApp delivery of both Spellcheck attachments.
 
-| Subject | Automated adapter coverage | Live acceptance required |
-| --- | --- | --- |
-| Math Class 10 | Submission, pinned reference, engine orchestration, exact delivery bytes | Check and format normal exam; layout review; missing-content report |
-| Chemistry Class 11 | Separate subject/reference and independent job | Check and format normal exam; preserve chemistry notation/figures; report review |
-| English Class 10 | Stored reference, default disablement, admin enablement and isolated request | Resolve the structural issue in the supplied guide; check and format representative exams; enable only after staff approval |
+Use a temporary Teacher Helper SQLite database for local testing (see `tests/conftest.py`), or configure an accessible PostgreSQL Teacher Helper database for a deployed instance. `DATABASE_URL` is required for service startup. For acceptance testing, log in with a registered teacher's WhatsApp number and the teacher access code; administrators log in with `ADMIN_PASSWORD`.
 
-## WhatsApp acceptance
+The automated suite uses a fake OpenAI client, so it does not verify a live provider account or a real WhatsApp webhook. Verify live English and Hindi files through both interfaces separately. For each, intentionally include two known spelling errors, check that the corrected DOCX contains both fixes, and inspect the TXT changes report. Check that original formatting and reference-based FORMAT/CHECK behavior are unchanged.
 
-- [ ] Configure Meta test sender, app credentials, and supported Graph API version. For beta, set `WHATSAPP_VERIFY_SIGNATURE=false`; for signed webhooks, set it to true and supply the app secret.
-- [ ] Verify GET token matching in both modes; verify unsigned POST acceptance only in beta mode and invalid-signature rejection in signed mode.
-- [ ] Send Hi on first contact: friendly introduction and main menu appear.
-- [ ] Send Hi during subject selection, upload, confirmation, help, processing, result, and error: returns to main menu.
-- [ ] Hi during processing preserves the active job; selecting another exam does not create another paid request.
-- [ ] Tap native Format and Check list rows; subject lists show only enabled references.
-- [ ] Confirm list messages and short reply-button menus appear on the phone; typing numbers does not navigate.
-- [ ] Old/expired confirmation taps produce fresh controls without a new paid request.
-- [ ] Paginated subject lists offer More Subjects, Previous Subjects, and Back to Main Menu when needed.
-- [ ] Upload normal DOCX; confirm the filename and class before submitting.
-- [ ] Change subject retains the pending exam; Replace File clears the pending upload; a newer valid attachment before confirmation replaces the earlier file.
-- [ ] Invalid input keeps the appropriate state. Native Back, Cancel Request, Main Menu, Exit, and Start Again work; Help Back returns to result/error screens too.
-- [ ] Queue cancellation succeeds; in-progress cancellation honestly explains that processing has started.
-- [ ] Duplicate webhook and repeated confirmation produce one formatter response.
-- [ ] Normal result sends a formatted exam. Structural/formatting failure sends an issues report, not an apparently completed exam.
-- [ ] Word opens the received file; hash compares exactly with the saved engine result.
-- [ ] Simulate media-download failure, missing reference, busy API, timeout, incomplete/no-output response, and delivery rejection.
-- [ ] Delivery retry sends the same saved result; OpenAI response count does not increase.
-- [ ] Reconnect after menu expiry; job still completes without losing its result.
+## Revision 2.2 checks
 
-## Browser acceptance
+`tests/test_release_22.py` tests direct WhatsApp `SPELLCHECK`, menu-based Spellcheck, and Web Spellcheck with exactly two English or Hindi misspellings per document. It checks both outputs, Word package preservation, compact admin activity, registered-teacher restrictions, and restart recovery (including interrupted document sends). These are simulated WhatsApp deliveries, not live Meta tests. For live acceptance, send the same four scenarios through a registered WhatsApp number and the deployed Web UI.
 
-- [ ] Teacher sign-in, subject selection, DOCX browse/drag-drop, and explicit confirmation.
-- [ ] Check and Format jobs each complete; status/history/downloads work.
-- [ ] Another signed-in browser cannot view/download someone else’s requests.
-- [ ] Teacher cannot access administrator endpoints or reference downloads.
-- [ ] Administrator add/replace/view/enable/disable/delete reference all work.
-- [ ] English stays unavailable before validation and becomes selectable after explicit enablement.
-- [ ] Mobile width shows usable forms with no horizontal overflow.
-- [ ] Admin job list, estimated cost note, activity log, and delivery retry work.
-
-## Hosting acceptance
-
-- [ ] HTTPS / secure cookies / persistent disk / one process and one replica.
-- [ ] Restart with queued job: it processes once.
-- [ ] Restart with saved remote response ID: polling resumes without new response creation.
-- [ ] Interrupt around response creation before ID persistence: job is unresolved, no automatic paid retry.
-- [ ] Restart immediately after engine result: saved result gets queued for delivery.
-- [ ] Meta delivered/read callback updates state without regressing on a late sent callback.
-- [ ] Seven-day cleanup removes expired closed jobs; active/unresolved jobs and outstanding deliveries remain.
-
-Staff presentation is ready only after these live tests and subject-quality reviews succeed. Mocked test passes do not complete the joint acceptance requirement.
+Before a deployment install `requirements.txt` (including the pinned `openai` and PostgreSQL driver) and run `pytest -q`. The Meta and OpenAI credentials must be verified separately in the deployment environment.

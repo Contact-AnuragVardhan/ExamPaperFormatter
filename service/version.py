@@ -1,0 +1,2 @@
+REVISION = '2.2'
+RELEASE = f'Revision {REVISION}'

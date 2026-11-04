@@ -9,15 +9,17 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import FastAPI,Request,HTTPException,UploadFile,File,Form
-from fastapi.responses import FileResponse,JSONResponse,PlainTextResponse
+from fastapi.responses import FileResponse,JSONResponse,PlainTextResponse,HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import records
+import spellcheck
 from runtime_logging import event,log_context,actor_key,error_fields
 from .config import Settings
 from .core import Service
 from .files import UserError,validate_docx
 from .limits import BodyLimit
 from .teacher_registry import TeacherRegistryUnavailable, TeacherAlreadyExists, InvalidTeacherDetails
+from .version import RELEASE
 
 WEB=Path(__file__).resolve().parent.parent/'web'
 log=logging.getLogger('exam.web')
@@ -51,7 +53,7 @@ def create_app(settings=None,service=None,start_workers=True):
         finally:
             if start_workers: service.close()
             event(log,'app.stopped')
-    app=FastAPI(title='Exam Formatter REV2',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
+    app=FastAPI(title=f'Exam Formatter {RELEASE}',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
     app.add_middleware(BodyLimit,limit=settings.max_bytes+1024*1024)
     app.state.service=service
     @app.exception_handler(UserError)
@@ -114,7 +116,7 @@ def create_app(settings=None,service=None,start_workers=True):
         event(log,'web.upload.validated',bytes=len(data))
         return data
     @app.get('/')
-    def home(): return FileResponse(WEB/'index.html')
+    def home(): return HTMLResponse((WEB/'index.html').read_text(encoding='utf-8').replace('__EXAM_RELEASE__',RELEASE))
     app.mount('/static',StaticFiles(directory=WEB),name='static')
     @app.get('/health')
     def health(): return {'status':'ok'}
@@ -167,6 +169,20 @@ def create_app(settings=None,service=None,start_workers=True):
         if not row['output'] or not Path(row['output']).is_file(): raise HTTPException(404,'No result file is available.')
         event(log,'web.result.download',job_id=jid,bytes=Path(row['output']).stat().st_size)
         return FileResponse(row['output'],filename=Path(row['output']).name,media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',headers={'Cache-Control':'no-store'})
+    @app.post('/api/spellcheck')
+    async def spellcheck_submit(request:Request,submission_id:str=Form(...),file:UploadFile=File(...)):
+        who=auth(request);data=await read_upload(file)
+        with service.lock:
+            row=service.submit_spellcheck(who['owner'],'web',file.filename,data,submission_id)
+        return service.public(row)
+    @app.get('/api/jobs/{jid}/spelling-report')
+    def spelling_report(jid:str,request:Request):
+        row=owned(request,jid)
+        if row['kind']!='spellcheck' or not row['output']: raise HTTPException(404,'No spelling report is available.')
+        report=spellcheck.report_path_for(row['output'])
+        if not report.is_file(): raise HTTPException(404,'No spelling report is available.')
+        event(log,'web.spellcheck.report_download',job_id=jid,bytes=report.stat().st_size)
+        return FileResponse(report,filename=report.name,media_type='text/plain; charset=utf-8',headers={'Cache-Control':'no-store'})
     @app.post('/api/jobs/{jid}/cancel')
     def cancel(jid:str,request:Request):
         row=owned(request,jid)
@@ -198,7 +214,7 @@ def create_app(settings=None,service=None,start_workers=True):
         auth(request,True)
         today,month,total,unpriced=records.cost_totals()
         return {'jobs':[service.admin_public(r) for r in service.db.all('SELECT * FROM jobs ORDER BY created DESC LIMIT 200')],
-                'activity':records.read_log(),'cost':{'today':today,'month':month,'total':total,'unpriced':unpriced,'estimated':True},
+                'activity':records.read_activity(),'cost':{'today':today,'month':month,'total':total,'unpriced':unpriced,'estimated':True},
                 'whatsapp_configured':settings.whatsapp_ready,'references':service.references()}
     @app.post('/api/admin/references')
     async def add_reference(request:Request,subject:str=Form(...),grade:str=Form(...),enabled:str=Form('false'),file:UploadFile=File(...)):

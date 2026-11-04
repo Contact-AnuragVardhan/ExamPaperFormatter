@@ -271,3 +271,26 @@ def _cell(value: str) -> str:
 def _filename_piece(value: str) -> str:
     cleaned = "".join(ch if ch.isalnum() else "_" for ch in value.strip()).strip("_")
     return cleaned[:40] or "file"
+
+
+def format_activity_line(line: str) -> str | None:
+    """Render historical or new activity records as one short phone-sized entry."""
+    parts = [part.strip() for part in line.split(' | ')]
+    if len(parts) != 5:
+        return None
+    try:
+        stamp = datetime.fromisoformat(parts[0]).strftime('%d/%m')
+    except ValueError:
+        return None
+    _, subject, grade, action, result = parts
+    subject = 'Spell' if action.casefold() == 'spellcheck' or subject.casefold() == 'spellcheck' else subject
+    subject = _cell(subject)[:20] or 'Unknown'
+    grade = _cell(grade)[:6] or '--'
+    failure = result.casefold() in {'system error', 'failed', 'fail', 'error', 'uncertain', 'cancelled'}
+    status = 'FAIL' if failure else 'PASS'
+    return f'{stamp} {subject}/{grade} {status}'[:39]
+
+def read_activity() -> str:
+    """Compact admin display; read_log() remains the unmodified audit trail."""
+    return '\n'.join(entry for line in read_log().splitlines()
+                     if (entry := format_activity_line(line)) is not None)

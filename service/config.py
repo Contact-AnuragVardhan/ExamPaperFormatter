@@ -21,6 +21,7 @@ class Settings:
     teacher_code: str = ''
     teacher_registry_database_url: str = ''
     admin_password: str = ''
+    teacher_registry_database_url: str = ''
     secure_cookie: bool = False
     max_upload_mb: int = 15
     session_minutes: int = 30
