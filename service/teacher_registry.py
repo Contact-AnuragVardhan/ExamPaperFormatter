@@ -7,15 +7,22 @@ from pathlib import Path
 from urllib.parse import unquote
 
 log = logging.getLogger('exam.teacher_registry')
+
 SCHOOL_NAME = 'Parivaar School'
 PREFERRED_LANGUAGE = 'Hinglish'
 
+
 class TeacherRegistryUnavailable(Exception):
     pass
+
+
 class TeacherAlreadyExists(Exception):
     pass
+
+
 class InvalidTeacherDetails(ValueError):
     pass
+
 
 def normalized_number(number):
     value = str(number or '').strip()
@@ -23,6 +30,7 @@ def normalized_number(number):
         return ''
     digits = ''.join(ch for ch in value if ch.isdigit())
     return digits if 7 <= len(digits) <= 15 else ''
+
 
 def valid_teacher_details(whatsapp_number, teacher_name, default_grade, default_subject):
     digits = normalized_number(whatsapp_number)
@@ -41,6 +49,7 @@ def valid_teacher_details(whatsapp_number, teacher_name, default_grade, default_
             raise InvalidTeacherDetails(f'{label} must be 1–{max_length} characters on one line.')
         details[field] = cleaned
     return details
+
 
 class TeacherRegistry:
     def __init__(self, database_url):

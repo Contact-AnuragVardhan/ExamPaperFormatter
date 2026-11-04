@@ -14,6 +14,7 @@ import spellcheck
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
+from .teacher_registry import TeacherRegistry
 from .meta import MetaClient
 from .teacher_registry import TeacherRegistry
 
