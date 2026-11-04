@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import FastAPI,Request,HTTPException,UploadFile,File,Form
-from fastapi.responses import FileResponse,JSONResponse,PlainTextResponse
+from fastapi.responses import FileResponse,JSONResponse,PlainTextResponse,HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import records
 import spellcheck
@@ -18,6 +18,8 @@ from .config import Settings
 from .core import Service
 from .files import UserError,validate_docx
 from .limits import BodyLimit
+from .teacher_registry import TeacherRegistryUnavailable, TeacherAlreadyExists, InvalidTeacherDetails
+from .version import RELEASE
 
 WEB=Path(__file__).resolve().parent.parent/'web'
 log=logging.getLogger('exam.web')
@@ -39,6 +41,8 @@ def create_app(settings=None,service=None,start_workers=True):
               session_minutes=settings.session_minutes,retention_days=settings.retention_days)
         if not settings.teacher_code or not settings.admin_password:
             raise RuntimeError('Set WEB_TEACHER_ACCESS_CODE and ADMIN_PASSWORD in .env before starting the service.')
+        if not settings.teacher_registry_database_url:
+            raise RuntimeError('Set DATABASE_URL to the Teacher Helper database before starting the service.')
         if settings.app_env=='prod' and not settings.wa_async:
             raise RuntimeError('WHATSAPP_ASYNC must be true in production so webhooks acknowledge promptly.')
         if settings.wa_http_timeout<=0:
@@ -49,7 +53,7 @@ def create_app(settings=None,service=None,start_workers=True):
         finally:
             if start_workers: service.close()
             event(log,'app.stopped')
-    app=FastAPI(title='Exam Formatter REV2',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
+    app=FastAPI(title=f'Exam Formatter {RELEASE}',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
     app.add_middleware(BodyLimit,limit=settings.max_bytes+1024*1024)
     app.state.service=service
     @app.exception_handler(UserError)
@@ -94,6 +98,12 @@ def create_app(settings=None,service=None,start_workers=True):
         row=service.db.one('SELECT * FROM auth WHERE token=? AND expires>?',(hashlib.sha256(token.encode()).hexdigest(),time.time()))
         if not row: raise HTTPException(401,'Please sign in.')
         if admin and row['role']!='admin': raise HTTPException(403,'Administrator access required.')
+        if row['role']=='teacher':
+            prefix='web:teacher:'
+            if not row['owner'].startswith(prefix): raise HTTPException(401,'Not a valid user.')
+            try: teacher=service.teacher_registry.find_by_id(row['owner'][len(prefix):].split(':',1)[0])
+            except TeacherRegistryUnavailable: raise HTTPException(503,'Teacher validation is temporarily unavailable.')
+            if not teacher: raise HTTPException(401,'Not a valid user.')
         return row
     def owned(request,jid):
         who=auth(request);row=service.get(jid)
@@ -106,7 +116,7 @@ def create_app(settings=None,service=None,start_workers=True):
         event(log,'web.upload.validated',bytes=len(data))
         return data
     @app.get('/')
-    def home(): return FileResponse(WEB/'index.html')
+    def home(): return HTMLResponse((WEB/'index.html').read_text(encoding='utf-8').replace('__EXAM_RELEASE__',RELEASE))
     app.mount('/static',StaticFiles(directory=WEB),name='static')
     @app.get('/health')
     def health(): return {'status':'ok'}
@@ -118,7 +128,14 @@ def create_app(settings=None,service=None,start_workers=True):
         expected=settings.admin_password if role=='admin' else settings.teacher_code
         supplied=str(payload.get('password',''))
         if role not in ('teacher','admin') or not expected or not hmac.compare_digest(supplied,expected): raise HTTPException(401,'Incorrect access code or password.')
-        token=secrets.token_urlsafe(32);owner='web:'+secrets.token_hex(16)
+        if role=='teacher':
+            try: teacher=service.teacher_registry.find_by_number(payload.get('whatsapp_number',''))
+            except TeacherRegistryUnavailable: raise HTTPException(503,'Teacher validation is temporarily unavailable.')
+            if not teacher: raise HTTPException(401,'Not a valid user.')
+            owner='web:teacher:'+str(teacher['id'])+':'+secrets.token_hex(16)
+        else:
+            owner='web:'+secrets.token_hex(16)
+        token=secrets.token_urlsafe(32)
         service.db.execute('INSERT INTO auth VALUES(?,?,?,?)',(hashlib.sha256(token.encode()).hexdigest(),owner,role,time.time()+86400*7))
         response=JSONResponse({'role':role})
         event(log,'web.login.succeeded',role=role,actor=actor_key(owner))
@@ -174,12 +191,30 @@ def create_app(settings=None,service=None,start_workers=True):
     async def retry(jid:str,request:Request):
         row=owned(request,jid);payload=await request.json()
         return service.public(service.retry(jid,row['owner'],str(payload.get('submission_id',''))))
+    @app.post('/api/admin/teachers')
+    async def add_teacher(request:Request):
+        auth(request,True)
+        try:
+            body=await request.json()
+            if not isinstance(body,dict): raise InvalidTeacherDetails('Enter the teacher details.')
+            teacher=service.teacher_registry.add_teacher(
+                body.get('whatsapp_number'),body.get('teacher_name'),
+                body.get('default_grade'),body.get('default_subject'),
+            )
+        except InvalidTeacherDetails as exc:
+            raise HTTPException(400,str(exc)) from exc
+        except TeacherAlreadyExists as exc:
+            raise HTTPException(409,str(exc)) from exc
+        except TeacherRegistryUnavailable as exc:
+            raise HTTPException(503,'Teacher registration is temporarily unavailable.') from exc
+        event(log,'admin.teacher.created',teacher_id=teacher['id'])
+        return JSONResponse({'teacher':teacher},status_code=201)
     @app.get('/api/admin/overview')
     def overview(request:Request):
         auth(request,True)
         today,month,total,unpriced=records.cost_totals()
         return {'jobs':[service.admin_public(r) for r in service.db.all('SELECT * FROM jobs ORDER BY created DESC LIMIT 200')],
-                'activity':records.read_log(),'cost':{'today':today,'month':month,'total':total,'unpriced':unpriced,'estimated':True},
+                'activity':records.read_activity(),'cost':{'today':today,'month':month,'total':total,'unpriced':unpriced,'estimated':True},
                 'whatsapp_configured':settings.whatsapp_ready,'references':service.references()}
     @app.post('/api/admin/references')
     async def add_reference(request:Request,subject:str=Form(...),grade:str=Form(...),enabled:str=Form('false'),file:UploadFile=File(...)):

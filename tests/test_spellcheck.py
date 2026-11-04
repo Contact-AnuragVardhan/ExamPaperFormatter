@@ -461,3 +461,55 @@ def test_spellcheck_menu_stays_within_whatsapp_limits(env):
 def test_format_instruction_is_not_used_for_spellcheck():
     assert "SPELLCHECK" not in FORMAT_INSTRUCTIONS
     assert job.FORMAT_INSTRUCTIONS is FORMAT_INSTRUCTIONS
+
+
+def test_whatsapp_spellcheck_report_delivery_can_be_retried(env):
+    """Both outputs are part of the same retriable request; no FORMAT rerun."""
+    svc, meta, row = run_menu(env, 'Retry.docx', make_docx(ENGLISH))
+    jid = row['id']
+    output = Path(row['output']).read_bytes()
+    attempts = []
+    original_send = meta.send_document
+
+    def send_document(sender, media_id, name, caption):
+        if name.endswith('.txt'):
+            attempts.append(name)
+            raise RuntimeError('Temporary WhatsApp delivery issue')
+        return original_send(sender, media_id, name, caption)
+
+    meta.send_document = send_document
+    for attempt in range(3):
+        if attempt:
+            svc.db.execute("UPDATE outbox SET due=0 WHERE job_id=? AND state='queued'", (jid,))
+        while svc.deliver_one():
+            pass
+    assert len(attempts) == 3
+    assert svc.get(jid)['delivery'] == 'failed'
+    docs = svc.db.all("SELECT * FROM outbox WHERE job_id=? AND kind='document' ORDER BY id", (jid,))
+    assert len(docs) == 2
+    assert docs[0]['state'] == 'sent' and docs[1]['state'] == 'failed'
+    assert svc.retry_delivery(jid, row['owner'])
+    meta.send_document = original_send
+    while svc.deliver_one():
+        pass
+    assert svc.get(jid)['delivery'] == 'sent'
+    assert len(meta.documents) == 2
+    assert sum(1 for item in meta.documents if item[2].endswith('_Spellchecked.docx')) == 1
+    assert sum(1 for item in meta.documents if item[2].endswith('_Spelling_Changes.txt')) == 1
+    assert Path(row['output']).read_bytes() == output
+
+
+def test_spellcheck_restart_recovers_both_attachments(env, monkeypatch):
+    """A restart between saving and enqueuing returns both Spellcheck files."""
+    svc, _, row = run_menu(env, 'Recover.docx', make_docx(ENGLISH))
+    svc.db.execute("DELETE FROM outbox WHERE job_id=? AND kind='document'", (row['id'],))
+    svc.db.execute("UPDATE jobs SET delivery=NULL WHERE id=?", (row['id'],))
+    monkeypatch.setattr(svc, 'jobs_loop', lambda: None)
+    monkeypatch.setattr(svc, 'messages_loop', lambda: None)
+    monkeypatch.setattr(svc, 'delivery_loop', lambda: None)
+    svc.start()
+    svc.close()
+    docs = svc.db.all("SELECT * FROM outbox WHERE job_id=? AND kind='document'", (row['id'],))
+    assert len(docs) == 2
+    assert sorted(Path(__import__('json').loads(item['payload'])['path']).suffix for item in docs) == ['.docx', '.txt']
+    assert svc.get(row['id'])['delivery'] == 'queued'

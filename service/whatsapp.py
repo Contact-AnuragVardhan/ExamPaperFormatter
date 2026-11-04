@@ -5,20 +5,24 @@ import uuid
 from runtime_logging import event,error_fields
 from .files import UserError,filename,validate_docx
 from .menus import menu
+from .teacher_registry import TeacherRegistryUnavailable
+from .version import RELEASE
 
 INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
        'Turn your Word Exam into a consistent, classroom-ready Word Exam using your school’s preferred Exam format.\n\n'
        'Choose your subject, attach your .docx exam, and FORMAT will return a new formatted Word file,  while preserving your questions and academic content. You can also CHECK an Exam and receive a report of issues.\n\n'
        'Formatting issues, such as incorrect numbering, can be fixed by the App.\n'
        'Structural issues, such as missing sections. must be fixed by you.\n\n'
+       'For English/Hindi spelling, send SPELLCHECK or choose it from the menu and attach .docx. No reference is needed.\n'
        'Please review every return file result before use in Exam.\n\n'
-       'Revision 2.1\n'
+       f'{RELEASE}\n'
        '(c) 2026 Jalta Sitara Foundation\n\n'
        'Tap Open Menu to choose what you would like to do.')
 HELP=('Choose Format Exam or Check Exam from the main menu.\n'
       'Select your subject and class, then attach your exam as a Word .docx file.\n'
       'Review the confirmation and tap Start Formatting or Start Checking.\n'
-      'Spellcheck corrects only confident spelling mistakes. It does not use a subject reference and does not change wording.\n'
+      'For Spellcheck, send SPELLCHECK directly or choose Spellcheck from the menu, then attach a .docx file.\n'
+      'Standalone Spellcheck supports English and Hindi, requires no subject/class/reference exam, and sends both a corrected Word file and a TXT changes report.\n'
       'We will send your result here. Review the Word file or issues report before use.')
 log=logging.getLogger('exam.whatsapp')
 GREETINGS=('hi','hello','hey','menu','start')
@@ -51,7 +55,7 @@ class WhatsAppFlow:
         return menu('Send Your Exam',f'Attach your Word (.docx) exam, up to {self.v.s.max_upload_mb} MB. Use the attachment icon to send the file.',
                     [('upload.cancel','Cancel'),('menu.help','Help')])
     def spellcheck_upload_menu(self):
-        return menu('Spellcheck Exam',f'Attach the Word (.docx) exam to spellcheck, up to {self.v.s.max_upload_mb} MB. No subject reference is used.',
+        return menu('Spellcheck Exam',f'Attach a Word (.docx) file, up to {self.v.s.max_upload_mb} MB. English and Hindi; no subject, class or reference needed. Receive a corrected DOCX and TXT report.',
                     [('upload.cancel','Cancel'),('menu.help','Help')])
     def confirm_menu(self,state):
         ref,_=self.v.resolve(state['reference_id'])
@@ -64,7 +68,7 @@ class WhatsAppFlow:
         if row and row['state']=='uncertain': body='The request status is unresolved. Please contact the administrator before trying another exam.'
         return menu('Exam Request Status',body,[('processing.status','Check Status'),('processing.cancel','Cancel Request'),('menu.main','Main Menu')])
     def help_menu(self):
-        return menu('How to Use Exam Formatter',HELP,[('help.back','Back'),('menu.main','Main Menu')])
+        return menu('How to Use Exam Formatter',f'{RELEASE}\n\n{HELP}',[('help.back','Back'),('menu.main','Main Menu')])
     @staticmethod
     def document_caption(row):
         """Describe the actual attachment, independent of the completed job state.
@@ -123,6 +127,16 @@ class WhatsAppFlow:
     def discard(self,state):
         if state.get('pending_id'): shutil.rmtree(self.v.s.data/'pending'/state['pending_id'],ignore_errors=True)
     def handle(self,sender,message,message_id):
+        try:
+            teacher=self.v.teacher_registry.find_by_number(sender)
+        except TeacherRegistryUnavailable:
+            self.v.db.emit(sender,'Teacher validation is temporarily unavailable. Please try again later.',dedupe=message_id+':registry-unavailable')
+            return
+        if not teacher:
+            self.v.admin_logout(sender)
+            self.v.db.execute('DELETE FROM sessions WHERE sender=?',(sender,))
+            self.v.db.emit(sender,'Not a valid user.',dedupe=message_id+':invalid-user')
+            return
         before=self.db.session(sender,self.v.s.session_minutes)
         reply=message.get('interactive',{})
         selection=(reply.get('button_reply',{}) or reply.get('list_reply',{})).get('id','')
@@ -157,10 +171,12 @@ class WhatsAppFlow:
             if not action:
                 event(log,'whatsapp.menu.stale_selection',level=logging.WARNING)
                 show('Please use the latest menu below.');return
+        if message.get('type')=='text' and text=='spellcheck':
+            action='main.spellcheck'
         if action=='menu.main':
             self.v.admin_logout(sender)
             self.discard(state);state={'state':'main'};save();say(self.main(sender));return
-        if action=='main.admin' or state['state'].startswith('admin_'):
+        if action=='main.admin' or (state['state'].startswith('admin_') and action!='main.spellcheck'):
             from .whatsapp_admin import WhatsAppAdmin
             return WhatsAppAdmin(self).handle(sender,message,message_id,state,action)
         if action=='menu.help':

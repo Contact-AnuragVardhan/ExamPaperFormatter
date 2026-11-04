@@ -20,6 +20,7 @@ class Settings:
     data: Path
     teacher_code: str = ''
     admin_password: str = ''
+    teacher_registry_database_url: str = ''
     secure_cookie: bool = False
     max_upload_mb: int = 15
     session_minutes: int = 30
@@ -46,6 +47,7 @@ class Settings:
         return cls(data=Path(env_value('EXAM_DATA_ROOT','EXAM_DATA_DIR',str(records.ROOT/'data'))).resolve(),
             teacher_code=env_value('WEB_TEACHER_ACCESS_CODE'),
             admin_password=env_value('ADMIN_PASSWORD'),
+            teacher_registry_database_url=env_value('DATABASE_URL'),
             secure_cookie=env_value('COOKIE_SECURE',default='true' if app_env=='prod' else 'false').lower()=='true',
             max_upload_mb=int(env_value('MAX_UPLOAD_MB',default='15')),
             session_minutes=int(env_value('SESSION_MINUTES',default='30')),

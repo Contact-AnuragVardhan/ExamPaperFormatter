@@ -48,7 +48,7 @@ def test_admin_requires_password_not_teacher_code(env):
     assert svc.db.session(SENDER,30)['state']=='admin_login'
     assert 'Incorrect' in latest(svc)['body']['text']
     send(flow,'admin-test');assert svc.admin_authenticated(SENDER)
-    assert set(svc.db.session(SENDER,30)['menu_actions'].values())=={'admin.refs','admin.add','admin.jobs','admin.activity','admin.cost','admin.system','admin.help','admin.logout'}
+    assert set(svc.db.session(SENDER,30)['menu_actions'].values())=={'admin.refs','admin.add','admin.teacher.add','admin.jobs','admin.activity','admin.cost','admin.system','admin.help','admin.logout'}
 
 def test_unicode_password_exact_and_constant_time_bytes(env):
     svc,_,_=env;svc.s.admin_password='密碼🔑 é'
