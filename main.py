@@ -34,6 +34,7 @@ COLORS = {
     "OK": "#0b6b2f",
     "PASS": "#0b6b2f",
     "SPELLCHECK": "#0b6b2f",
+    "TESTING SC": "#0b6b2f",
     "ALL GOOD": "#0b6b2f",
     "FORMAT ERROR": "#8a5a00",
     "FORMATTING": "#8a5a00",
@@ -109,7 +110,7 @@ class App(tk.Tk):
         buttons.pack(anchor="w", pady=(0, 16))
         self.check_button = ttk.Button(buttons, text="CHECK EXAM", width=18, command=self._check)
         self.format_button = ttk.Button(buttons, text="FORMAT EXAM", width=18, command=self._format)
-        self.spell_button = ttk.Button(buttons, text="SPELLCHECK", width=16, command=self._spellcheck)
+        self.spell_button = ttk.Button(buttons, text="TESTING SC", width=16, command=self._spellcheck)
         self.check_button.pack(side="left")
         self.format_button.pack(side="left", padx=(8, 0))
         self.spell_button.pack(side="left", padx=(8, 0))
@@ -274,7 +275,7 @@ class App(tk.Tk):
                 ))
                 if result.skipped:
                     detail += f"\n\nUncertain spellings left unchanged: {len(result.skipped)}."
-                self._show("SPELLCHECK", detail, result.docx_path)
+                self._show("TESTING SC", detail, result.docx_path)
                 _open_path(result.docx_path)
                 continue
             _marker, kind, subject, grade, result = item
@@ -349,7 +350,7 @@ class App(tk.Tk):
         if self.busy:
             if not messagebox.askokcancel(
                 "Exam Formatter",
-                "Spellcheck is still working. Close anyway?" if self.activity == "spellcheck" else "ChatGPT is still working. Close anyway?",
+                "TESTING SC is still working. Close anyway?" if self.activity == "spellcheck" else "ChatGPT is still working. Close anyway?",
                 parent=self,
             ):
                 return

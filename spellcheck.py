@@ -165,7 +165,7 @@ def run(source: Path, output_dir: Path | None = None, stem: str | None = None) -
     summary = (
         "No confident spelling corrections found."
         if corrections == 0
-        else f"Spellcheck finished. {len(package.changes)} line(s) changed, {corrections} word correction(s)."
+        else f"TESTING SC finished. {len(package.changes)} line(s) changed, {corrections} word correction(s)."
     )
     event(
         log,
