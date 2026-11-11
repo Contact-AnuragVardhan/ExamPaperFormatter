@@ -70,6 +70,6 @@ services:
       - key: SESSION_MINUTES
         value: "30"
       - key: RETENTION_DAYS
-        value: "7"
+        value: "365"
       # Set WHATSAPP_ALLOWED_SENDERS in the dashboard if a beta allowlist is needed.
       # Render provides PORT at runtime; do not hardcode it in this Blueprint.

@@ -11,6 +11,7 @@ import job
 import records
 import reporting
 import spellcheck
+from storage_health import validate_data_root
 from runtime_logging import event,log_context,actor_key,error_fields,register_secrets
 from .files import UserError,filename,validate_docx
 from .storage import Store
@@ -23,6 +24,7 @@ ACTIVE=('queued','running','uncertain')
 
 class Service:
     def __init__(self,settings,engine=None,meta=None):
+        validate_data_root(settings.data)
         self.s=settings
         register_secrets(settings.teacher_code,settings.admin_password,settings.wa_token,
                          settings.wa_app_secret,settings.wa_verify_token)
@@ -268,7 +270,7 @@ class Service:
         # Only FORMAT/CHECK use the remote-response reconciliation path.
         for row in self.db.all("SELECT * FROM jobs WHERE state='running'"):
             if row['kind']=='spellcheck':
-                self.update(row['id'],state='queued',message='Resuming local Spellcheck from the saved exam.')
+                self.update(row['id'],state='queued',message='Resuming TESTING SC from the saved exam.')
                 event(log,'spellcheck.restart.requeued',job_id=row['id'])
                 continue
             remote=json.loads(row['remote'] or '{}')
@@ -280,7 +282,7 @@ class Service:
         for row in self.db.all("SELECT * FROM jobs WHERE kind='spellcheck' AND state='completed'"):
             output=Path(row['output']) if row['output'] else None
             if not output or not output.is_file() or not spellcheck.report_path_for(output).is_file():
-                self.update(row['id'],state='queued',output=None,message='Restoring saved Spellcheck attachments.')
+                self.update(row['id'],state='queued',output=None,message='Restoring saved TESTING SC attachments.')
                 event(log,'spellcheck.restart.output_missing',job_id=row['id'])
         self.db.execute("UPDATE inbox SET state='queued' WHERE state='processing'")
         # A send interrupted after the Meta request began may already have
@@ -298,7 +300,7 @@ class Service:
             if row['kind']=='spellcheck' and row['output']:
                 try: self._queue_spellcheck_files(row)
                 except (OSError,UserError):
-                    self.update(row['id'],state='queued',output=None,message='Restoring saved Spellcheck attachments.')
+                    self.update(row['id'],state='queued',output=None,message='Restoring saved TESTING SC attachments.')
             else:
                 self.finish_whatsapp(row)
         # Repair a crash between updating the outbox and updating the job.
@@ -446,7 +448,7 @@ class Service:
             records.log('Spellcheck','','SPELLCHECK','FAIL')
         except Exception as exc:
             self.diagnostic(jid,str(exc),stage='spellcheck',error_type=type(exc).__name__)
-            self.update(jid,state='failed',result_status='SYSTEM ERROR',message='Spellcheck could not finish. The original exam was not changed.',output=None,retryable=0)
+            self.update(jid,state='failed',result_status='SYSTEM ERROR',message='TESTING SC could not finish. The original exam was not changed.',output=None,retryable=0)
             records.log('Spellcheck','','SPELLCHECK','FAIL')
             event(log,'spellcheck.job.failed',level=logging.ERROR,job_id=jid,**error_fields(exc))
         if row['channel']=='whatsapp':
@@ -465,7 +467,7 @@ class Service:
         if not report.is_file():
             raise UserError('The spelling report was not saved.')
         self.db.enqueue_many([
-            (sender,'document',{'path':row['output'],'caption':(row['message'] or 'Spellcheck finished.')[:1024]},row['id'],'spell-docx:'+row['id']),
+            (sender,'document',{'path':row['output'],'caption':(row['message'] or 'TESTING SC finished.')[:1024]},row['id'],'spell-docx:'+row['id']),
             (sender,'document',{'path':str(report),'caption':'Spelling changes report'},row['id'],'spell-report:'+row['id']),
         ])
         self.update(row['id'],delivery='queued')

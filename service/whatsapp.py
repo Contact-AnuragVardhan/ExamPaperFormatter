@@ -13,7 +13,7 @@ INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
        'Choose your subject, attach your .docx exam, and FORMAT will return a new formatted Word file,  while preserving your questions and academic content. You can also CHECK an Exam and receive a report of issues.\n\n'
        'Formatting issues, such as incorrect numbering, can be fixed by the App.\n'
        'Structural issues, such as missing sections. must be fixed by you.\n\n'
-       'For English/Hindi spelling, send SPELLCHECK or choose it from the menu and attach .docx. No reference is needed.\n'
+       'For English/Hindi spelling, send TESTING SC or choose it from the menu and attach .docx. No reference is needed.\n'
        'Please review every return file result before use in Exam.\n\n'
        f'{RELEASE}\n'
        '(c) 2026 Jalta Sitara Foundation\n\n'
@@ -21,8 +21,8 @@ INTRO=('👋 Welcome to *Exam Formatter*!\n\n'
 HELP=('Choose Format Exam or Check Exam from the main menu.\n'
       'Select your subject and class, then attach your exam as a Word .docx file.\n'
       'Review the confirmation and tap Start Formatting or Start Checking.\n'
-      'For Spellcheck, send SPELLCHECK directly or choose Spellcheck from the menu, then attach a .docx file.\n'
-      'Standalone Spellcheck supports English and Hindi, requires no subject/class/reference exam, and sends both a corrected Word file and a TXT changes report.\n'
+      'For TESTING SC, send TESTING SC directly or choose TESTING SC from the menu, then attach a .docx file.\n'
+      'TESTING SC supports English and Hindi, requires no subject/class/reference exam, and sends both a corrected Word file and a TXT changes report.\n'
       'We will send your result here. Review the Word file or issues report before use.')
 log=logging.getLogger('exam.whatsapp')
 GREETINGS=('hi','hello','hey','menu','start')
@@ -30,7 +30,7 @@ GREETINGS=('hi','hello','hey','menu','start')
 class WhatsAppFlow:
     def __init__(self,service): self.v=service;self.db=service.db
     def main(self,sender):
-        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('main.spellcheck','Spellcheck','Spelling only, no reference'),('main.admin','Admin'),('menu.help','Help')]
+        choices=[('main.format','Format Exam'),('main.check','Check Exam'),('main.spellcheck','TESTING SC','Spelling only, no reference'),('main.admin','Admin'),('menu.help','Help')]
         if self.db.one("SELECT id FROM jobs WHERE owner=? AND output IS NOT NULL AND delivery='failed' ORDER BY created DESC LIMIT 1",('wa:'+sender,)):
             choices.append(('delivery.retry','Retry Delivery'))
         choices.append(('main.exit','Exit'))
@@ -55,7 +55,7 @@ class WhatsAppFlow:
         return menu('Send Your Exam',f'Attach your Word (.docx) exam, up to {self.v.s.max_upload_mb} MB. Use the attachment icon to send the file.',
                     [('upload.cancel','Cancel'),('menu.help','Help')])
     def spellcheck_upload_menu(self):
-        return menu('Spellcheck Exam',f'Attach a Word (.docx) file, up to {self.v.s.max_upload_mb} MB. English and Hindi; no subject, class or reference needed. Receive a corrected DOCX and TXT report.',
+        return menu('TESTING SC Exam',f'Attach a Word (.docx) file, up to {self.v.s.max_upload_mb} MB. English and Hindi; no subject, class or reference needed. Receive a corrected DOCX and TXT report.',
                     [('upload.cancel','Cancel'),('menu.help','Help')])
     def confirm_menu(self,state):
         ref,_=self.v.resolve(state['reference_id'])
@@ -89,10 +89,10 @@ class WhatsAppFlow:
     def result_menu(self,row):
         if row and row.get('kind')=='spellcheck':
             if row['state'] in ('completed','needs_changes'):
-                return menu('Spellcheck Ready',row['message'] or 'Spellcheck finished.',
-                            [('main.spellcheck','Spellcheck Another'),('menu.help','Help'),('menu.main','Main Menu')])
-            return menu('Spellcheck Needs Attention',row['message'] if row else 'This request is no longer available. Please start again.',
-                        [('main.spellcheck','Spellcheck Another'),('menu.help','Help'),('menu.main','Main Menu')],force_list=True)
+                return menu('TESTING SC Ready',row['message'] or 'TESTING SC finished.',
+                            [('main.spellcheck','TESTING SC Again'),('menu.help','Help'),('menu.main','Main Menu')])
+            return menu('TESTING SC Needs Attention',row['message'] if row else 'This request is no longer available. Please start again.',
+                        [('main.spellcheck','TESTING SC Again'),('menu.help','Help'),('menu.main','Main Menu')],force_list=True)
         if row and row['state'] in ('completed','needs_changes'):
             title = {
                 'ALL GOOD': 'ALL GOOD',
@@ -171,7 +171,7 @@ class WhatsAppFlow:
             if not action:
                 event(log,'whatsapp.menu.stale_selection',level=logging.WARNING)
                 show('Please use the latest menu below.');return
-        if message.get('type')=='text' and text=='spellcheck':
+        if message.get('type')=='text' and text in ('testing sc','spellcheck'):
             action='main.spellcheck'
         if action=='menu.main':
             self.v.admin_logout(sender)

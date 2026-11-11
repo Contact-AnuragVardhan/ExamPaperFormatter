@@ -13,7 +13,7 @@ from io import BytesIO
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT / "data"
+DATA = Path(os.getenv("EXAM_DATA_ROOT") or os.getenv("EXAM_DATA_DIR") or ROOT / "data").resolve()
 REFERENCES = DATA / "references"
 INDEX = REFERENCES / "index.json"
 LOG = DATA / "activity.log"
